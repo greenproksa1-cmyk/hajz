@@ -1,0 +1,156 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { signIn } from "next-auth/react";
+import { motion } from "framer-motion";
+import { UserPlus, ArrowRight } from "lucide-react";
+
+export default function RegisterPage() {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "حدث خطأ أثناء التسجيل");
+      }
+
+      // Automatically log them in after registration
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        router.push("/login?registered=true");
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (err: any) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 py-12">
+      {/* Decorative gradient blobs */}
+      <div className="absolute top-[-10%] left-[-10%] h-[500px] w-[500px] animate-pulse rounded-full bg-orange-400/20 mix-blend-multiply blur-[100px] duration-10000" />
+      <div className="absolute right-[-10%] top-[20%] h-[400px] w-[400px] animate-pulse rounded-full bg-amber-300/20 mix-blend-multiply blur-[100px] duration-10000" style={{ animationDelay: '2s' }} />
+      <div className="absolute bottom-[-10%] left-[20%] h-[600px] w-[600px] animate-pulse rounded-full bg-orange-500/10 mix-blend-multiply blur-[120px] duration-10000" style={{ animationDelay: '4s' }} />
+
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative z-10 w-full max-w-md p-10 bg-white/70 backdrop-blur-2xl rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/60"
+      >
+        <Link href="/" className="inline-flex items-center text-sm font-medium text-orange-600 hover:text-orange-500 transition-colors mb-6 group" dir="rtl">
+          <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+          العودة للرئيسية
+        </Link>
+
+        <div className="text-center mb-8">
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 15 }}
+            className="w-16 h-16 bg-gradient-to-tr from-orange-600 to-orange-400 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-orange-500/30"
+          >
+            <UserPlus className="w-8 h-8 text-white" />
+          </motion.div>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">إنشاء حساب جديد</h1>
+          <p className="mt-2 text-sm text-gray-500">سجل الآن لتبدأ رحلتك في معرض مقاولي الرياض</p>
+        </div>
+
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-4 text-sm font-medium text-red-600 bg-red-50/80 border border-red-100 rounded-xl mb-6 text-right"
+          >
+            {error}
+          </motion.div>
+        )}
+
+        <form onSubmit={onSubmit} className="space-y-4" dir="rtl">
+          <div className="space-y-1.5">
+            <Label htmlFor="name" className="text-gray-700 font-medium">الاسم الكامل</Label>
+            <Input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="اسمك الكريم"
+              required
+              className="text-right h-12 bg-white/50 border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-all rounded-xl"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+             <Label htmlFor="email" className="text-gray-700 font-medium">البريد الإلكتروني</Label>
+             <Input
+               id="email"
+               type="email"
+               value={email}
+               onChange={(e) => setEmail(e.target.value)}
+               placeholder="name@example.com"
+               required
+               className="text-right h-12 bg-white/50 border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-all rounded-xl"
+             />
+          </div>
+
+          <div className="space-y-1.5">
+             <Label htmlFor="password" className="text-gray-700 font-medium">كلمة المرور</Label>
+             <Input
+               id="password"
+               type="password"
+               value={password}
+               onChange={(e) => setPassword(e.target.value)}
+               placeholder="••••••••"
+               required
+               className="text-right h-12 bg-white/50 border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-all rounded-xl"
+             />
+          </div>
+
+          <Button 
+            type="submit" 
+            disabled={loading}
+            className="w-full h-12 mt-6 text-base font-semibold bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 shadow-xl shadow-orange-500/20 rounded-xl transition-all hover:scale-[1.02] active:scale-95"
+          >
+            {loading ? "جاري التسجيل..." : "إنشاء حساب"}
+          </Button>
+        </form>
+
+        <div className="mt-8 text-center text-sm text-gray-600">
+          لديك حساب بالفعل؟{" "}
+          <Link href="/login" className="font-semibold text-orange-600 hover:text-orange-500 transition-colors">
+            سجل الدخول الآن
+          </Link>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

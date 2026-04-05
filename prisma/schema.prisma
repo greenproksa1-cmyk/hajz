@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  role      String   @default("user") // "user" or "admin"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bookings  Booking[]
+}
+
+model FloorPlan {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+  width       Float  @default(1200)
+  height      Float  @default(800)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  booths      Booth[]
+}
+
+model Booth {
+  id          String    @id @default(cuid())
+  label       String
+  area        Float
+  status      String    @default("available")
+  boothType   String    @default("standard")
+  price       Float?
+  x           Float     @default(0)
+  y           Float     @default(0)
+  width       Float     @default(100)
+  height      Float     @default(80)
+  floorPlanId String?
+  floorPlan   FloorPlan? @relation(fields: [floorPlanId], references: [id])
+  bookings    Booking[]
+  
+  @@unique([floorPlanId, label])
+}
+
+model Booking {
+  id            String   @id @default(cuid())
+  entityName    String
+  unifiedNumber String
+  address       String
+  contactName   String
+  jobTitle      String
+  mobile        String
+  phone         String
+  email         String
+  boothIds      String
+  totalPrice    Float
+  status        String   @default("pending")
+  contractPath  String?
+  receiptPath   String?
+  signedContractPath String?
+  otpVerified   Boolean  @default(false)
+  adminNotes    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+
+  booths        Booth[]
+  payment       Payment?
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  bookingId     String   @unique
+  amount        Float
+  status        String   @default("pending")
+  iban          String?
+  bankName      String?
+  receiptPath   String?
+  verifiedAt    DateTime?
+  verifiedBy    String?
+  createdAt     DateTime @default(now())
+  booking       Booking  @relation(fields: [bookingId], references: [id])
+}
