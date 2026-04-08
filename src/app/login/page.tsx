@@ -80,13 +80,13 @@ export default function LoginPage() {
 
         <form onSubmit={onSubmit} className="space-y-5" dir="rtl">
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-gray-700 font-medium">البريد الإلكتروني</Label>
+            <Label htmlFor="email" className="text-gray-700 font-medium">اسم المستخدم أو البريد الإلكتروني</Label>
             <Input
               id="email"
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@example.com"
+              placeholder="اسم المستخدم"
               required
               className="text-right h-12 bg-white/50 border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-all rounded-xl"
             />
