@@ -23,8 +23,8 @@ export default function LoginPage() {
     setError("");
 
     const result = await signIn("credentials", {
-      email,
-      password,
+      email: email.trim(),
+      password: password.trim(),
       redirect: false,
     });
 
