@@ -103,11 +103,11 @@ export default function FloorPlanEditor({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const [booths, setBooths] = useState<BoothShape[]>(initialBooths)
+  const [booths, setBooths] = useState<BoothShape[]>(Array.isArray(initialBooths) ? initialBooths : [])
   const [selectedBoothId, setSelectedBoothId] = useState<string | null>(null)
   const [mode, setMode] = useState<'draw' | 'select'>('select')
   const [zoom, setZoom] = useState(1)
-  const [planName, setPlanName] = useState(initialPlanName)
+  const [planName, setPlanName] = useState(initialPlanName || '')
   const [isSaving, setIsSaving] = useState(false)
 
   // Drawing state
@@ -115,11 +115,14 @@ export default function FloorPlanEditor({
   const [drawStart, setDrawStart] = useState<{ x: number; y: number } | null>(null)
   const [drawCurrent, setDrawCurrent] = useState<{ x: number; y: number } | null>(null)
 
-  // Drag/resize state
+  // Drag/resize state (Refs for performance to avoid state-triggering re-renders on move)
   const [isDragging, setIsDragging] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
-  const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+  const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
+  const dragPosRef = useRef<{ x: number; y: number } | null>(null)
+  const resizeRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null)
   const [resizeHandle, setResizeHandle] = useState<string | null>(null)
+  const rafRef = useRef<number | null>(null)
 
   const selectedBooth = booths.find((b) => b.id === selectedBoothId) || null
 
@@ -237,17 +240,33 @@ export default function FloorPlanEditor({
 
     // Draw booths
     for (const booth of booths) {
+      let bx = booth.x
+      let by = booth.y
+      let bw = booth.width
+      let bh = booth.height
+
+      // Override with active drag/resize coordinates
+      if (isDragging && booth.id === selectedBoothId && dragPosRef.current) {
+        bx = dragPosRef.current.x
+        by = dragPosRef.current.y
+      } else if (isResizing && booth.id === selectedBoothId && resizeRef.current) {
+        bx = resizeRef.current.x
+        by = resizeRef.current.y
+        bw = resizeRef.current.width
+        bh = resizeRef.current.height
+      }
+
       const color = BOOTH_TYPE_COLORS[booth.boothType] || BOOTH_TYPE_COLORS.standard
       const fill = BOOTH_TYPE_FILL[booth.boothType] || BOOTH_TYPE_FILL.standard
 
       // Fill
       ctx.fillStyle = fill
-      ctx.fillRect(booth.x, booth.y, booth.width, booth.height)
+      ctx.fillRect(bx, by, bw, bh)
 
       // Border
       ctx.strokeStyle = color
       ctx.lineWidth = booth.id === selectedBoothId ? 2.5 : 1.5
-      ctx.strokeRect(booth.x, booth.y, booth.width, booth.height)
+      ctx.strokeRect(bx, by, bw, bh)
 
       // Label
       ctx.fillStyle = '#1e293b'
@@ -256,30 +275,34 @@ export default function FloorPlanEditor({
       ctx.textBaseline = 'middle'
       ctx.fillText(
         booth.label,
-        booth.x + booth.width / 2,
-        booth.y + booth.height / 2 - 8
+        bx + bw / 2,
+        by + bh / 2 - 8
       )
 
       // Area
+      const areaVal = (isResizing && booth.id === selectedBoothId && resizeRef.current) 
+        ? Math.round((bw * bh) / 100) / 100 
+        : booth.area
+
       ctx.fillStyle = '#64748b'
       ctx.font = '10px sans-serif'
       ctx.fillText(
-        `${booth.area} ${isRTL ? 'م²' : 'm²'}`,
-        booth.x + booth.width / 2,
-        booth.y + booth.height / 2 + 8
+        `${areaVal} ${isRTL ? 'م²' : 'm²'}`,
+        bx + bw / 2,
+        by + bh / 2 + 8
       )
 
       // Selection handles
       if (booth.id === selectedBoothId) {
         const handles = [
-          { cx: booth.x, cy: booth.y },
-          { cx: booth.x + booth.width, cy: booth.y },
-          { cx: booth.x, cy: booth.y + booth.height },
-          { cx: booth.x + booth.width, cy: booth.y + booth.height },
-          { cx: booth.x + booth.width / 2, cy: booth.y },
-          { cx: booth.x + booth.width / 2, cy: booth.y + booth.height },
-          { cx: booth.x, cy: booth.y + booth.height / 2 },
-          { cx: booth.x + booth.width, cy: booth.y + booth.height / 2 },
+          { cx: bx, cy: by },
+          { cx: bx + bw, cy: by },
+          { cx: bx, cy: by + bh },
+          { cx: bx + bw, cy: by + bh },
+          { cx: bx + bw / 2, cy: by },
+          { cx: bx + bw / 2, cy: by + bh },
+          { cx: bx, cy: by + bh / 2 },
+          { cx: bx + bw, cy: by + bh / 2 },
         ]
         for (const h of handles) {
           ctx.fillStyle = '#ffffff'
@@ -375,10 +398,11 @@ export default function FloorPlanEditor({
       if (clickedBooth) {
         setSelectedBoothId(clickedBooth.id)
         setIsDragging(true)
-        setDragOffset({
+        dragOffsetRef.current = {
           x: pos.x - clickedBooth.x,
           y: pos.y - clickedBooth.y,
-        })
+        }
+        dragPosRef.current = { x: clickedBooth.x, y: clickedBooth.y }
       } else {
         setSelectedBoothId(null)
       }
@@ -396,44 +420,39 @@ export default function FloorPlanEditor({
       }
 
       if (isDragging && selectedBoothId) {
-        setBooths((prev) =>
-          prev.map((b) =>
-            b.id === selectedBoothId
-              ? { ...b, x: pos.x - dragOffset.x, y: pos.y - dragOffset.y }
-              : b
-          )
-        )
+        dragPosRef.current = { x: pos.x - dragOffsetRef.current.x, y: pos.y - dragOffsetRef.current.y }
+        if (rafRef.current) cancelAnimationFrame(rafRef.current)
+        rafRef.current = requestAnimationFrame(drawCanvas)
         return
       }
 
       if (isResizing && selectedBoothId && resizeHandle) {
-        setBooths((prev) =>
-          prev.map((b) => {
-            if (b.id !== selectedBoothId) return b
-            let { x, y, width, height } = b
-            const minSize = 20
+        const booth = booths.find(b => b.id === selectedBoothId)
+        if (!booth) return
+        
+        let { x, y, width, height } = booth
+        const minSize = 20
 
-            if (resizeHandle.includes('w')) {
-              const newX = Math.min(pos.x, b.x + b.width - minSize)
-              width = b.x + b.width - newX
-              x = newX
-            }
-            if (resizeHandle.includes('e')) {
-              width = Math.max(minSize, pos.x - b.x)
-            }
-            if (resizeHandle.includes('n')) {
-              const newY = Math.min(pos.y, b.y + b.height - minSize)
-              height = b.y + b.height - newY
-              y = newY
-            }
-            if (resizeHandle.includes('s')) {
-              height = Math.max(minSize, pos.y - b.y)
-            }
+        if (resizeHandle.includes('w')) {
+          const newX = Math.min(pos.x, booth.x + booth.width - minSize)
+          width = booth.x + booth.width - newX
+          x = newX
+        }
+        if (resizeHandle.includes('e')) {
+          width = Math.max(minSize, pos.x - booth.x)
+        }
+        if (resizeHandle.includes('n')) {
+          const newY = Math.min(pos.y, booth.y + booth.height - minSize)
+          height = booth.y + booth.height - newY
+          y = newY
+        }
+        if (resizeHandle.includes('s')) {
+          height = Math.max(minSize, pos.y - booth.y)
+        }
 
-            const area = Math.round((width * height) / 100) / 100
-            return { ...b, x, y, width, height, area }
-          })
-        )
+        resizeRef.current = { x, y, width, height }
+        if (rafRef.current) cancelAnimationFrame(rafRef.current)
+        rafRef.current = requestAnimationFrame(drawCanvas)
         return
       }
 
@@ -461,7 +480,7 @@ export default function FloorPlanEditor({
       const overBooth = getBoothAtPoint(pos.x, pos.y)
       canvas.style.cursor = overBooth ? 'move' : 'default'
     },
-    [isDrawing, drawStart, isDragging, isResizing, selectedBoothId, resizeHandle, dragOffset, mode, booths, screenToCanvas, getBoothAtPoint, getResizeHandle]
+    [isDrawing, drawStart, isDragging, isResizing, selectedBoothId, resizeHandle, mode, booths, screenToCanvas, getBoothAtPoint, getResizeHandle]
   )
 
   const handleMouseUp = useCallback(() => {
@@ -495,10 +514,34 @@ export default function FloorPlanEditor({
       setDrawCurrent(null)
     }
 
+    if (isDragging && selectedBoothId && dragPosRef.current) {
+      setBooths((prev) =>
+        prev.map((b) =>
+          b.id === selectedBoothId
+            ? { ...b, x: dragPosRef.current!.x, y: dragPosRef.current!.y }
+            : b
+        )
+      )
+    }
+
+    if (isResizing && selectedBoothId && resizeRef.current) {
+      setBooths((prev) =>
+        prev.map((b) => {
+          if (b.id !== selectedBoothId) return b
+          const { x, y, width, height } = resizeRef.current!
+          const area = Math.round((width * height) / 100) / 100
+          return { ...b, x, y, width, height, area }
+        })
+      )
+    }
+
     setIsDragging(false)
     setIsResizing(false)
     setResizeHandle(null)
-  }, [isDrawing, drawStart, drawCurrent, booths])
+    dragPosRef.current = null
+    resizeRef.current = null
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+  }, [isDrawing, drawStart, drawCurrent, booths, isDragging, isResizing, selectedBoothId, drawCanvas])
 
   const handleDeleteSelected = () => {
     if (!selectedBoothId) return

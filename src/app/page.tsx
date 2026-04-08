@@ -10,11 +10,13 @@ import AdminLogin from '@/components/admin/AdminLogin'
 import AdminDashboard from '@/components/admin/AdminDashboard'
 import AdminDashboardNew from '@/components/admin/AdminDashboardNew'
 import UserDashboard from '@/components/user/UserDashboard'
+import HomeView from '@/components/home/HomeView'
 import { Button } from '@/components/ui/button'
 import { Globe, ArrowLeft, ArrowRight } from 'lucide-react'
 import { Loader2 } from 'lucide-react'
 
 type View =
+  | 'home'
   | 'map'
   | 'booking'
   | 'admin'
@@ -68,13 +70,14 @@ function AdminBar({
 
 function AppContent() {
   const { t, dir, isRTL } = useTranslation()
-  const [currentView, setCurrentView] = useState<View>('map')
+  const [currentView, setCurrentView] = useState<View>('home')
   const [booths, setBooths] = useState<BoothData[]>([])
   const [selectedBoothIds, setSelectedBoothIds] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
   const [floorPlanId, setFloorPlanId] = useState<string | null>(null)
   const [userTrackingEmail, setUserTrackingEmail] = useState<string | null>(null)
+  const [floorPlanMetadata, setFloorPlanMetadata] = useState<{ width: number; height: number; name: string } | null>(null)
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const fetchBooths = useCallback(async () => {
@@ -83,6 +86,9 @@ function AppContent() {
       const data = await res.json()
       if (data.success) {
         setBooths(data.data)
+        if (data.floorPlan) {
+          setFloorPlanMetadata(data.floorPlan)
+        }
       }
     } catch {
       // Silently fail on refresh
@@ -136,7 +142,7 @@ function AppContent() {
   const showAdminBar = currentView === 'admin-new' && isAdminLoggedIn
 
   return (
-    <div dir={dir} className="flex min-h-screen flex-col bg-[#f8fafc]">
+    <div dir={dir} className="flex min-h-screen flex-col bg-background text-foreground transition-colors duration-300">
       {showAdminBar ? (
         <AdminBar dir={dir} onNavigate={handleNavigate} />
       ) : (
@@ -144,11 +150,37 @@ function AppContent() {
       )}
 
       <main className="flex-1">
+        {currentView === 'home' && (
+          <HomeView onNavigate={handleNavigate} />
+        )}
+
         {currentView === 'map' && (
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
                 <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
+              </div>
+            ) : booths.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 text-center">
+                 <div className="bg-orange-100 p-6 rounded-full mb-6">
+                    <Globe className="h-12 w-12 text-orange-600" />
+                 </div>
+                 <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                    {isRTL ? 'لا يوجد معرض نشط حالياً' : 'No Active Exhibition'}
+                 </h2>
+                 <p className="text-gray-500 max-w-md">
+                    {isRTL 
+                      ? 'يرجى مراجعة الموقع لاحقاً، المخطط الحالي قيد التحديث أو غير متاح.' 
+                      : 'Please check back later. The floor plan is currently being updated or is not available.'}
+                 </p>
+                 {isAdminLoggedIn && (
+                   <Button 
+                    onClick={() => setCurrentView('admin-new')}
+                    className="mt-6 bg-orange-500 hover:bg-orange-600"
+                   >
+                     {isRTL ? 'إنشاء أول مخطط' : 'Create First Plan'}
+                   </Button>
+                 )}
               </div>
             ) : (
               <BoothMap
@@ -156,6 +188,7 @@ function AppContent() {
                 selectedBoothIds={selectedBoothIds}
                 onSelectBooths={setSelectedBoothIds}
                 onBookNow={handleBookNow}
+                dimensions={floorPlanMetadata}
               />
             )}
           </div>

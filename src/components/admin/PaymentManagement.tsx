@@ -51,6 +51,8 @@ import {
   ImageIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { generateContractPDF } from '@/lib/pdf-export'
+import ContractTemplate from '@/components/pdf/ContractTemplate'
 
 interface PaymentRecord {
   id: string
@@ -62,6 +64,7 @@ interface PaymentRecord {
   contractPath: string | null
   bookingStatus: string
   createdAt: string
+  rawBooking: any
 }
 
 const PAYMENT_STATUS_CONFIG: Record<string, { color: string; icon: typeof CheckCircle }> = {
@@ -83,26 +86,20 @@ export default function PaymentManagement() {
       const data = await res.json()
       if (data.success) {
         // Transform bookings into payment records
-        const paymentRecords: PaymentRecord[] = data.data
-          .filter((b: { receiptPath: string | null }) => b.receiptPath || b.contractPath)
-          .map((b: {
-            id: string
-            entityName: string
-            totalPrice: number
-            status: string
-            receiptPath: string | null
-            contractPath: string | null
-            createdAt: string
-          }) => ({
+        const rawData = Array.isArray(data.data) ? data.data : []
+        const paymentRecords: PaymentRecord[] = rawData
+          .filter((b: any) => b?.receiptPath || b?.contractPath)
+          .map((b: any) => ({
             id: b.id,
             bookingId: b.id,
-            entityName: b.entityName,
-            amount: b.totalPrice,
+            entityName: b.entityName || '',
+            amount: b.totalPrice || 0,
             status: (b.status === 'approved' || b.status === 'completed' ? 'verified' : b.status === 'rejected' ? 'rejected' : 'pending') as 'pending' | 'verified' | 'rejected',
             receiptPath: b.receiptPath,
             contractPath: b.contractPath,
             bookingStatus: b.status,
             createdAt: b.createdAt,
+            rawBooking: b,
           }))
         setPayments(paymentRecords)
       }
@@ -139,6 +136,22 @@ export default function PaymentManagement() {
     } catch {
       toast.error(t('common.error'))
     }
+  }
+
+  const [downloadingContractId, setDownloadingContractId] = useState<string | null>(null)
+  const [contractToRender, setContractToRender] = useState<any | null>(null)
+
+  const handleDownloadPDF = (booking: any) => {
+    setDownloadingContractId(booking.id)
+    setContractToRender(booking)
+    setTimeout(async () => {
+      toast.info(isRTL ? 'جاري تصدير العقد...' : 'Generating PDF...')
+      const success = await generateContractPDF(`contract-pdf-${booking.id}`, `Contract_${booking.entityName.replace(/\s+/g, '_')}.pdf`)
+      if (success) toast.success(isRTL ? 'تم حفظ العقد بنجاح!' : 'Contract saved successfully!')
+      setDownloadingContractId(null)
+      // We don't nullify contractToRender immediately to avoid react unmounting it before html2canvas completes
+      setTimeout(() => setContractToRender(null), 1000)
+    }, 150)
   }
 
   const handleReject = async (bookingId: string) => {
@@ -389,8 +402,18 @@ export default function PaymentManagement() {
                                 </Button>
                               </a>
                             )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-1 text-blue-600 hover:bg-blue-50"
+                              onClick={() => handleDownloadPDF(payment.rawBooking)}
+                              disabled={downloadingContractId === payment.bookingId}
+                            >
+                              {downloadingContractId === payment.bookingId ? <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-600" /> : <FileText className="h-3.5 w-3.5" />}
+                              {isRTL ? 'تحميل العقد' : 'Download Contract'}
+                            </Button>
                             {!payment.receiptPath && !payment.contractPath && (
-                              <span className="text-xs text-gray-400">—</span>
+                              <span className="text-xs text-gray-400 opacity-0 px-2">—</span>
                             )}
                           </div>
                         </TableCell>
@@ -520,6 +543,11 @@ export default function PaymentManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Hidden Contract Template for PDF Export */}
+      {contractToRender && (
+        <ContractTemplate booking={contractToRender} />
+      )}
     </div>
   )
 }

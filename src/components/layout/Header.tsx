@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Globe, Shield, UserCircle, LogIn, LayoutDashboard } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 interface HeaderProps {
   currentView: string
@@ -64,25 +65,27 @@ export default function Header({ currentView, onNavigate }: HeaderProps) {
             </Button>
 
             {session ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="text-white hover:bg-white/20 hover:text-white"
-              >
-                <LayoutDashboard className="ms-2 h-4 w-4" />
-                {t('admin.user.myBookings') || (lang === 'ar' ? 'حجوزاتي' : 'My Bookings')}
-              </Button>
+              <Link href="/dashboard" prefetch={true}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/20 hover:text-white"
+                >
+                  <LayoutDashboard className="ms-2 h-4 w-4" />
+                  {t('admin.user.myBookings') || (lang === 'ar' ? 'حجوزاتي' : 'My Bookings')}
+                </Button>
+              </Link>
             ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/login')}
-                className="text-white hover:bg-white/20 hover:text-white"
-              >
-                <LogIn className="ms-2 h-4 w-4" />
-                {lang === 'ar' ? 'تسجيل الدخول' : 'Login'}
-              </Button>
+              <Link href="/login" prefetch={true}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/20 hover:text-white"
+                >
+                  <LogIn className="ms-2 h-4 w-4" />
+                  {lang === 'ar' ? 'تسجيل الدخول' : 'Login'}
+                </Button>
+              </Link>
             )}
 
             <Button

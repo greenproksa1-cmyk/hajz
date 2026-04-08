@@ -5,7 +5,7 @@ import { useTranslation } from '@/i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
   Select,
@@ -49,9 +49,10 @@ import {
   Box,
   CheckCircle,
   Clock,
-  XCircle,
+  LayoutGrid,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 interface Booth {
   id: string
@@ -72,10 +73,10 @@ interface EditFormData {
   price: number
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  available: { label: 'admin.boothMap.legend.available', color: 'bg-green-100 text-green-700 border-green-200' },
-  pending: { label: 'admin.pending', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-  booked: { label: 'admin.approved', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
+  available: { label: 'admin.boothMap.legend.available', color: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20', icon: CheckCircle },
+  pending: { label: 'admin.pending', color: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20', icon: Clock },
+  booked: { label: 'admin.approved', color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20', icon: Box },
 }
 
 export default function BoothManagement() {
@@ -97,11 +98,12 @@ export default function BoothManagement() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const fetchBooths = useCallback(async () => {
+    setIsLoading(true)
     try {
       const res = await fetch('/api/booths')
       const data = await res.json()
       if (data.success) {
-        setBooths(data.data)
+        setBooths(Array.isArray(data.data) ? data.data : [])
       }
     } catch {
       toast.error(t('common.error'))
@@ -114,11 +116,12 @@ export default function BoothManagement() {
     fetchBooths()
   }, [fetchBooths])
 
-  const filteredBooths = booths.filter((booth) => {
+  const filteredBooths = (booths || []).filter((booth) => {
+    if (!booth) return false;
     const matchesSearch =
       !searchQuery ||
-      booth.label.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || booth.status === statusFilter
+      booth?.label?.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || booth?.status === statusFilter
     return matchesSearch && matchesStatus
   })
 
@@ -136,7 +139,15 @@ export default function BoothManagement() {
 
   const handleEditSave = async () => {
     if (!editingBooth) return
-    setIsSaving(true)
+    
+    // Save previous state for rollback
+    const prevBooths = [...booths];
+    
+    // Optimistic Update
+    const updatedBooth = { ...editingBooth, ...editForm };
+    setBooths(prev => prev.map(b => b.id === editingBooth.id ? updatedBooth : b));
+    setEditDialogOpen(false);
+
     try {
       const res = await fetch(`/api/booths/${editingBooth.id}`, {
         method: 'PATCH',
@@ -146,19 +157,26 @@ export default function BoothManagement() {
       const data = await res.json()
       if (data.success) {
         toast.success(t('common.success'))
-        setEditDialogOpen(false)
-        fetchBooths()
+        // No need to fetchBooths, we already updated locally
       } else {
+        // Rollback
+        setBooths(prevBooths);
         toast.error(data.error || t('common.error'))
       }
     } catch {
+      // Rollback
+      setBooths(prevBooths);
       toast.error(t('common.error'))
-    } finally {
-      setIsSaving(false)
     }
   }
 
   const handleDelete = async (id: string) => {
+    const prevBooths = [...booths];
+    
+    // Optimistic Update
+    setBooths(prev => prev.filter(b => b.id !== id));
+    setDeleteId(null);
+
     try {
       const res = await fetch(`/api/booths/${id}`, {
         method: 'DELETE',
@@ -166,17 +184,24 @@ export default function BoothManagement() {
       const data = await res.json()
       if (data.success) {
         toast.success(t('common.success'))
-        setDeleteId(null)
-        fetchBooths()
       } else {
+        // Rollback
+        setBooths(prevBooths);
         toast.error(data.error || t('common.error'))
       }
     } catch {
+      // Rollback
+      setBooths(prevBooths);
       toast.error(t('common.error'))
     }
   }
 
   const handleStatusChange = async (id: string, newStatus: string) => {
+    const prevBooths = [...booths];
+    
+    // Optimistic Update
+    setBooths(prev => prev.map(b => b.id === id ? { ...b, status: newStatus } : b));
+
     try {
       const res = await fetch(`/api/booths/${id}`, {
         method: 'PATCH',
@@ -186,181 +211,151 @@ export default function BoothManagement() {
       const data = await res.json()
       if (data.success) {
         toast.success(t('common.success'))
-        fetchBooths()
       } else {
+        // Rollback
+        setBooths(prevBooths);
         toast.error(data.error || t('common.error'))
       }
     } catch {
+      // Rollback
+      setBooths(prevBooths);
       toast.error(t('common.error'))
     }
   }
 
   const statusCounts = {
-    all: booths.length,
-    available: booths.filter((b) => b.status === 'available').length,
-    pending: booths.filter((b) => b.status === 'pending').length,
-    booked: booths.filter((b) => b.status === 'booked').length,
+    all: booths?.length || 0,
+    available: (booths || []).filter((b) => b?.status === 'available').length,
+    pending: (booths || []).filter((b) => b?.status === 'pending').length,
+    booked: (booths || []).filter((b) => b?.status === 'booked').length,
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
-            <Box className="h-5 w-5 text-orange-600" />
+    <div className="space-y-8 animate-in fade-in duration-700">
+      {/* Premium Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-card p-6 rounded-3xl border border-border shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-inner">
+            <LayoutGrid className="h-7 w-7" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-800">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">
               {isRTL ? 'إدارة الأجنحة' : 'Booth Management'}
             </h2>
-            <p className="text-sm text-gray-500">
-              {isRTL ? 'عرض وتعديل أجنحة المعرض' : 'View and manage exhibition booths'}
+            <p className="text-muted-foreground">
+              {isRTL ? 'تحكم كامل في أجنحة المعرض وبياناتها' : 'Full control over exhibition booths and data'}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Card>
-          <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
-              <Box className="h-5 w-5 text-gray-600" />
+      {/* Stats Grid - Premium Cards */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {[
+          { label: isRTL ? 'الإجمالي' : 'Total', count: statusCounts.all, icon: Box, color: 'bg-blue-500', text: 'text-blue-600 dark:text-blue-400' },
+          { label: isRTL ? 'متاح' : 'Available', count: statusCounts.available, icon: CheckCircle, color: 'bg-green-500', text: 'text-green-600 dark:text-green-400' },
+          { label: isRTL ? 'قيد الحجز' : 'Pending', count: statusCounts.pending, icon: Clock, color: 'bg-yellow-500', text: 'text-yellow-600 dark:text-yellow-400' },
+          { label: isRTL ? 'محجوز' : 'Booked', count: statusCounts.booked, icon: Box, color: 'bg-orange-500', text: 'text-orange-600 dark:text-orange-400' }
+        ].map((stat, i) => (
+          <div key={i} className="relative group overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-1">
+            <div className={cn("absolute left-0 top-0 h-1 w-full opacity-70", stat.color)} />
+            <div className="flex items-center justify-between mb-2">
+              <stat.icon className={cn("h-5 w-5", stat.text)} />
             </div>
-            <div>
-              <p className="text-xs text-gray-500">{isRTL ? 'الإجمالي' : 'Total'}</p>
-              <p className="text-lg font-bold">{statusCounts.all}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-xs text-green-600">{isRTL ? 'متاح' : 'Available'}</p>
-              <p className="text-lg font-bold text-green-700">{statusCounts.available}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-50">
-              <Clock className="h-5 w-5 text-yellow-600" />
-            </div>
-            <div>
-              <p className="text-xs text-yellow-600">{isRTL ? 'قيد الحجز' : 'Pending'}</p>
-              <p className="text-lg font-bold text-yellow-700">{statusCounts.pending}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
-              <XCircle className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-xs text-blue-600">{isRTL ? 'محجوز' : 'Booked'}</p>
-              <p className="text-lg font-bold text-blue-700">{statusCounts.booked}</p>
-            </div>
-          </CardContent>
-        </Card>
+            <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+            <p className={cn("mt-1 text-2xl font-bold tracking-tight", stat.text)}>{stat.count}</p>
+          </div>
+        ))}
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isRTL ? 'البحث بالتسمية...' : 'Search by label...'}
-              className="ps-9"
-              dir={isRTL ? 'rtl' : 'ltr'}
-            />
+      {/* Enhanced Filters Table */}
+      <Card className="rounded-3xl shadow-sm border-border overflow-hidden">
+        <CardHeader className="bg-muted/30 pb-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle className="text-lg font-bold">{isRTL ? 'قائمة الأجنحة' : 'Booth List'}</CardTitle>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative">
+                <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={isRTL ? 'البحث بالتسمية...' : 'Search...'}
+                  className="ps-9 w-full sm:w-64 bg-background border-border rounded-xl"
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-40 bg-background border-border rounded-xl">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-3.5 w-3.5 opacity-60" />
+                    <SelectValue />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{isRTL ? 'جميع الحالات' : 'All Status'}</SelectItem>
+                  <SelectItem value="available">{isRTL ? 'متاح' : 'Available'}</SelectItem>
+                  <SelectItem value="pending">{isRTL ? 'قيد الحجز' : 'Pending'}</SelectItem>
+                  <SelectItem value="booked">{isRTL ? 'محجوز' : 'Booked'}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-400" />
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">
-                  {isRTL ? 'جميع الحالات' : 'All Status'}
-                </SelectItem>
-                <SelectItem value="available">{isRTL ? 'متاح' : 'Available'}</SelectItem>
-                <SelectItem value="pending">{isRTL ? 'قيد الحجز' : 'Pending'}</SelectItem>
-                <SelectItem value="booked">{isRTL ? 'محجوز' : 'Booked'}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <span className="text-sm text-gray-500">
-            {filteredBooths.length} {isRTL ? 'جناح' : 'booths'}
-          </span>
-        </CardContent>
-      </Card>
-
-      {/* Table */}
-      <Card>
+        </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground animate-pulse">{t('common.loading')}</p>
             </div>
           ) : filteredBooths.length === 0 ? (
-            <div className="py-12 text-center text-gray-500">
-              {t('common.noData')}
+            <div className="py-20 text-center text-muted-foreground bg-accent/10">
+              <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted border border-border mb-4">
+                <Box className="h-8 w-8 opacity-20" />
+              </div>
+              <p className="font-medium">{t('common.noData')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t('admin.editor.label')}</TableHead>
-                    <TableHead>{isRTL ? 'النوع' : 'Type'}</TableHead>
-                    <TableHead>{t('admin.editor.area')} (m²)</TableHead>
-                    <TableHead>{t('admin.editor.price')}</TableHead>
-                    <TableHead>{t('admin.status')}</TableHead>
-                    <TableHead>{isRTL ? 'الموضع' : 'Position'}</TableHead>
-                    <TableHead className="text-end">{isRTL ? 'إجراءات' : 'Actions'}</TableHead>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="hover:bg-transparent border-border">
+                    <TableHead className="font-bold py-4">{t('admin.editor.label')}</TableHead>
+                    <TableHead className="font-bold">{isRTL ? 'النوع' : 'Type'}</TableHead>
+                    <TableHead className="font-bold">{t('admin.editor.area')} (m²)</TableHead>
+                    <TableHead className="font-bold">{t('admin.editor.price')}</TableHead>
+                    <TableHead className="font-bold">{t('admin.status')}</TableHead>
+                    <TableHead className="font-bold text-end pe-8">{isRTL ? 'إجراءات' : 'Actions'}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredBooths.map((booth) => {
                     const statusCfg = STATUS_CONFIG[booth.status] || STATUS_CONFIG.available
+                    const StatusIcon = statusCfg.icon
                     return (
-                      <TableRow key={booth.id}>
-                        <TableCell className="font-semibold">{booth.label}</TableCell>
+                      <TableRow key={booth.id} className="border-border hover:bg-muted/30 transition-colors group">
+                        <TableCell className="font-bold text-foreground py-4 text-base">{booth.label}</TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                          <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-none font-medium">
                             standard
                           </Badge>
                         </TableCell>
-                        <TableCell>{booth.area} m²</TableCell>
-                        <TableCell className="font-semibold">
-                          {Math.round(booth.area * 1700).toLocaleString()} {t('common.sar')}
+                        <TableCell className="font-medium">{booth.area} m²</TableCell>
+                        <TableCell className="font-bold text-foreground">
+                          {Math.round(booth.area * 1700).toLocaleString()} <span className="text-xs font-normal text-muted-foreground">{t('common.sar')}</span>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={statusCfg.color}>
+                          <Badge variant="outline" className={cn("px-2.5 py-1 flex w-fit items-center gap-1.5", statusCfg.color)}>
+                            <StatusIcon className="h-3 w-3" />
                             {t(statusCfg.label)}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <span className="font-mono text-xs text-gray-500" dir="ltr">
-                            ({Math.round(booth.x)}, {Math.round(booth.y)})
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-end gap-1">
+                          <div className="flex items-center justify-end gap-2 pe-4">
                             <Button
                               variant="ghost"
-                              size="sm"
+                              size="icon"
+                              className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
                               onClick={() => handleEdit(booth)}
-                              title={isRTL ? 'تعديل' : 'Edit'}
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -368,52 +363,50 @@ export default function BoothManagement() {
                             {booth.status === 'available' ? (
                               <Button
                                 variant="ghost"
-                                size="sm"
-                                className="text-yellow-600 hover:bg-yellow-50"
+                                size="icon"
+                                className="h-9 w-9 rounded-xl text-yellow-600 hover:bg-yellow-500/10 transition-colors"
                                 onClick={() => handleStatusChange(booth.id, 'booked')}
-                                title={isRTL ? 'تغيير الحالة' : 'Change Status'}
                               >
                                 <Clock className="h-4 w-4" />
                               </Button>
-                            ) : booth.status === 'booked' ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-green-600 hover:bg-green-50"
-                                onClick={() => handleStatusChange(booth.id, 'available')}
-                                title={isRTL ? 'تغيير الحالة' : 'Change Status'}
-                              >
-                                <CheckCircle className="h-4 w-4" />
-                              </Button>
-                            ) : null}
+                            ) : (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-9 w-9 rounded-xl text-green-600 hover:bg-green-500/10 transition-colors"
+                                  onClick={() => handleStatusChange(booth.id, 'available')}
+                                >
+                                  <CheckCircle className="h-4 w-4" />
+                                </Button>
+                            )}
 
-                            <AlertDialog open={deleteId === booth.id} onOpenChange={() => setDeleteId(null)}>
+                            <AlertDialog open={deleteId === booth.id} onOpenChange={(o) => !o && setDeleteId(null)}>
                               <AlertDialogTrigger asChild>
                                 <Button
                                   variant="ghost"
-                                  size="sm"
-                                  className="text-red-600 hover:bg-red-50"
-                                  title={isRTL ? 'حذف' : 'Delete'}
+                                  size="icon"
+                                  className="h-9 w-9 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors"
+                                  onClick={() => setDeleteId(booth.id)}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent>
+                              <AlertDialogContent className="rounded-2xl border-border bg-background shadow-2xl">
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>
+                                  <AlertDialogTitle className="text-xl font-bold">
                                     {isRTL ? 'حذف الجناح' : 'Delete Booth'}
                                   </AlertDialogTitle>
-                                  <AlertDialogDescription>
+                                  <AlertDialogDescription className="text-base">
                                     {isRTL
-                                      ? `هل أنت متأكد من حذف الجناح "${booth.label}"؟`
+                                      ? `هل أنت متأكد من حذف الجناح "${booth.label}"؟ لا يمكن التراجع عن هذا الإجراء.`
                                       : `Are you sure you want to delete booth "${booth.label}"? This action cannot be undone.`}
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                                <AlertDialogFooter className="mt-4 gap-2">
+                                  <AlertDialogCancel className="rounded-xl border-border">{t('common.cancel')}</AlertDialogCancel>
                                   <AlertDialogAction
                                     onClick={() => handleDelete(booth.id)}
-                                    className="bg-red-600 hover:bg-red-700"
+                                    className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
                                   >
                                     {t('admin.booths.delete')}
                                   </AlertDialogAction>
@@ -432,93 +425,105 @@ export default function BoothManagement() {
         </CardContent>
       </Card>
 
-      {/* Edit Dialog */}
+      {/* Redesigned Edit Dialog - Solid Opaque Background */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {isRTL ? `تعديل الجناح: ${editingBooth?.label}` : `Edit Booth: ${editingBooth?.label}`}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label className="mb-1 block text-sm">{t('admin.editor.label')}</Label>
-              <Input
-                value={editForm.label}
-                onChange={(e) => setEditForm((f) => ({ ...f, label: e.target.value }))}
-                dir={isRTL ? 'rtl' : 'ltr'}
-              />
+        <DialogContent className="max-w-lg bg-background border-border p-0 overflow-hidden rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="bg-primary/5 p-6 border-b border-border">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">
+                {isRTL ? `تعديل الجناح: ${editingBooth?.label}` : `Edit Booth: ${editingBooth?.label}`}
+              </DialogTitle>
+            </DialogHeader>
+          </div>
+          
+          <div className="p-8 space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-muted-foreground">{t('admin.editor.label')}</Label>
+                <Input
+                  value={editForm.label}
+                  onChange={(e) => setEditForm((f) => ({ ...f, label: e.target.value }))}
+                  className="bg-muted/30 border-border rounded-xl h-11 focus:ring-primary/20"
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-muted-foreground">{t('admin.editor.area')} (m²)</Label>
+                <Input
+                  type="number"
+                  value={editForm.area}
+                  onChange={(e) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      area: parseFloat(e.target.value) || 0,
+                      price: Math.round((parseFloat(e.target.value) || 0) * 1700),
+                    }))
+                  }
+                  className="bg-muted/30 border-border rounded-xl h-11"
+                  dir="ltr"
+                />
+              </div>
             </div>
-            <div>
-              <Label className="mb-1 block text-sm">{t('admin.editor.area')} (m²)</Label>
-              <Input
-                type="number"
-                value={editForm.area}
-                onChange={(e) =>
-                  setEditForm((f) => ({
-                    ...f,
-                    area: parseFloat(e.target.value) || 0,
-                    price: Math.round((parseFloat(e.target.value) || 0) * 1700),
-                  }))
-                }
-                dir="ltr"
-              />
+
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-muted-foreground">{t('admin.status')}</Label>
+                <Select
+                  value={editForm.status}
+                  onValueChange={(v) => setEditForm((f) => ({ ...f, status: v }))}
+                >
+                  <SelectTrigger className="bg-muted/30 border-border rounded-xl h-11">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-border bg-background shadow-xl border">
+                    <SelectItem value="available" className="rounded-lg">{isRTL ? 'متاح' : 'Available'}</SelectItem>
+                    <SelectItem value="pending" className="rounded-lg">{isRTL ? 'قيد الحجز' : 'Pending'}</SelectItem>
+                    <SelectItem value="booked" className="rounded-lg">{isRTL ? 'محجوز' : 'Booked'}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-muted-foreground">{t('admin.editor.type')}</Label>
+                <Select
+                  value={editForm.boothType}
+                  onValueChange={(v) => setEditForm((f) => ({ ...f, boothType: v }))}
+                >
+                  <SelectTrigger className="bg-muted/30 border-border rounded-xl h-11">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-border bg-background shadow-xl border">
+                    <SelectItem value="standard" className="rounded-lg">{t('admin.editor.standard')}</SelectItem>
+                    <SelectItem value="vip" className="rounded-lg">{t('admin.editor.vip')}</SelectItem>
+                    <SelectItem value="sponsor" className="rounded-lg">{t('admin.editor.sponsor')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label className="mb-1 block text-sm">{t('admin.status')}</Label>
-              <Select
-                value={editForm.status}
-                onValueChange={(v) => setEditForm((f) => ({ ...f, status: v }))}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="available">{isRTL ? 'متاح' : 'Available'}</SelectItem>
-                  <SelectItem value="pending">{isRTL ? 'قيد الحجز' : 'Pending'}</SelectItem>
-                  <SelectItem value="booked">{isRTL ? 'محجوز' : 'Booked'}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="mb-1 block text-sm">{t('admin.editor.type')}</Label>
-              <Select
-                value={editForm.boothType}
-                onValueChange={(v) => setEditForm((f) => ({ ...f, boothType: v }))}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="standard">{t('admin.editor.standard')}</SelectItem>
-                  <SelectItem value="vip">{t('admin.editor.vip')}</SelectItem>
-                  <SelectItem value="sponsor">{t('admin.editor.sponsor')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="mb-1 block text-sm">{t('admin.editor.price')} ({t('common.sar')})</Label>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-muted-foreground">{t('admin.editor.price')} ({t('common.sar')})</Label>
               <Input
                 type="number"
                 value={editForm.price}
                 onChange={(e) =>
                   setEditForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))
                 }
+                className="bg-muted/30 border-border rounded-xl h-11 text-lg font-bold text-primary"
                 dir="ltr"
               />
             </div>
           </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+
+          <DialogFooter className="bg-muted/30 p-6 px-8 flex gap-3">
+            <Button variant="ghost" className="rounded-xl h-11 px-6 font-medium" onClick={() => setEditDialogOpen(false)}>
               {t('common.cancel')}
             </Button>
             <Button
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 rounded-xl h-11 px-8 font-bold min-w-[120px]"
               onClick={handleEditSave}
               disabled={isSaving}
             >
-              {isSaving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-              {t('common.save')}
+              {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>

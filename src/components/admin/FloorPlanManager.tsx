@@ -36,6 +36,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import FloorPlanEditor, { type BoothShape } from './FloorPlanEditor'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 interface FloorPlan {
   id: string
@@ -60,7 +61,7 @@ export default function FloorPlanManager() {
       const res = await fetch('/api/floor-plans')
       const data = await res.json()
       if (data.success) {
-        setPlans(data.data)
+        setPlans(Array.isArray(data.data) ? data.data : [])
       }
     } catch {
       toast.error(t('common.error'))
@@ -84,6 +85,11 @@ export default function FloorPlanManager() {
   }
 
   const handleDelete = async (plan: FloorPlan) => {
+    const prevPlans = [...plans];
+    
+    // Optimistic Update
+    setPlans(prev => prev.filter(p => p.id !== plan.id));
+
     try {
       const res = await fetch(`/api/floor-plans/${plan.id}`, {
         method: 'DELETE',
@@ -91,29 +97,47 @@ export default function FloorPlanManager() {
       const data = await res.json()
       if (data.success) {
         toast.success(t('common.success'))
-        fetchPlans()
       } else {
+        // Rollback
+        setPlans(prevPlans);
         toast.error(data.error || t('common.error'))
       }
     } catch {
+      // Rollback
+      setPlans(prevPlans);
       toast.error(t('common.error'))
     }
   }
 
   const handleToggleActive = async (plan: FloorPlan) => {
+    const prevPlans = [...plans];
+    
+    // Optimistic Update: Toggle target and potentially deactivate others (if backend does that)
+    const newStatus = !plan.isActive;
+    setPlans(prev => prev.map(p => {
+      if (p.id === plan.id) return { ...p, isActive: newStatus };
+      // If we are activating this one, the others might become inactive
+      if (newStatus && p.isActive) return { ...p, isActive: false };
+      return p;
+    }));
+
     try {
       const res = await fetch(`/api/floor-plans/${plan.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: !plan.isActive }),
+        body: JSON.stringify({ isActive: newStatus }),
       })
       const data = await res.json()
       if (data.success) {
-        fetchPlans()
+        // Updated successfully
       } else {
+        // Rollback
+        setPlans(prevPlans);
         toast.error(data.error || t('common.error'))
       }
     } catch {
+      // Rollback
+      setPlans(prevPlans);
       toast.error(t('common.error'))
     }
   }
@@ -464,13 +488,15 @@ export default function FloorPlanManager() {
           </div>
           {/* Editor Content - fills remaining space */}
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <FloorPlanEditor
-              planId={editingPlan?.id}
-              planName={editingPlan?.name}
-              initialBooths={editingPlan?.booths || []}
-              onSave={handleEditorSave}
-              onCancel={() => setEditorOpen(false)}
-            />
+            <ErrorBoundary>
+              <FloorPlanEditor
+                planId={editingPlan?.id}
+                planName={editingPlan?.name}
+                initialBooths={editingPlan?.booths || []}
+                onSave={handleEditorSave}
+                onCancel={() => setEditorOpen(false)}
+              />
+            </ErrorBoundary>
           </div>
         </div>
       )}
