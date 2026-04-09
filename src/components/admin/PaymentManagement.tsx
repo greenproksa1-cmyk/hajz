@@ -556,18 +556,19 @@ export default function PaymentManagement() {
             mobile={contractToRender.mobile}
             phone={contractToRender.phone}
             email={contractToRender.email}
-            booths={Array.isArray(contractToRender.rawBooking?.booths) ? contractToRender.rawBooking.booths.map((b: any) => ({
+            booths={Array.isArray(contractToRender.booths) ? contractToRender.booths.map((b: any) => ({
               label: b.label,
               category: b.boothType || 'Shell Stand',
               area: b.area,
-              price: contractToRender.amount / (contractToRender.rawBooking.booths?.length || 1)
-            })) : [{ label: contractToRender.rawBooking?.boothLabels?.[0] || 'A1', category: 'Shell Stand', area: 9, price: contractToRender.amount }]}
+              price: (contractToRender.totalPrice || 0) / (contractToRender.booths?.length || 1)
+            })) : [{ label: 'A1', category: 'Shell Stand', area: 9, price: contractToRender.totalPrice || 0 }]}
             bookingRef={contractToRender.id.toUpperCase().substring(0, 8)}
             exhibits="General Exhibit"
-            sponsorshipLevel={contractToRender.rawBooking?.sponsorshipLevel || "Co-Sponsor"}
+            sponsorshipLevel={contractToRender.sponsorshipLevel || "Co-Sponsor"}
           />
         )}
       </div>
+
 
 
     </div>
