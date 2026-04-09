@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Upload, Building2, CheckCircle, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'
+import { Upload, Building2, CheckCircle, ArrowLeft, ArrowRight, Loader2, Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import type { BookingFormData } from './BookingWizard'
 import type { BoothData } from '../booth/BoothMap'
@@ -31,8 +31,16 @@ export default function Step4Payment({
   const [receiptFile, setReceiptFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [copiedField, setCopiedField] = useState<string | null>(null)
   const contractInputRef = useRef<HTMLInputElement>(null)
   const receiptInputRef = useRef<HTMLInputElement>(null)
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedField(field)
+    toast.success(isRTL ? 'تم النسخ!' : 'Copied!')
+    setTimeout(() => setCopiedField(null), 2000)
+  }
 
   const handleFileSelect = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -132,37 +140,59 @@ export default function Step4Payment({
         <h3 className="text-lg font-semibold text-gray-800">{t('payment.title')}</h3>
       </div>
 
-      {/* Bank Transfer Info */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Building2 className="h-4 w-4 text-orange-500" />
-            {t('payment.bankInfo')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-gray-600">{t('payment.transferNote')}</p>
-          <div className="rounded-lg bg-gray-50 p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">{t('payment.bankName')}</span>
-              <span className="text-sm font-medium">{t('payment.bankName')}</span>
+      {/* Bank Transfer Info - Premium Styled Card */}
+      <Card className="overflow-hidden border-none shadow-xl">
+        <div className="bg-[#001f3f] p-6 text-white text-center space-y-4">
+          <div className="mx-auto w-40 h-40 bg-white p-2 rounded-xl mb-2">
+            <img 
+              src="/images/payment-qr.png" 
+              alt="Payment QR" 
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <h4 className="text-xl font-bold tracking-wide">عبدالمجيد محمد ضاعني</h4>
+          
+          <div className="space-y-3 mt-6">
+            {/* Account Number Row */}
+            <div className="bg-white/10 rounded-lg p-3 flex items-center justify-between group hover:bg-white/20 transition-colors">
+              <div className="text-right">
+                <p className="text-[10px] uppercase opacity-70 mb-1">{isRTL ? 'رقم الحساب' : 'Account Number'}</p>
+                <p className="font-mono text-sm tracking-widest">68205997021002</p>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white hover:text-white hover:bg-white/20 h-8 w-8"
+                onClick={() => copyToClipboard('68205997021002', 'account')}
+              >
+                {copiedField === 'account' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">{t('payment.iban')}</span>
-              <span className="text-sm font-mono font-medium" dir="ltr">{t('payment.bankDetails')}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">{t('payment.accountName')}</span>
-              <span className="text-sm font-medium">{t('payment.accountNameValue')}</span>
-            </div>
-            <div className="flex items-center justify-between border-t pt-2">
-              <span className="text-sm font-semibold text-gray-700">{t('boothMap.totalPrice')}</span>
-              <span className="text-base font-bold text-orange-600">
-                {totalPrice.toLocaleString()} {t('common.sar')}
-              </span>
+
+            {/* IBAN Row */}
+            <div className="bg-white/10 rounded-lg p-3 flex items-center justify-between group hover:bg-white/20 transition-colors">
+              <div className="text-right w-full">
+                <p className="text-[10px] uppercase opacity-70 mb-1">{isRTL ? 'الآيبان' : 'IBAN'}</p>
+                <p className="font-mono text-xs tracking-tight break-all" dir="ltr">SA8805000068205997021002</p>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white hover:text-white hover:bg-white/20 h-8 w-8 ml-2"
+                onClick={() => copyToClipboard('SA8805000068205997021002', 'iban')}
+              >
+                {copiedField === 'iban' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
             </div>
           </div>
-        </CardContent>
+
+          <div className="pt-4 border-t border-white/10 flex justify-between items-center text-sm">
+            <span className="opacity-80 font-medium">{t('boothMap.totalPrice')}</span>
+            <span className="text-lg font-bold text-orange-400">
+              {totalPrice.toLocaleString()} {t('common.sar')}
+            </span>
+          </div>
+        </div>
       </Card>
 
       {/* File Uploads */}
