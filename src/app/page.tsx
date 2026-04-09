@@ -97,6 +97,30 @@ function AppContent() {
     }
   }, [])
 
+  // URL Hash Sync for Persistence
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '')
+      const validViews: View[] = [
+        'home', 'map', 'booking', 'admin', 'admin-dashboard', 
+        'admin-new', 'user-dashboard', 'floor-plan-editor', 
+        'floor-plan-manager', 'booth-management', 'payment-management'
+      ]
+      
+      if (hash && validViews.includes(hash as View)) {
+        setCurrentView(hash as View)
+      } else if (!hash) {
+        setCurrentView('home')
+      }
+    }
+
+    // Set initial view from hash if it exists
+    handleHashChange()
+
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
+
   useEffect(() => {
     fetchBooths()
     // Refresh booths every 30 seconds
@@ -108,6 +132,7 @@ function AppContent() {
 
   const handleNavigate = useCallback(
     (view: string) => {
+      window.location.hash = view
       if (view === 'admin' && isAdminLoggedIn) {
         setCurrentView('admin-new')
       } else {
