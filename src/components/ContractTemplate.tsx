@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 
 // 1. الواجهات البرمجية
 export interface Booth {
@@ -27,9 +27,7 @@ export interface ContractProps {
 }
 
 /**
- * 2. دالة التصدير باستخدام الجيل الجديد (Native Print)
- * بدلاً من html2canvas الذي يكسر الحروف العربية ويخرجها كصورة سيئة، 
- * نستخدم محرك المتصفح لتصدير PDF عالي الدقة (Vector) قابل لتحديد النص.
+ * دالة التصدير الاحترافية (Print PDF)
  */
 export const exportToPDF = () => {
   window.print();
@@ -57,20 +55,23 @@ export const ContractTemplate: React.FC<ContractProps> = (props) => {
         
         #contract-print-layer {
           font-family: 'Cairo', sans-serif !important;
-          color: black;
+          color: #1e293b;
           background: white;
           width: 210mm;
           min-height: 297mm;
           margin: auto;
           box-sizing: border-box;
-          padding: 20px;
+          padding: 10mm; /* Narrow padding to fit one page */
+          position: relative;
         }
 
-        /* 
-         * سر الاحترافية: 
-         * إخفاء العقد في الشاشة العادية، وإظهاره فقط عند التصدير لـ PDF (أمر الطباعة).
-         * وإخفاء النظام بأكمله عدا العقد ليتم تصديره كـ PDF رسمي منفصل!
-         */
+        /* التصميم الملون والاحترافي */
+        .brand-navy { color: #003366; }
+        .brand-orange { color: #f97316; }
+        .bg-navy { background-color: #003366 !important; color: white !important; -webkit-print-color-adjust: exact; }
+        .bg-orange { background-color: #f97316 !important; color: white !important; -webkit-print-color-adjust: exact; }
+        .bg-light-grey { background-color: #f8fafc !important; -webkit-print-color-adjust: exact; }
+
         @media screen {
           #contract-print-layer {
             display: none !important;
@@ -78,9 +79,7 @@ export const ContractTemplate: React.FC<ContractProps> = (props) => {
         }
 
         @media print {
-          body * {
-            visibility: hidden;
-          }
+          body * { visibility: hidden; }
           #contract-print-layer, #contract-print-layer * {
             visibility: visible;
           }
@@ -89,9 +88,9 @@ export const ContractTemplate: React.FC<ContractProps> = (props) => {
             left: 0;
             top: 0;
             width: 100%;
-            height: auto;
             margin: 0;
-            padding: 15mm 10mm;
+            padding: 8mm; /* Extra compact for single page */
+            height: 100%;
           }
           @page {
             size: A4;
@@ -99,230 +98,209 @@ export const ContractTemplate: React.FC<ContractProps> = (props) => {
           }
         }
 
-        .c-table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 10px; border: 1.5px solid #000; }
-        .c-table td, .c-table th { border: 1.5px solid #000; padding: 8px 10px; }
-        .c-label { font-weight: bold; background-color: #f0f0f0; width: 25%; }
-        .c-data { text-align: center; font-weight: 700; width: 50%; font-size: 13px; }
-        .c-checkbox { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border: 1.5px solid #000; margin: 0 5px; vertical-align: middle; font-size: 10px; font-weight: bold; color: black; background-color: white;}
-        .c-checkbox.checked::after { content: "X"; font-size: 12px;}
-        .section-title { background-color: #e2e2e2; border: 1.5px solid #000; padding: 4px 10px; font-weight: 900; display: flex; justify-content: space-between; margin-top: 15px; font-size: 13px; }
-        .signature-row { display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 12px; align-items: flex-end; }
-        .signature-line { border-bottom: 1px dashed #000; flex-grow: 1; margin: 0 10px; }
+        .c-table { width: 100%; border-collapse: collapse; margin-top: 3px; margin-bottom: 5px; border: 1px solid #e2e8f0; }
+        .c-table td, .c-table th { border: 1px solid #cbd5e1; padding: 5px 10px; font-size: 11px; }
+        .c-label { font-weight: bold; background-color: #f1f5f9; width: 22%; color: #475569; }
+        .c-data { text-align: center; font-weight: 700; width: 56%; font-size: 11.5px; color: #0f172a; }
+        
+        .c-checkbox { display: inline-flex; align-items: center; justify-content: center; width: 12px; height: 12px; border: 1.5px solid #003366; margin: 0 4px; vertical-align: middle; font-size: 9px; font-weight: bold; color: #003366; background-color: white;}
+        .c-checkbox.checked { background-color: #003366; color: white; }
+        .c-checkbox.checked::after { content: "X"; font-size: 10px;}
+        
+        .section-header { 
+           background: linear-gradient(to right, #003366, #1e40af); 
+           color: white; 
+           padding: 4px 12px; 
+           font-weight: 800; 
+           display: flex; 
+           justify-content: space-between; 
+           margin-top: 10px; 
+           font-size: 11px; 
+           border-radius: 4px;
+           -webkit-print-color-adjust: exact;
+        }
+        
+        .signature-box { border: 1px solid #e2e8f0; background: #fcfcfc; padding: 12px; border-radius: 6px; }
+        .signature-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 10.5px; align-items: flex-end; }
+        .signature-line { border-bottom: 1px dashed #94a3b8; flex-grow: 1; margin: 0 10px; }
+        
+        .divider { height: 3px; background: linear-gradient(90deg, #f97316 0%, #003366 100%); margin: 10px 0; -webkit-print-color-adjust: exact; }
       `}} />
 
       <div id="contract-print-layer" dir="ltr">
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '3px solid #000', paddingBottom: '10px' }}>
-          <div style={{ textAlign: 'left' }} dir="ltr">
-            <div style={{ fontWeight: '900', fontSize: '16px' }}>RIYADH CONTRACTORS EXHIBITION 2026</div>
-            <div style={{ fontSize: '10px' }}>Exhibition & Conference Organization</div>
+        {/* Superior Header with Logo and Contacts */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '5px' }}>
+          <div style={{ textAlign: 'left', width: '35%' }} dir="ltr">
+            <div style={{ fontWeight: '900', fontSize: '13px', color: '#003366' }}>RIYADH CONTRACTORS EXHIBITION 2026</div>
+            <div style={{ fontSize: '9px', color: '#64748b' }}>✉ contact@gren-pro.com</div>
+            <div style={{ fontSize: '9px', color: '#64748b' }}>📞 +966 590 401 777</div>
           </div>
-          <div style={{ textAlign: 'right' }} dir="rtl">
-            <div style={{ fontWeight: '900', fontSize: '16px' }}>معرض مقاولين الرياض ٢٠٢٦م</div>
-            <div style={{ fontSize: '10px' }}>لتنظيم المعارض والمؤتمرات</div>
+          
+          <div style={{ textAlign: 'center', width: '30%' }}>
+            <img 
+              src="/images/exhibition-logo.png" 
+              alt="Logo" 
+              style={{ height: '55px', objectFit: 'contain' }} 
+            />
+          </div>
+
+          <div style={{ textAlign: 'right', width: '35%' }} dir="rtl">
+            <div style={{ fontWeight: '900', fontSize: '13px', color: '#003366' }}>معرض مقاولين الرياض ٢٠٢٦م</div>
+            <div style={{ fontSize: '9px', color: '#64748b' }}>البريد: contact@gren-pro.com</div>
+            <div style={{ fontSize: '9px', color: '#64748b' }}>هاتف: ٧٧٧ ١٧٧ ٥٩٠ ٩٦٦ +</div>
           </div>
         </div>
 
-        <div style={{ textAlign: 'center', margin: '20px 0' }}>
-          <div style={{ fontWeight: '900', fontSize: '18px', textDecoration: 'underline' }}>
-            عقد الرعاية والمشاركة في معرض مقاولين الرياض 2026
-          </div>
-          <div style={{ fontWeight: '900', fontSize: '14px', textDecoration: 'underline', marginTop: '5px' }}>
-            Sponsorship and Participation Contract in Riyadh Contractors Exhibition 2026
-          </div>
+        <div className="divider"></div>
+
+        <div style={{ textAlign: 'center', margin: '10px 0' }}>
+          <h1 style={{ fontWeight: '900', fontSize: '16px', color: '#003366', margin: '0' }}>
+            عقد الرعاية والمشاركة في المعرض
+          </h1>
+          <h2 style={{ fontWeight: '700', fontSize: '11px', color: '#f97316', margin: '3px 0' }}>
+            SPONSORSHIP AND PARTICIPATION CONTRACT
+          </h2>
         </div>
 
-        {/* Exhibitor Info */}
+        {/* 1. Client Table - Colored Labels */}
         <table className="c-table">
           <tbody>
             {[
-              { en: 'Name of the entity', val: props.companyName, ar: 'اسم الجهة' },
-              { en: 'Unified number', val: props.crNumber, ar: 'الرقم الموحد' },
-              { en: 'Address', val: props.address, ar: 'العنوان' },
-              { en: 'Responsible person', val: props.contactPerson, ar: 'الشخص المسؤول' },
-              { en: 'Job title', val: props.jobTitle, ar: 'الوظيفة' },
-              { en: 'Mobile / Telephone', val: `${props.mobile} ${props.phone ? '/ ' + props.phone : ''}`, ar: 'الجوال / الهاتف' },
-              { en: 'Email', val: props.email, ar: 'البريد الالكتروني' }
+              { en: 'Entity Name', val: props.companyName, ar: 'اسم الجهة' },
+              { en: 'Unified Number', val: props.crNumber, ar: 'الرقم الموحد' },
+              { en: 'Contact Person', val: props.contactPerson, ar: 'المسؤول' },
+              { en: 'Email', val: props.email, ar: 'البريد الالكتروني' },
+              { en: 'Mobile / Phone', val: `${props.mobile} / ${props.phone || '-'}`, ar: 'الجوال / الهاتف' }
             ].map((row, i) => (
               <tr key={i}>
-                <td className="c-label" style={{ textAlign: 'left', fontSize: '11px' }} dir="ltr">{row.en} :</td>
-                <td className="c-data">{row.val || '......................................'}</td>
-                <td className="c-label" style={{ textAlign: 'right', fontSize: '12px' }} dir="rtl">:{row.ar}</td>
+                <td className="c-label" dir="ltr">{row.en} :</td>
+                <td className="c-data bg-light-grey">{row.val || '................................'}</td>
+                <td className="c-label" style={{ textAlign: 'right' }} dir="rtl">:{row.ar}</td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        {/* Sponsorship Levels */}
-        <div className="section-title">
-          <span dir="ltr">Sponsorship Levels</span>
-          <span dir="rtl">مستويات الرعاية</span>
+        {/* 2. Sponsorship - Colorful Badge Grid */}
+        <div className="section-header">
+           <span dir="ltr">SPONSORSHIP LEVELS</span>
+           <span dir="rtl">مستويات الرعاية والتميز</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px', padding: '15px', border: '1.5px solid #000', borderTop: 'none' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', border: '1px solid #e2e8f0', borderTop: 'none', padding: '8px' }}>
           {sponsorshipLevels.map((level) => {
             const isChecked = props.sponsorshipLevel === level.en;
             return (
-              <div key={level.en} style={{ fontSize: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', width: '50%' }} dir="ltr">
-                  <span className={`c-checkbox ${isChecked ? 'checked' : ''}`}></span>
-                  <b style={{ marginLeft: '5px' }}>{level.en}</b>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', width: '50%', justifyContent: 'flex-end' }} dir="rtl">
-                  <b style={{ marginRight: '5px' }}>{level.ar}</b>
-                  <span className={`c-checkbox ${isChecked ? 'checked' : ''}`}></span>
-                </div>
+              <div key={level.en} style={{ fontSize: '9px', padding: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', border: '0.5px solid #f1f5f9' }}>
+                <span className={`c-checkbox ${isChecked ? 'checked' : ''}`}></span>
+                <span style={{ fontWeight: isChecked ? 'bold' : 'normal', marginTop: '2px', color: isChecked ? '#f97316' : '#64748b' }}>{level.ar}</span>
+                <span style={{ fontSize: '8px' }}>{level.en}</span>
               </div>
             );
           })}
         </div>
 
-        {/* Participation Details */}
-        <div className="section-title">
-          <span dir="ltr">Participation Details</span>
-          <span dir="rtl">تفاصيل المشاركة</span>
+        {/* 3. Participation - Professional Table */}
+        <div className="section-header">
+           <span dir="ltr">PARTICIPATION DETAILS</span>
+           <span dir="rtl">تفاصيل المساحات المحجوزة</span>
         </div>
         <table className="c-table" style={{ textAlign: 'center' }}>
-          <thead style={{ backgroundColor: '#f0f0f0' }}>
+          <thead className="bg-navy">
             <tr>
-              <th>
-                <div dir="ltr" style={{fontSize: '11px'}}>Booth ID</div>
-                <div dir="rtl" style={{fontSize: '12px', fontWeight: 'bold'}}>رقم المساحة</div>
-              </th>
-              <th>
-                <div dir="ltr" style={{fontSize: '11px'}}>Category</div>
-                <div dir="rtl" style={{fontSize: '12px', fontWeight: 'bold'}}>الفئة</div>
-              </th>
-              <th>
-                <div dir="ltr" style={{fontSize: '11px'}}>Area</div>
-                <div dir="rtl" style={{fontSize: '12px', fontWeight: 'bold'}}>المساحة</div>
-              </th>
-              <th>
-                <div dir="ltr" style={{fontSize: '11px'}}>Cost</div>
-                <div dir="rtl" style={{fontSize: '12px', fontWeight: 'bold'}}>القيمة</div>
-              </th>
+              <th style={{ fontSize: '10px' }}>Booth ID / رقم البوث</th>
+              <th style={{ fontSize: '10px' }}>Category / الفئة</th>
+              <th style={{ fontSize: '10px' }}>Area / المساحة</th>
+              <th style={{ fontSize: '10px' }}>Amount / المبلغ المالي</th>
             </tr>
           </thead>
           <tbody>
             {props.booths.map((booth, i) => (
               <tr key={i}>
-                <td style={{ fontWeight: 'bold', fontSize: '13px' }}>{booth.label}</td>
-                <td style={{ fontSize: '12px', fontWeight: 'bold' }}>
-                  {booth.category === 'Shell Stand' ? 'مساحة عرض شاملة التجهيزات / Shell Stand' : booth.category}
+                <td style={{ fontWeight: 'bold' }}>{booth.label}</td>
+                <td style={{ fontSize: '10px' }}>
+                  {booth.category === 'Shell Stand' ? 'مساحة عرض مجهزة / Shell Stand' : booth.category}
                 </td>
-                <td style={{ fontWeight: 'bold', fontSize: '13px' }}>{booth.area} m²</td>
-                <td style={{ fontSize: '13px', direction: 'ltr' }}>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '5px' }}>
-                    <b>SAR</b> <b>{booth.price.toLocaleString()}</b> <b dir="rtl">ريال سعودي</b>
-                  </div>
+                <td style={{ fontWeight: 'bold' }}>{booth.area} m²</td>
+                <td style={{ fontWeight: 'bold', color: '#003366', direction: 'ltr' }}>
+                   {booth.price.toLocaleString()} SAR
                 </td>
               </tr>
             ))}
-            <tr style={{ backgroundColor: '#f9f9f9' }}>
-              <td colSpan={2} style={{ fontWeight: '900', fontSize: '14px', textAlign: 'center' }}>
-                <span dir="ltr" style={{marginRight: '20px'}}>Total Amount</span>
-                <span dir="rtl">الإجمالي</span>
-              </td>
-              <td style={{ fontWeight: 'bold', fontSize: '14px' }}>{autoCalculatedArea} m²</td>
-              <td style={{ fontSize: '14px', direction: 'ltr' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '5px' }}>
-                  <b>SAR</b> <b style={{ color: '#003366' }}>{autoCalculatedPrice.toLocaleString()}</b> <b dir="rtl">ريال سعودي</b>
+            <tr className="bg-light-grey">
+              <td colSpan={2} style={{ fontWeight: '900', fontSize: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                   <span dir="ltr">GRAND TOTAL</span>
+                   <span dir="rtl">الإجمالي الكلي</span>
                 </div>
+              </td>
+              <td style={{ fontWeight: '900', color: '#f97316' }}>{autoCalculatedArea} m²</td>
+              <td className="bg-orange" style={{ fontWeight: '900', fontSize: '13px', direction: 'ltr' }}>
+                {autoCalculatedPrice.toLocaleString()} SAR
               </td>
             </tr>
           </tbody>
         </table>
 
-        {/* Terms */}
-        <div className="section-title">
-          <span dir="ltr">Terms & Conditions</span>
-          <span dir="rtl">الشروط والأحكام</span>
+        {/* 4. Terms - Compressed but Readable */}
+        <div className="section-header" style={{ background: '#f8fafc', color: '#003366', border: '1px solid #e2e8f0' }}>
+           <span dir="ltr" style={{ fontWeight: '900' }}>Terms & Conditions</span>
+           <span dir="rtl" style={{ fontWeight: '900' }}>الشروط والأحكام العامة</span>
         </div>
-        <div style={{ border: '1.5px solid #000', borderTop: 'none', padding: '15px', fontSize: '11px', lineHeight: '1.8' }}>
-          <div style={{ display: 'flex', gap: '30px' }}>
+        <div style={{ border: '1px solid #e2e8f0', borderTop: 'none', padding: '8px', fontSize: '9px', lineHeight: '1.4', display: 'flex', gap: '20px' }}>
             <div style={{ width: '50%' }} dir="ltr">
-              <ol style={{ paddingLeft: '15px', margin: 0, fontWeight: '600' }}>
-                <li>By signing this application, you agree to the obligations and conditions of participation.</li>
-                <li>The entity is obliged to pay the full amount upon signing this contract.</li>
-                <li>The organizer is not responsible for the contents of the exhibits or any lost items.</li>
+              <ol style={{ paddingLeft: '15px', margin: 0 }}>
+                <li>Contract is binding once signed and full payment is required to confirm.</li>
+                <li>The organizer is not responsible for lost items or damage to exhibits.</li>
+                <li>Cancellation follows the policy specified in the general exhibition rules.</li>
               </ol>
             </div>
-            <div style={{ width: '50%', textAlign: 'justify' }} dir="rtl">
-              <ol style={{ paddingRight: '15px', margin: 0, fontWeight: '700' }}>
-                <li>بتوقيع هذا الطلب، توافق وتلتزم بكافة شروط الاشتراك والقواعد العامة للمعرض.</li>
-                <li>تعتبر الجهة المشاركة ملزمة بدفع كامل المبلغ الموضح أعلاه فور توقيع العقد.</li>
-                <li>إدارة المعرض غير مسؤولة عن محتويات الأجنحة أو المعروضات أو أي مفقودات.</li>
+            <div style={{ width: '50%', color: '#475569' }} dir="rtl">
+              <ol style={{ paddingRight: '15px', margin: 0 }}>
+                <li>يعتبر العقد ملزماً بعد التوقيع، ويجب سداد الرسوم لتأكيد الحجز.</li>
+                <li>المنظم غير مسؤول عن المعروضات أو المفقودات الشخصية للعارضين.</li>
+                <li>تطبق شروط الإلغاء الموجودة في الدليل العام للمشاركة في المعرض.</li>
               </ol>
             </div>
+        </div>
+
+        {/* 5. Signatures - Premium Look */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginTop: '12px' }}>
+          <div className="signature-box">
+             <div style={{ borderBottom: '2px solid #f97316', paddingBottom: '3px', marginBottom: '10px', fontWeight: '900', fontSize: '12px' }}>
+                <span dir="ltr">EXHIBITOR (العارض)</span>
+             </div>
+             <div className="signature-row">
+               <span style={{ fontWeight: 'bold' }}>Rep:</span>
+               <span className="signature-line"></span>
+             </div>
+             <div className="signature-row" style={{ marginBottom: '8px' }}>
+               <span style={{ fontWeight: 'bold' }}>Sign:</span>
+               <span className="signature-line"></span>
+             </div>
+             <div style={{ display: 'flex', alignItems: 'center', height: '50px', border: '1px dashed #cbd5e1', borderRadius: '4px', justifyContent: 'center', color: '#94a3b8', fontSize: '10px' }}>
+                STAMP / الختم
+             </div>
+          </div>
+
+          <div className="signature-box" style={{ background: '#edf2f7' }}>
+             <div style={{ borderBottom: '2px solid #003366', paddingBottom: '3px', marginBottom: '10px', fontWeight: '900', fontSize: '12px' }}>
+                <span dir="ltr">ORGANIZER (المنظم)</span>
+             </div>
+             <div style={{ textAlign: 'center', padding: '10px' }}>
+                <div style={{ border: '2px double #003366', color: '#003366', fontWeight: '900', display: 'inline-block', padding: '5px 15px', transform: 'rotate(-5deg)', opacity: 0.3, fontSize: '14px' }}>
+                   APPROVED - RC EXPO 2026
+                </div>
+                <div style={{ marginTop: '15px', fontSize: '10px', fontWeight: 'bold', color: '#1e293b' }}>
+                   Booking ID: {props.bookingRef || 'RC-5432'}
+                </div>
+             </div>
           </div>
         </div>
 
-        {/* Signature Block */}
-        <div style={{ marginTop: '20px' }}>
-          <table className="c-table">
-            <tbody>
-              <tr>
-                <td style={{ width: '50%', verticalAlign: 'top', padding: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px', fontWeight: '900', fontSize: '14px', backgroundColor: '#f0f0f0', padding: '8px 10px', border: '1px solid #ccc' }}>
-                    <span dir="ltr">Exhibitor</span>
-                    <span dir="rtl">العارض</span>
-                  </div>
-                  
-                  <div className="signature-row">
-                    <span dir="ltr" style={{ fontWeight: 'bold' }}>Responsible:</span>
-                    <span className="signature-line"></span>
-                    <span dir="rtl" style={{ fontWeight: 'bold' }}>:المسؤول</span>
-                  </div>
-                  
-                  <div className="signature-row">
-                    <span dir="ltr" style={{ fontWeight: 'bold' }}>Position:</span>
-                    <span className="signature-line"></span>
-                    <span dir="rtl" style={{ fontWeight: 'bold' }}>:الوظيفة</span>
-                  </div>
-
-                  <div className="signature-row">
-                    <span dir="ltr" style={{ fontWeight: 'bold' }}>Signature:</span>
-                    <span className="signature-line"></span>
-                    <span dir="rtl" style={{ fontWeight: 'bold' }}>:التوقيع</span>
-                  </div>
-
-                  <div className="signature-row">
-                    <span dir="ltr" style={{ fontWeight: 'bold' }}>Date:</span>
-                    <span className="signature-line"></span>
-                    <span dir="rtl" style={{ fontWeight: 'bold' }}>:التاريخ</span>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px', height: '100px', alignItems: 'center' }}>
-                    <span dir="ltr" style={{ fontWeight: 'bold' }}>Company Stamp:</span>
-                    <div style={{ flexGrow: 1, height: '100%', border: '1px dashed #999', margin: '0 15px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc', fontSize: '15px', fontWeight: 'bold' }}>STAMP HERE</div>
-                    <span dir="rtl" style={{ fontWeight: 'bold' }}>:ختم المنشأة</span>
-                  </div>
-                </td>
-                <td style={{ width: '50%', verticalAlign: 'top', padding: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontWeight: '900', fontSize: '14px', backgroundColor: '#f0f0f0', padding: '8px 10px', border: '1px solid #ccc' }}>
-                    <span dir="ltr">Organizer</span>
-                    <span dir="rtl">المنظم</span>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '220px' }}>
-                    <div style={{ color: '#003366', fontWeight: '900', fontSize: '20px', opacity: 0.25, textAlign: 'center', border: '4px solid #003366', padding: '15px 25px', borderRadius: '10px', transform: 'rotate(-10deg)', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                      <div>RIYADH CONTRACTORS</div>
-                      <div>EXHIBITION 2026</div>
-                      <div style={{ fontSize: '16px', marginTop: '5px' }}>OFFICIAL APPROVAL</div>
-                    </div>
-                    <div style={{ marginTop: '30px', fontSize: '13px', fontWeight: 'bold' }}>
-                      Ref No: {props.bookingRef || 'BK-XXXXX'}
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Footer */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#666', marginTop: '10px', borderTop: '1px solid #ccc', paddingTop: '8px' }}>
-          <span dir="ltr">This is an official participation contract generated by the electronic system.</span>
-          <span dir="rtl">تم إصدار هذا العقد آلياً من خلال النظام الإلكتروني لمنصة المعرض.</span>
+        {/* Simplified Footer */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8px', color: '#94a3b8', marginTop: '10px', borderTop: '1px solid #f1f5f9', paddingTop: '5px' }}>
+          <span dir="ltr">Generated Electronically - Riyadh Contractors Platform.</span>
+          <span dir="rtl">نظام العقود الإلكتروني - منصة معرض مقاولين الرياض ٢٠٢٦م.</span>
         </div>
       </div>
     </>
@@ -332,17 +310,16 @@ export const ContractTemplate: React.FC<ContractProps> = (props) => {
 const ContractPreviewApp = () => {
   return (
     <div style={{ padding: '40px', textAlign: 'center', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-      <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '15px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', display: 'inline-block', maxWidth: '850px', width: '100%' }}>
-        <h2 style={{ marginBottom: '10px', color: '#333' }}>نظام إصدار عقود المعرض</h2>
-        <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>اضغط على استخراج وسيظهر لك العقد بدقة حقيقية جاهزة للطباعة أو التخزين كـ PDF.</p>
+      <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '20px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', display: 'inline-block', maxWidth: '850px', width: '100%' }}>
+        <h1 style={{ marginBottom: '10px', color: '#003366', fontWeight: '900' }}>نظام إصدار العقود الفاخرة</h1>
+        <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '30px' }}>تصميم ملون بنظام الصفحة الواحدة - جاهز للطباعة والتحويل لـ PDF.</p>
         
-        {/* يتم إرسال البيانات للمكون هنا */}
         <ContractTemplate 
-          companyName="شركة قرين بروجيكتس"
+          companyName="شركة قرين بروجيكتس للتطوير"
           crNumber="7895045262"
-          address="الرياض - حي الملز"
+          address="الرياض - طريق الملك فهد"
           contactPerson="عبدالمجيد الضاغني"
-          jobTitle="المدير التنفيذي"
+          jobTitle="المدير العام"
           mobile="0554767928"
           email="majeed.dane@gmail.com"
           booths={[{ label: 'A7', category: 'Shell Stand', area: 36, price: 15300 }]}
@@ -352,21 +329,24 @@ const ContractPreviewApp = () => {
         />
         
         <button 
-          onClick={() => exportToPDF()}
+          onClick={exportToPDF}
           style={{ 
-            backgroundColor: '#1a1a1a', 
+            background: 'linear-gradient(to right, #003366, #1e40af)', 
             color: 'white', 
-            padding: '14px 40px', 
-            borderRadius: '5px', 
+            padding: '16px 50px', 
+            borderRadius: '12px', 
             fontWeight: 'bold', 
             border: 'none', 
             cursor: 'pointer',
-            fontSize: '16px',
+            fontSize: '18px',
             marginTop: '20px',
-            transition: 'background 0.3s'
+            boxShadow: '0 6px 20px rgba(0, 51, 102, 0.3)',
+            transition: 'transform 0.2s'
           }}
+          onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
+          onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          استخراج العقد الرسمي (Print PDF)
+          استخراج العقد الفاخر (Print PDF)
         </button>
       </div>
     </div>
