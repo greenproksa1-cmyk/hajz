@@ -17,10 +17,8 @@ interface HomeViewProps {
 export default function HomeView({ onNavigate }: HomeViewProps) {
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section - Simple Prototype Style */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900" />
+      {/* Hero Section - 2 Column Layout with Booth Image */}
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900">
         <div className="absolute inset-0 opacity-10">
           <div
             className="absolute inset-0"
@@ -31,50 +29,85 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
         </div>
 
         <div className="relative container max-w-7xl mx-auto pt-24 pb-16 px-6">
-          <div className="max-w-3xl mx-auto text-center" dir="rtl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-8">
-              <Calendar className="w-4 h-4 text-amber-400" />
-              <span className="text-sm text-white/90 font-medium">
-                15 - 18 مارس 2026 | الرياض، المملكة العربية السعودية
-              </span>
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20" dir="rtl">
+            
+            {/* Text Side (Right in RTL) */}
+            <div className="flex-1 text-center lg:text-right">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-8">
+                <Calendar className="w-4 h-4 text-amber-400" />
+                <span className="text-sm text-white/90 font-medium">
+                  15 - 18 مارس 2026 | الرياض، المملكة العربية السعودية
+                </span>
+              </div>
+
+              <h1 className="text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+                معرض مقاولين
+                <br />
+                <span className="text-amber-400">الرياض 2026</span>
+              </h1>
+
+              <p className="text-lg lg:text-xl text-white/80 mb-10 max-w-2xl leading-relaxed">
+                المنصة الرائدة لقطاع البناء والتشييد في المملكة العربية السعودية. احجز بوثك الآن وانضم إلى أكثر من 500 عارض.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                <Button
+                  onClick={() => onNavigate("map")}
+                  size="lg"
+                  className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold rounded-xl px-8 py-6 text-lg hover:scale-105 transition-transform"
+                >
+                  <MapPin className="w-5 h-5 ml-2" />
+                  احجز بوثك الآن
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="bg-transparent border-white/30 text-white hover:bg-white/10 rounded-xl px-8 py-6 text-lg"
+                >
+                  تعرف على المزيد
+                  <ArrowLeft className="w-5 h-5 mr-2" />
+                </Button>
+              </div>
+
+              {/* Simple Stats */}
+              <div className="flex gap-8 mt-16 pt-10 border-t border-white/10 justify-center lg:justify-start">
+                <StatItem value="500+" label="عارض" />
+                <StatItem value="40+" label="دولة" />
+                <StatItem value="50K+" label="زائر" />
+              </div>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-              معرض الإنشاءات
-              <br />
-              <span className="text-amber-400">العالمي 2026</span>
-            </h1>
-
-            <p className="text-lg md:text-xl text-white/75 mb-10 max-w-2xl mx-auto leading-relaxed">
-              المنصة الرائدة لقطاع البناء والتشييد في الشرق الأوسط. احجز بوثك
-              الآن وانضم إلى أكثر من 500 عارض من 40 دولة.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button
-                onClick={() => onNavigate("map")}
-                size="lg"
-                className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold rounded-xl px-8 py-6 text-lg"
-              >
-                <MapPin className="w-5 h-5 ml-2" />
-                استكشف خريطة البوثات
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="bg-transparent border-white/30 text-white hover:bg-white/10 rounded-xl px-8 py-6 text-lg"
-              >
-                تعرف على المزيد
-                <ArrowLeft className="w-5 h-5 mr-2" />
-              </Button>
+            {/* Image Side (Left in RTL) */}
+            <div className="flex-1 w-full relative">
+               <div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white/10 backdrop-blur-sm group">
+                  <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/80 to-transparent z-10 mix-blend-multiply opacity-50" />
+                  {/* PLEASE ENSURE YOU UPLOAD YOUR BOOTH IMAGE TO public/hero-booth.jpg */}
+                  <img 
+                    src="/hero-booth.jpg" 
+                    alt="معرض البوثات والمقاولين" 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    onError={(e) => {
+                      // Fallback placeholder gradient if image is not uploaded yet
+                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1200&auto=format&fit=crop";
+                    }}
+                  />
+                  <div className="absolute bottom-6 left-6 right-6 z-20 bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-3xl">
+                     <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-amber-400 rounded-full flex items-center justify-center flex-shrink-0">
+                           <Star className="w-6 h-6 text-amber-900" />
+                        </div>
+                        <div>
+                           <p className="text-white font-bold text-lg">أجنحة مخصصة للشركات</p>
+                           <p className="text-white/70 text-sm">مساحات مصممة بأعلى معايير الجودة</p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               
+               {/* Decorative dots behind the image */}
+               <div className="absolute -z-10 -bottom-8 -left-8 w-64 h-64 bg-amber-400/20 rounded-full blur-[80px]" />
             </div>
 
-            {/* Simple Stats */}
-            <div className="grid grid-cols-3 gap-6 mt-16 max-w-lg mx-auto border-t border-white/10 pt-10">
-              <StatItem value="500+" label="عارض" />
-              <StatItem value="40+" label="دولة" />
-              <StatItem value="50K+" label="زائر" />
-            </div>
           </div>
         </div>
       </section>
