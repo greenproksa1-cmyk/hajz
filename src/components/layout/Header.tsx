@@ -2,7 +2,7 @@
 
 import { useTranslation } from '@/i18n'
 import { Button } from '@/components/ui/button'
-import { Globe, Shield, UserCircle, LogIn, LayoutDashboard } from 'lucide-react'
+import { Globe, Shield, UserCircle, LogIn, LayoutDashboard, ListOrdered } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -62,6 +62,18 @@ export default function Header({ currentView, onNavigate }: HeaderProps) {
               }`}
             >
               {t('nav.home')}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onNavigate('booking-steps')}
+              className={`text-white hover:bg-white/20 hover:text-white ${
+                currentView === 'booking-steps' ? 'bg-white/20' : ''
+              }`}
+            >
+              <ListOrdered className="ms-2 h-4 w-4" />
+              {lang === 'ar' ? 'خطوات الحجز' : 'How to Book'}
             </Button>
 
             {session ? (

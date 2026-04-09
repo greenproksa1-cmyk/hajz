@@ -11,6 +11,7 @@ import AdminDashboard from '@/components/admin/AdminDashboard'
 import AdminDashboardNew from '@/components/admin/AdminDashboardNew'
 import UserDashboard from '@/components/user/UserDashboard'
 import HomeView from '@/components/home/HomeView'
+import BookingSteps from '@/components/home/BookingSteps'
 import { Button } from '@/components/ui/button'
 import { Globe, ArrowLeft, ArrowRight } from 'lucide-react'
 import { Loader2 } from 'lucide-react'
@@ -23,6 +24,7 @@ type View =
   | 'admin-dashboard'
   | 'admin-new'
   | 'user-dashboard'
+  | 'booking-steps'
   | 'floor-plan-editor'
   | 'floor-plan-manager'
   | 'booth-management'
@@ -104,7 +106,8 @@ function AppContent() {
       const validViews: View[] = [
         'home', 'map', 'booking', 'admin', 'admin-dashboard', 
         'admin-new', 'user-dashboard', 'floor-plan-editor', 
-        'floor-plan-manager', 'booth-management', 'payment-management'
+        'floor-plan-manager', 'booth-management', 'payment-management',
+        'booking-steps'
       ]
       
       if (hash && validViews.includes(hash as View)) {
@@ -175,6 +178,10 @@ function AppContent() {
       )}
 
       <main className="flex-1">
+        {currentView === 'booking-steps' && (
+          <BookingSteps onNavigate={handleNavigate} isRTL={isRTL} />
+        )}
+
         {currentView === 'home' && (
           <HomeView onNavigate={handleNavigate} />
         )}
