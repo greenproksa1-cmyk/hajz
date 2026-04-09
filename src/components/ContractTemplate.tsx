@@ -24,6 +24,7 @@ export interface ContractProps {
   bookingRef?: string;
   exhibits?: string; // المعروضات
   sponsorshipLevel?: string; // مستوى الرعاية
+  id?: string; // Optional ID for targeting during PDF export
 }
 
 /**
@@ -34,8 +35,8 @@ export const exportToPDF = () => {
 };
 
 export const ContractTemplate: React.FC<ContractProps> = (props) => {
-  const autoCalculatedArea = props.booths.reduce((acc, booth) => acc + booth.area, 0);
-  const autoCalculatedPrice = props.booths.reduce((acc, booth) => acc + booth.price, 0);
+  const autoCalculatedArea = (props.booths || []).reduce((acc, booth) => acc + (booth.area || 0), 0);
+  const autoCalculatedPrice = (props.booths || []).reduce((acc, booth) => acc + (booth.price || 0), 0);
 
   const sponsorshipLevels = [
     { en: 'Platinum', ar: 'بلاتيني' },
@@ -57,13 +58,14 @@ export const ContractTemplate: React.FC<ContractProps> = (props) => {
           font-family: 'Cairo', sans-serif !important;
           color: #1e293b;
           background: white;
-          width: 210mm;
-          min-height: 297mm;
-          margin: auto;
+          width: 190mm; /* Adjusted for safe PDF margins */
+          min-height: 277mm; /* Adjusted for safe PDF margins */
+          margin: 0;
           box-sizing: border-box;
-          padding: 10mm; /* Narrow padding to fit one page */
+          padding: 8mm; /* Compact padding */
           position: relative;
         }
+
 
         /* التصميم الملون والاحترافي */
         .brand-navy { color: #003366; }
@@ -72,9 +74,13 @@ export const ContractTemplate: React.FC<ContractProps> = (props) => {
         .bg-orange { background-color: #f97316 !important; color: white !important; -webkit-print-color-adjust: exact; }
         .bg-light-grey { background-color: #f8fafc !important; -webkit-print-color-adjust: exact; }
 
-        @media screen {
-          #contract-print-layer {
-            display: none !important;
+        .contract-print-layer {
+          display: none;
+        }
+
+        @media print {
+          .contract-print-layer {
+            display: block !important;
           }
         }
 
@@ -127,7 +133,7 @@ export const ContractTemplate: React.FC<ContractProps> = (props) => {
         .divider { height: 3px; background: linear-gradient(90deg, #f97316 0%, #003366 100%); margin: 10px 0; -webkit-print-color-adjust: exact; }
       `}} />
 
-      <div id="contract-print-layer" dir="ltr">
+      <div id={props.id || "contract-print-layer"} dir="ltr">
         {/* Superior Header with Logo and Contacts */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '5px' }}>
           <div style={{ textAlign: 'left', width: '35%' }} dir="ltr">
@@ -216,13 +222,13 @@ export const ContractTemplate: React.FC<ContractProps> = (props) => {
           <tbody>
             {props.booths.map((booth, i) => (
               <tr key={i}>
-                <td style={{ fontWeight: 'bold' }}>{booth.label}</td>
+                <td style={{ fontWeight: 'bold' }}>{booth.label || 'N/A'}</td>
                 <td style={{ fontSize: '10px' }}>
-                  {booth.category === 'Shell Stand' ? 'مساحة عرض مجهزة / Shell Stand' : booth.category}
+                  {booth.category === 'Shell Stand' ? 'مساحة عرض مجهزة / Shell Stand' : (booth.category || 'Space Only')}
                 </td>
-                <td style={{ fontWeight: 'bold' }}>{booth.area} m²</td>
+                <td style={{ fontWeight: 'bold' }}>{(booth.area ?? 0)} m²</td>
                 <td style={{ fontWeight: 'bold', color: '#003366', direction: 'ltr' }}>
-                   {booth.price.toLocaleString()} SAR
+                   {(booth.price ?? 0).toLocaleString()} SAR
                 </td>
               </tr>
             ))}
@@ -233,11 +239,12 @@ export const ContractTemplate: React.FC<ContractProps> = (props) => {
                    <span dir="rtl">الإجمالي الكلي</span>
                 </div>
               </td>
-              <td style={{ fontWeight: '900', color: '#f97316' }}>{autoCalculatedArea} m²</td>
+              <td style={{ fontWeight: '900', color: '#f97316' }}>{(autoCalculatedArea ?? 0).toLocaleString()} m²</td>
               <td className="bg-orange" style={{ fontWeight: '900', fontSize: '13px', direction: 'ltr' }}>
-                {autoCalculatedPrice.toLocaleString()} SAR
+                {(autoCalculatedPrice ?? 0).toLocaleString()} SAR
               </td>
             </tr>
+
           </tbody>
         </table>
 

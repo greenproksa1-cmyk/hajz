@@ -52,7 +52,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { generateContractPDF } from '@/lib/pdf-export'
-import ContractTemplate from '@/components/pdf/ContractTemplate'
+import { ContractTemplate } from '@/components/ContractTemplate'
 
 interface PaymentRecord {
   id: string
@@ -543,11 +543,33 @@ export default function PaymentManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
       {/* Hidden Contract Template for PDF Export */}
-      {contractToRender && (
-        <ContractTemplate booking={contractToRender} />
-      )}
+      <div style={{ position: 'fixed', left: '-5000px', top: 0, pointerEvents: 'none', opacity: 0 }}>
+        {contractToRender && (
+          <ContractTemplate 
+            id={`contract-pdf-${contractToRender.id}`}
+            companyName={contractToRender.entityName}
+            crNumber={contractToRender.unifiedNumber}
+            address={contractToRender.address}
+            contactPerson={contractToRender.contactName}
+            jobTitle={contractToRender.jobTitle}
+            mobile={contractToRender.mobile}
+            phone={contractToRender.phone}
+            email={contractToRender.email}
+            booths={Array.isArray(contractToRender.rawBooking?.booths) ? contractToRender.rawBooking.booths.map((b: any) => ({
+              label: b.label,
+              category: b.boothType || 'Shell Stand',
+              area: b.area,
+              price: contractToRender.amount / (contractToRender.rawBooking.booths?.length || 1)
+            })) : [{ label: contractToRender.rawBooking?.boothLabels?.[0] || 'A1', category: 'Shell Stand', area: 9, price: contractToRender.amount }]}
+            bookingRef={contractToRender.id.toUpperCase().substring(0, 8)}
+            exhibits="General Exhibit"
+            sponsorshipLevel={contractToRender.rawBooking?.sponsorshipLevel || "Co-Sponsor"}
+          />
+        )}
+      </div>
+
+
     </div>
   )
 }
