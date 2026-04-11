@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Shield, LogIn, Loader2 } from 'lucide-react'
+import { Shield, LogIn, Loader2, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface AdminLoginProps {
@@ -19,6 +19,7 @@ interface AdminLoginProps {
 export default function AdminLogin({ onLogin }: AdminLoginProps) {
   const { t, isRTL } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const schema = z.object({
     username: z.string().min(1, t('validation.required')),
@@ -91,14 +92,23 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
               <Label htmlFor="password" className="mb-1.5 block text-sm font-medium">
                 {t('admin.password')}
               </Label>
-              <Input
-                id="password"
-                type="password"
-                dir="ltr"
-                placeholder="••••••••"
-                className={errors.password ? 'border-red-500' : ''}
-                {...register('password')}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  dir="ltr"
+                  placeholder="••••••••"
+                  className={errors.password ? 'border-red-500 pe-10' : 'pe-10'}
+                  {...register('password')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pe-3 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {errors.password && (
                 <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
               )}
