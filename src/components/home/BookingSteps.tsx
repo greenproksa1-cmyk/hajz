@@ -96,17 +96,17 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
       className="min-h-screen relative overflow-hidden"
       dir={isRTL ? 'rtl' : 'ltr'}
       style={{
-        background: 'linear-gradient(135deg, #020617 0%, #0a1628 40%, #0d1f3c 70%, #070d1a 100%)',
+        background: 'linear-gradient(to bottom, #f8fafc 0%, #eff6ff 100%)',
         fontFamily: "'Cairo', sans-serif",
       }}
     >
       {/* Animated background grid */}
       <div
-        className="absolute inset-0 opacity-[0.06]"
+        className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(249,115,22,0.8) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(249,115,22,0.8) 1px, transparent 1px)
+            linear-gradient(rgba(37,99,235,0.8) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(37,99,235,0.8) 1px, transparent 1px)
           `,
           backgroundSize: '60px 60px',
         }}
@@ -133,26 +133,26 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
           </div>
 
           <h1
-            className="text-5xl lg:text-7xl font-black text-white mb-6 leading-tight"
+            className="text-5xl lg:text-7xl font-black text-slate-900 mb-6 leading-tight"
           >
             {isRTL ? (
               <>
                 كيف تحجز{' '}
-                <span className="bg-gradient-to-r from-blue-500 to-amber-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
                   بوثك؟
                 </span>
               </>
             ) : (
               <>
                 How to{' '}
-                <span className="bg-gradient-to-r from-blue-500 to-amber-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
                   Book Your Booth?
                 </span>
               </>
             )}
           </h1>
 
-          <p className="text-lg text-white/60 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
             {isRTL
               ? 'عملية احترافية من خمس خطوات مصممة لتمنحك تجربة حجز عالمية المستوى — سريعة، آمنة، ورقمية بالكامل.'
               : 'A professional 5-step process designed to give you a world-class booking experience — fast, secure, and fully digital.'}
@@ -184,14 +184,11 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
                 key={step.number}
                 variants={cardVariants}
                 whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
-                className={`relative flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-8 lg:gap-16 p-8 rounded-3xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm hover:border-white/20 transition-all duration-500`}
-                style={{
-                  boxShadow: `0 0 60px -20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)`,
-                }}
+                className={`relative flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-8 lg:gap-16 p-8 rounded-3xl border border-slate-200 bg-white shadow-sm hover:border-blue-200 hover:shadow-xl transition-all duration-500`}
               >
                 {/* Step Number - Background */}
                 <div
-                  className="absolute top-4 opacity-5 font-black text-[120px] leading-none pointer-events-none select-none"
+                  className="absolute top-4 opacity-[0.03] text-slate-900 font-black text-[120px] leading-none pointer-events-none select-none"
                   style={{ [isRTL ? 'right' : 'left']: isEven ? '1rem' : undefined, [isRTL ? 'left' : 'right']: !isEven ? '1rem' : undefined }}
                 >
                   {step.number}
@@ -226,7 +223,7 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
                     {isRTL ? `الخطوة ${step.number}` : `Step ${step.number}`}
                   </span>
 
-                  <h2 className="text-3xl lg:text-4xl font-black text-white mb-4 leading-tight">
+                  <h2 className="text-3xl lg:text-4xl font-black text-slate-900 mb-4 leading-tight">
                     {isRTL ? step.titleAr : step.titleEn}
                   </h2>
 
@@ -237,7 +234,7 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
                     {isRTL ? step.titleEn : step.titleAr}
                   </p>
 
-                  <p className="text-white/60 text-lg leading-relaxed max-w-xl">
+                  <p className="text-slate-600 text-lg leading-relaxed max-w-xl">
                     {isRTL ? step.descAr : step.descEn}
                   </p>
 
@@ -250,8 +247,8 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
                           i === index
                             ? `w-8 bg-gradient-to-r ${step.color}`
                             : i < index
-                            ? 'w-4 bg-white/40'
-                            : 'w-4 bg-white/10'
+                            ? 'w-4 bg-blue-300'
+                            : 'w-4 bg-slate-200'
                         }`}
                       />
                     ))}
@@ -264,17 +261,18 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
 
         {/* Final CTA Banner */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mt-20 text-center p-12 rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-600/10 to-blue-600/5 backdrop-blur-sm"
+           initial={{ opacity: 0, y: 40 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true }}
+           transition={{ duration: 0.8, delay: 0.2 }}
+           className="mt-20 text-center p-12 rounded-3xl border border-blue-100 bg-white shadow-xl relative overflow-hidden"
         >
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-white -z-10" />
           <div className="text-5xl mb-4">🏆</div>
-          <h3 className="text-3xl font-black text-white mb-4">
+          <h3 className="text-3xl font-black text-slate-900 mb-4">
             {isRTL ? 'جاهز لتأمين مكانك؟' : 'Ready to Secure Your Spot?'}
           </h3>
-          <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">
+          <p className="text-slate-600 text-lg mb-8 max-w-xl mx-auto">
             {isRTL
               ? 'انضم إلى أكثر من 500 شركة رائدة في القطاع. الأماكن محدودة، لا تفوّت الفرصة.'
               : 'Join over 500 leading companies in the sector. Spaces are limited — don\'t miss the opportunity.'}

@@ -79,15 +79,11 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
             <div className="flex-1 w-full relative">
                <div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square rounded-[3rem] overflow-hidden border-8 border-white bg-white shadow-xl group">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent z-10 opacity-10" />
-                  {/* PLEASE ENSURE YOU UPLOAD YOUR BOOTH IMAGE TO public/hero-booth.jpg */}
+                  {/* Generated Booth Image */}
                   <img 
-                    src="/hero-booth.jpg" 
+                    src="/images/modern_booth.png" 
                     alt="معرض البوثات والمقاولين" 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    onError={(e) => {
-                      // Fallback placeholder gradient if image is not uploaded yet
-                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1200&auto=format&fit=crop";
-                    }}
                   />
                   <div className="absolute bottom-6 left-6 right-6 z-20 bg-white/90 backdrop-blur-md border border-white p-6 rounded-3xl shadow-lg">
                      <div className="flex items-center gap-4">
