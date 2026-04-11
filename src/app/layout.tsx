@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 import AuthProvider from "@/components/AuthProvider";
+import { TranslationProvider } from "@/i18n";
 
 export const metadata: Metadata = {
   title: "معرض مقاولي الرياض 2026 | Riyadh Contractors Exhibition 2026",
@@ -30,8 +31,10 @@ export default function RootLayout({
     <html lang="ar" suppressHydrationWarning>
       <body className="antialiased font-sans">
         <AuthProvider>
-          {children}
-          <Toaster richColors />
+          <TranslationProvider>
+            {children}
+            <Toaster richColors />
+          </TranslationProvider>
         </AuthProvider>
       </body>
     </html>

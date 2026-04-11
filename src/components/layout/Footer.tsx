@@ -11,8 +11,13 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {/* Exhibition Info */}
-          <div>
-            <h3 className="mb-3 text-lg font-bold text-white">
+          <div className="flex flex-col gap-4">
+            <img 
+              src="/images/logo.png" 
+              alt={lang === 'ar' ? 'معرض مقاولي الرياض 2026' : 'Riyadh Contractors Exhibition 2026'} 
+              className="h-14 w-auto object-contain self-start invert brightness-0" 
+            />
+            <h3 className="text-lg font-bold text-white hidden">
               {lang === 'ar' ? 'معرض مقاولي الرياض 2026' : 'Riyadh Contractors Exhibition 2026'}
             </h3>
             <p className="text-sm leading-relaxed text-gray-400">
@@ -43,11 +48,11 @@ export default function Footer() {
             <div className="flex flex-col gap-2 text-sm text-gray-400">
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0 text-blue-600" />
-                <span dir="ltr">+966 11 234 5678</span>
+                <span dir="ltr">+966 59 0401 777</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0 text-blue-600" />
-                <span>info@riyadh-contractors-exhibition.sa</span>
+                <span>contact@gren-pro.com</span>
               </div>
             </div>
           </div>

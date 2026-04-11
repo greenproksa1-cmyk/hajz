@@ -196,7 +196,7 @@ function AppContent() {
 
         {currentView === 'home' && (
           <>
-            <HomeView onNavigate={handleNavigate} />
+            <HomeView onNavigate={handleNavigate} isRTL={isRTL} />
             <div id="booth-map-section" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
               <div className="text-center mb-10">
                 <h2 className="text-3xl font-black text-slate-900 mb-2">{isRTL ? 'المخطط التفاعلي للمعرض' : 'Interactive Exhibition Map'}</h2>
@@ -303,5 +303,5 @@ export default function Home() {
     <TranslationProvider>
       <AppContent />
     </TranslationProvider>
-  )
+  );
 }

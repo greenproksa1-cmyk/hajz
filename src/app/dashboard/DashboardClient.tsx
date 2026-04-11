@@ -4,8 +4,11 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { FileText, CalendarCheck, ArrowRight, LayoutDashboard, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/i18n";
 
 export default function DashboardClient({ user, userBookings }: { user: any, userBookings: any[] }) {
+  const { lang } = useTranslation();
+  const isRTL = lang === 'ar';
   // Animation variants
   const container = {
     hidden: { opacity: 0 },
@@ -21,7 +24,7 @@ export default function DashboardClient({ user, userBookings }: { user: any, use
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 relative overflow-hidden flex flex-col items-center py-12 px-4 sm:px-6" dir="rtl">
+    <div className="min-h-screen bg-slate-50 relative overflow-hidden flex flex-col items-center py-12 px-4 sm:px-6" dir={isRTL ? "rtl" : "ltr"}>
       {/* Dynamic Background */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] mix-blend-multiply pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-amber-300/10 rounded-full blur-[120px] mix-blend-multiply pointer-events-none" />
@@ -43,20 +46,20 @@ export default function DashboardClient({ user, userBookings }: { user: any, use
                <LayoutDashboard size={32} className="text-white" />
             </div>
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-1">أهلاً بك، {user.name}</h1>
-              <p className="text-blue-50 text-sm sm:text-base font-medium">لوحة التحكم الخاصة بمعارضك وحجوزاتك</p>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-1">{isRTL ? 'أهلاً بك' : 'Welcome'}, {user.name}</h1>
+              <p className="text-blue-50 text-sm sm:text-base font-medium">{isRTL ? 'لوحة التحكم الخاصة بمعارضك وحجوزاتك' : 'Your exhibitions and bookings dashboard'}</p>
             </div>
           </div>
           
           <div className="relative z-10 flex gap-3">
              <Link href="/">
                <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md">
-                 <ArrowRight className="ml-2 h-4 w-4" /> العودة للرئيسية
+                 <ArrowRight className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'} ${isRTL ? '' : 'rotate-180'}`} /> {isRTL ? 'العودة للرئيسية' : 'Back to Home'}
                </Button>
              </Link>
              <Link href="/api/auth/signout">
                <Button variant="outline" className="bg-white text-blue-700 border-none hover:bg-orange-50 shadow-lg">
-                 تسجيل الخروج
+                 {isRTL ? 'تسجيل الخروج' : 'Sign out'}
                </Button>
              </Link>
           </div>
@@ -73,7 +76,7 @@ export default function DashboardClient({ user, userBookings }: { user: any, use
             <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-700 shadow-sm border border-orange-200">
                <CalendarCheck size={20} />
             </div>
-            <h2 className="text-2xl font-bold text-slate-800">حجوزاتك السابقة <span className="text-blue-600 font-sans text-xl">({userBookings.length})</span></h2>
+            <h2 className="text-2xl font-bold text-slate-800">{isRTL ? 'حجوزاتك السابقة' : 'Your Previous Bookings'} <span className="text-blue-600 font-sans text-xl">({userBookings.length})</span></h2>
           </motion.div>
 
           {userBookings.length === 0 ? (
@@ -85,10 +88,10 @@ export default function DashboardClient({ user, userBookings }: { user: any, use
               <div className="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-6">
                  <Ticket size={40} className="text-orange-300" />
               </div>
-              <p className="text-slate-500 text-lg mb-6 font-medium">ليس لديك أي حجوزات حتى الآن.</p>
+              <p className="text-slate-500 text-lg mb-6 font-medium">{isRTL ? 'ليس لديك أي حجوزات حتى الآن.' : 'You have no bookings yet.'}</p>
               <Link href="/">
                 <Button className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-orange-700 hover:to-blue-700 rounded-xl px-8 h-12 shadow-lg shadow-blue-600/20">
-                  احجز جناحك الآن واحصل على مساحتك
+                  {isRTL ? 'احجز جناحك الآن واحصل على مساحتك' : 'Book your booth now and secure your space'}
                 </Button>
               </Link>
             </motion.div>
@@ -119,23 +122,24 @@ export default function DashboardClient({ user, userBookings }: { user: any, use
                         booking.status === 'rejected' ? 'bg-red-500' :
                         'bg-blue-600 animate-pulse'
                       }`} />
-                      {booking.status === 'approved' ? 'موافق عليه' : 
-                       booking.status === 'rejected' ? 'مرفوض' : 'معلق'}
+                      {booking.status === 'approved' ? (isRTL ? 'موافق عليه' : 'Approved') : 
+                       booking.status === 'rejected' ? (isRTL ? 'مرفوض' : 'Rejected') : 
+                       (isRTL ? 'معلق' : 'Pending')}
                     </span>
                   </div>
                   
                   <h3 className="font-bold text-xl text-slate-800 mb-1 group-hover:text-blue-700 transition-colors">{booking.entityName}</h3>
-                  <p className="text-sm text-slate-500 font-medium mb-6">{new Date(booking.createdAt).toLocaleDateString("ar-SA", { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  <p className="text-sm text-slate-500 font-medium mb-6">{new Date(booking.createdAt).toLocaleDateString(lang === 'ar' ? "ar-SA" : "en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                   
                   <div className="bg-slate-50 rounded-2xl p-4 mb-6 border border-slate-100 flex-grow">
                      <div className="flex justify-between mb-3 text-sm">
-                       <span className="text-slate-500">الجناح:</span>
+                       <span className="text-slate-500">{isRTL ? 'الجناح:' : 'Booth:'}</span>
                        <span className="font-bold text-slate-700" dir="ltr">{booking.booths.map((b: any) => b.label).join(", ")}</span>
                      </div>
                      <div className="w-full h-[1px] bg-slate-200/60 mb-3" />
                      <div className="flex justify-between text-sm">
-                       <span className="text-slate-500">الإجمالي:</span>
-                       <span className="font-bold text-blue-700 bg-orange-50 px-2 py-0.5 rounded-md">{booking.totalPrice.toLocaleString()} ر.س</span>
+                       <span className="text-slate-500">{isRTL ? 'الإجمالي:' : 'Total:'}</span>
+                       <span className="font-bold text-blue-700 bg-orange-50 px-2 py-0.5 rounded-md">{booking.totalPrice.toLocaleString()} {isRTL ? 'ر.س' : 'SAR'}</span>
                      </div>
                   </div>
                   
@@ -145,7 +149,7 @@ export default function DashboardClient({ user, userBookings }: { user: any, use
                       <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-amber-300 rounded-xl blur opacity-0 group-hover:opacity-40 transition duration-500 pb-1"></div>
                       <Button variant="outline" className="relative w-full flex items-center justify-center gap-2 h-12 rounded-xl border-orange-200 text-orange-700 hover:bg-orange-50 hover:border-orange-300 bg-white shadow-sm font-medium">
                         <FileText size={18} />
-                        معاينة العقد وثيقة
+                        {isRTL ? 'معاينة العقد وثيقة' : 'View Contract Document'}
                       </Button>
                     </a>
                   </div>
