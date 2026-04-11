@@ -8,6 +8,7 @@ import {
   Star,
   ArrowLeft,
   CheckCircle2,
+  Gem,
 } from "lucide-react";
 
 interface HomeViewProps {
@@ -116,36 +117,42 @@ export default function HomeView({ onNavigate, isRTL = true }: HomeViewProps) {
         <div className="container max-w-7xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-foreground mb-4">
-              {isRTL ? 'فئات البوثات المتاحة' : 'Available Booth Categories'}
+              {isRTL ? 'باقات الرعاية والمشاركة' : 'Sponsorship & Participation Packages'}
             </h2>
-            <p className="text-muted-foreground">{isRTL ? 'اختر الفئة التي تناسب احتياجات عرضك' : 'Choose the category that fits your exhibition needs'}</p>
+            <p className="text-muted-foreground">{isRTL ? 'اختر الباقة التي تمنح علامتك التجارية أكبر أثر' : 'Choose the package that gives your brand the maximum impact'}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             <CategoryCard
+              icon={<Gem className="w-7 h-7" />}
+              title={isRTL ? "الراعي الماسي" : "Diamond Sponsor"}
+              price="295,000"
+              color="diamond"
+              features={isRTL 
+                ? ["80 متر مربع", "واجهة المعرض الرئيسية", "8 دعوات VIP", "درع تكريم + تغطية موسعة"] 
+                : ["80 sqm Area", "Main Exhibition Entrance", "8 VIP Invitations", "Honor Shield + Expanded Coverage"]}
+              onBook={() => onNavigate("map")}
+              isRTL={isRTL}
+            />
+            <CategoryCard
               icon={<Crown className="w-7 h-7" />}
-              title={isRTL ? "منطقة VIP" : "VIP Area"}
-              price="75,000"
-              color="amber"
-              features={isRTL ? ["موقع متميز", "إضاءة مخصصة", "خدمة استقبال", "شاشة عرض"] : ["Strategic Location", "Custom Lighting", "Reception Service", "Display Screen"]}
+              title={isRTL ? "الراعي الذهبي" : "Gold Sponsor"}
+              price="245,000"
+              color="gold"
+              features={isRTL 
+                ? ["50 متر مربع", "موقع مميز", "6 دعوات VIP", "شهادات شكر وتكريم"] 
+                : ["50 sqm Area", "Strategic Location", "6 VIP Invitations", "Appreciation Certificates"]}
               onBook={() => onNavigate("map")}
               isRTL={isRTL}
             />
             <CategoryCard
               icon={<Star className="w-7 h-7" />}
-              title={isRTL ? "منطقة الرعاة" : "Sponsors Area"}
-              price="45,000"
-              color="slate"
-              features={isRTL ? ["مساحة واسعة", "شعار على المواد", "تخطيط مخصص", "دعوات VIP"] : ["Large Space", "Logo on Materials", "Custom Layout", "VIP Invitations"]}
-              onBook={() => onNavigate("map")}
-              isRTL={isRTL}
-            />
-            <CategoryCard
-              icon={<Building2 className="w-7 h-7" />}
-              title={isRTL ? "منطقة قياسية" : "Standard Area"}
-              price="15,000"
-              color="emerald"
-              features={isRTL ? ["بوث مجهز", "إنترنت فائق", "كهرباء", "لوحة اسم"] : ["Equipped Booth", "High-speed Internet", "Electricity", "Name Board"]}
+              title={isRTL ? "الراعي الفضي" : "Silver Sponsor"}
+              price="195,000"
+              color="silver"
+              features={isRTL 
+                ? ["35 متر مربع", "جناح مميز", "4 دعوات VIP", "شهادات شكر وتكريم"] 
+                : ["35 sqm Area", "Featured Booth", "4 VIP Invitations", "Appreciation Certificates"]}
               onBook={() => onNavigate("map")}
               isRTL={isRTL}
             />
@@ -167,9 +174,9 @@ function StatItem({ value, label }: { value: string; label: string }) {
 
 function CategoryCard({ icon, title, price, color, features, onBook, isRTL }: any) {
   const colorMap: any = {
-    amber: "bg-blue-600",
-    slate: "bg-blue-500",
-    emerald: "bg-blue-400",
+    diamond: "bg-cyan-500",
+    gold: "bg-amber-400",
+    silver: "bg-slate-400",
   };
   return (
     <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm hover:shadow-md transition-shadow">

@@ -188,3 +188,70 @@ export async function sendConfirmationEmail(email: string, bookingId: string, en
   console.log(`[DEMO MODE] Confirmation email for ${email}, booking: ${bookingId}`);
   return true;
 }
+
+// Send password reset email
+export async function sendPasswordResetEmail(email: string, resetLink: string, lang: string = 'ar'): Promise<boolean> {
+  const subjectAr = 'استعادة كلمة المرور - معرض مقاولي الرياض 2026';
+  const subjectEn = 'Password Reset - Riyadh Contractors Exhibition 2026';
+
+  const htmlAr = `
+    <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: #1e40af; color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+        <h1 style="margin: 0;">معرض مقاولي الرياض 2026</h1>
+      </div>
+      <div style="border: 1px solid #ddd; padding: 40px; border-radius: 0 0 10px 10px; text-align: center; background: white;">
+        <h2 style="color: #1e293b; margin-top: 0;">طلب استعادة كلمة المرور</h2>
+        <p style="font-size: 16px; color: #64748b; line-height: 1.6;">تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك. إذا لم تقم بهذا الطلب، يمكنك تجاهل هذا البريد الإلكتروني.</p>
+        <div style="margin: 35px 0;">
+          <a href="${resetLink}" style="background: #1e40af; color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">تعيين كلمة مرور جديدة</a>
+        </div>
+        <p style="color: #94a3b8; font-size: 14px;">هذا الرابط صالح لمدة ساعة واحدة فقط.</p>
+        <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 30px 0;">
+        <p style="color: #94a3b8; font-size: 12px;">إذا كنت تواجه مشكلة في النقر على الزر، انسخ الرابط التالي وألصقه في متصفحك:</p>
+        <p style="color: #3b82f6; font-size: 12px; word-break: break-all;">${resetLink}</p>
+      </div>
+    </div>
+  `;
+
+  const htmlEn = `
+    <div dir="ltr" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: #1e40af; color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+        <h1 style="margin: 0;">Riyadh Contractors Exhibition 2026</h1>
+      </div>
+      <div style="border: 1px solid #ddd; padding: 40px; border-radius: 0 0 10px 10px; text-align: center; background: white;">
+        <h2 style="color: #1e293b; margin-top: 0;">Password Reset Request</h2>
+        <p style="font-size: 16px; color: #64748b; line-height: 1.6;">We received a request to reset your account password. If you didn't make this request, you can ignore this email.</p>
+        <div style="margin: 35px 0;">
+          <a href="${resetLink}" style="background: #1e40af; color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">Set New Password</a>
+        </div>
+        <p style="color: #94a3b8; font-size: 14px;">This link is valid for 1 hour only.</p>
+        <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 30px 0;">
+        <p style="color: #94a3b8; font-size: 12px;">If you're having trouble clicking the button, copy and paste the link below into your browser:</p>
+        <p style="color: #3b82f6; font-size: 12px; word-break: break-all;">${resetLink}</p>
+      </div>
+    </div>
+  `;
+
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    try {
+      const transporter = createTransporter();
+      const mailOptions = {
+        from: process.env.SMTP_FROM || '"Riyadh Exhibition" <noreply@exhibition.sa>',
+        to: email,
+        subject: lang === 'ar' ? subjectAr : subjectEn,
+        html: lang === 'ar' ? htmlAr : htmlEn,
+      };
+
+      const sent = await sendWithRetry(transporter, mailOptions);
+      return sent;
+    } catch (error) {
+      console.error('[Email] Error sending reset email:', error);
+      return false;
+    }
+  }
+
+  // Demo mode
+  console.log(`[DEMO MODE] Password reset email for ${email}\nReset Link: ${resetLink}`);
+  return true;
+}
+
