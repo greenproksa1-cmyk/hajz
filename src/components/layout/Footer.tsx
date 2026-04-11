@@ -29,7 +29,7 @@ export default function Footer() {
             </h3>
             <div className="flex flex-col gap-2 text-sm text-gray-400">
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 shrink-0 text-orange-500" />
+                <MapPin className="h-4 w-4 shrink-0 text-blue-600" />
                 <span>{lang === 'ar' ? 'مركز الرياض للمؤتمرات والمعارض' : 'Riyadh International Convention & Exhibition Center'}</span>
               </div>
             </div>
@@ -42,11 +42,11 @@ export default function Footer() {
             </h3>
             <div className="flex flex-col gap-2 text-sm text-gray-400">
               <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0 text-orange-500" />
+                <Phone className="h-4 w-4 shrink-0 text-blue-600" />
                 <span dir="ltr">+966 11 234 5678</span>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 shrink-0 text-orange-500" />
+                <Mail className="h-4 w-4 shrink-0 text-blue-600" />
                 <span>info@riyadh-contractors-exhibition.sa</span>
               </div>
             </div>

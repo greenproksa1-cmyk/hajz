@@ -28,9 +28,9 @@ const steps = [
     titleEn: 'Instant Booking',
     descAr: 'أدخل بيانات منشأتك (الاسم، الرقم الضريبي، النشاط) بضغطة زر. العملية لا تستغرق أكثر من دقيقتين.',
     descEn: 'Enter your company details (name, tax ID, activity) with a single click. The process takes less than two minutes.',
-    color: 'from-orange-500 to-amber-600',
-    glow: 'shadow-orange-500/30',
-    badge: 'bg-orange-500/20 text-orange-300 border-orange-400/30',
+    color: 'from-blue-600 to-blue-700',
+    glow: 'shadow-blue-600/30',
+    badge: 'bg-blue-600/20 text-orange-300 border-blue-500/30',
   },
   {
     number: '03',
@@ -50,9 +50,9 @@ const steps = [
     titleEn: 'Secure Payment',
     descAr: 'قم بتحويل الرسوم المقررة وارفع إيصال السداد لضمان حجز المنصة باسمك وتأكيد مشاركتك الرسمية.',
     descEn: 'Transfer the required fees and upload the receipt to secure your booth and confirm your official participation.',
-    color: 'from-emerald-500 to-teal-600',
-    glow: 'shadow-emerald-500/30',
-    badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30',
+    color: 'from-slate-500 to-blue-600',
+    glow: 'shadow-slate-500/30',
+    badge: 'bg-slate-500/20 text-emerald-300 border-slate-400/30',
   },
   {
     number: '05',
@@ -113,7 +113,7 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
       />
 
       {/* Glowing orbs */}
-      <div className="absolute top-20 left-1/4 w-96 h-96 bg-orange-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-20 left-1/4 w-96 h-96 bg-blue-700/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-900/10 rounded-full blur-[150px] pointer-events-none" />
 
@@ -127,7 +127,7 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
           className="text-center mb-20"
         >
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-orange-400/30 bg-orange-500/10 text-orange-300 text-sm font-medium mb-8 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-blue-500/30 bg-blue-600/10 text-orange-300 text-sm font-medium mb-8 backdrop-blur-sm">
             <Sparkles className="w-4 h-4" />
             <span>{isRTL ? 'الخطوات الخمس الذهبية للحجز' : 'The 5 Golden Steps to Booking'}</span>
           </div>
@@ -138,14 +138,14 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
             {isRTL ? (
               <>
                 كيف تحجز{' '}
-                <span className="bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-blue-500 to-amber-300 bg-clip-text text-transparent">
                   بوثك؟
                 </span>
               </>
             ) : (
               <>
                 How to{' '}
-                <span className="bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-blue-500 to-amber-300 bg-clip-text text-transparent">
                   Book Your Booth?
                 </span>
               </>
@@ -161,7 +161,7 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
           {/* CTA */}
           <Button
             onClick={() => onNavigate('map')}
-            className="mt-8 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold px-8 py-6 text-lg rounded-2xl shadow-lg shadow-orange-500/30 hover:scale-105 transition-all duration-300"
+            className="mt-8 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white font-bold px-8 py-6 text-lg rounded-2xl shadow-lg shadow-blue-600/30 hover:scale-105 transition-all duration-300"
           >
             <MapPin className="w-5 h-5 mx-2" />
             {isRTL ? 'احجز بوثك الآن' : 'Book Your Booth Now'}
@@ -268,7 +268,7 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mt-20 text-center p-12 rounded-3xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-amber-500/5 backdrop-blur-sm"
+          className="mt-20 text-center p-12 rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-600/10 to-blue-600/5 backdrop-blur-sm"
         >
           <div className="text-5xl mb-4">🏆</div>
           <h3 className="text-3xl font-black text-white mb-4">
@@ -282,7 +282,7 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
           <Button
             onClick={() => onNavigate('map')}
             size="lg"
-            className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black px-12 py-6 text-xl rounded-2xl shadow-2xl shadow-orange-500/40 hover:scale-105 transition-all duration-300"
+            className="bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white font-black px-12 py-6 text-xl rounded-2xl shadow-2xl shadow-blue-600/40 hover:scale-105 transition-all duration-300"
           >
             {isRTL ? 'ابدأ حجزك الآن ←' : '→ Start Booking Now'}
           </Button>

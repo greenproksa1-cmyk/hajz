@@ -212,8 +212,8 @@ export default function UserDashboard({ email, onBack }: UserDashboardProps) {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
-            <LayoutDashboard className="h-5 w-5 text-orange-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+            <LayoutDashboard className="h-5 w-5 text-blue-700" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-800">
@@ -280,7 +280,7 @@ export default function UserDashboard({ email, onBack }: UserDashboardProps) {
       {/* Booking List */}
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
       ) : filteredBookings.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 py-16">
@@ -355,7 +355,7 @@ export default function UserDashboard({ email, onBack }: UserDashboardProps) {
                         <p className="text-xs text-gray-500">
                           {isRTL ? 'المبلغ' : 'Amount'}
                         </p>
-                        <p className="text-sm font-bold text-orange-600">
+                        <p className="text-sm font-bold text-blue-700">
                           {booking.totalPrice.toLocaleString()} {t('common.sar')}
                         </p>
                       </div>
@@ -374,7 +374,7 @@ export default function UserDashboard({ email, onBack }: UserDashboardProps) {
                       onClick={() =>
                         setExpandedId(isExpanded ? null : booking.id)
                       }
-                      className="mt-3 flex w-full items-center justify-center gap-1 rounded-md border border-gray-100 bg-gray-50 py-2 text-xs text-gray-500 transition-colors hover:bg-orange-50 hover:text-orange-600"
+                      className="mt-3 flex w-full items-center justify-center gap-1 rounded-md border border-gray-100 bg-gray-50 py-2 text-xs text-gray-500 transition-colors hover:bg-orange-50 hover:text-blue-700"
                     >
                       {isExpanded ? (
                         <>
@@ -421,7 +421,7 @@ export default function UserDashboard({ email, onBack }: UserDashboardProps) {
                         <div className="flex gap-2">
                           <Button
                             variant="outline"
-                            className="flex-1 text-orange-600 border-orange-200 hover:bg-orange-50"
+                            className="flex-1 text-blue-700 border-orange-200 hover:bg-orange-50"
                             onClick={() => setDetailBooking(booking)}
                           >
                             <Eye className="me-2 h-4 w-4" />
@@ -430,7 +430,7 @@ export default function UserDashboard({ email, onBack }: UserDashboardProps) {
                           {booking.contractPath && (
                             <Button
                               variant="outline"
-                              className="flex-1 border-orange-200 text-orange-600 hover:bg-orange-50"
+                              className="flex-1 border-orange-200 text-blue-700 hover:bg-orange-50"
                               onClick={() => handleDownloadContract(booking)}
                             >
                               <Download className="me-2 h-4 w-4" />
@@ -564,7 +564,7 @@ export default function UserDashboard({ email, onBack }: UserDashboardProps) {
                     <span className="text-sm font-semibold text-gray-700">
                       {t('boothMap.totalPrice')}
                     </span>
-                    <span className="text-lg font-bold text-orange-600">
+                    <span className="text-lg font-bold text-blue-700">
                       {detailBooking.totalPrice.toLocaleString()} {t('common.sar')}
                     </span>
                   </div>
@@ -626,7 +626,7 @@ export default function UserDashboard({ email, onBack }: UserDashboardProps) {
                 {detailBooking.contractPath && (
                   <Button
                     onClick={() => handleDownloadContract(detailBooking)}
-                    className="flex-1 bg-orange-500 hover:bg-orange-600"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
                   >
                     <Download className="me-2 h-4 w-4" />
                     {isRTL ? 'تحميل العقد' : 'Download Contract'}

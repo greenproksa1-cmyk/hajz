@@ -124,7 +124,7 @@ export default function Step4Payment({
         <p className="max-w-md text-center text-gray-600">{t('payment.successMessage')}</p>
         <Button
           onClick={onComplete}
-          className="bg-orange-500 hover:bg-orange-600"
+          className="bg-blue-600 hover:bg-blue-700"
           size="lg"
         >
           {t('payment.backToMap')}
@@ -136,7 +136,7 @@ export default function Step4Payment({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <Building2 className="mx-auto mb-4 h-16 w-16 text-orange-500" />
+        <Building2 className="mx-auto mb-4 h-16 w-16 text-blue-600" />
         <h3 className="text-lg font-semibold text-gray-800">{t('payment.title')}</h3>
       </div>
 
@@ -188,7 +188,7 @@ export default function Step4Payment({
 
           <div className="pt-4 border-t border-white/10 flex justify-between items-center text-sm">
             <span className="opacity-80 font-medium">{t('boothMap.totalPrice')}</span>
-            <span className="text-lg font-bold text-orange-400">
+            <span className="text-lg font-bold text-blue-500">
               {totalPrice.toLocaleString()} {t('common.sar')}
             </span>
           </div>
@@ -204,7 +204,7 @@ export default function Step4Payment({
           </label>
           <div
             onClick={() => contractInputRef.current?.click()}
-            className="cursor-pointer rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center transition-colors hover:border-orange-400 hover:bg-orange-50"
+            className="cursor-pointer rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center transition-colors hover:border-blue-500 hover:bg-orange-50"
           >
             <input
               ref={contractInputRef}
@@ -235,7 +235,7 @@ export default function Step4Payment({
           </label>
           <div
             onClick={() => receiptInputRef.current?.click()}
-            className="cursor-pointer rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center transition-colors hover:border-orange-400 hover:bg-orange-50"
+            className="cursor-pointer rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center transition-colors hover:border-blue-500 hover:bg-orange-50"
           >
             <input
               ref={receiptInputRef}
@@ -269,7 +269,7 @@ export default function Step4Payment({
         <Button
           onClick={handleSubmit}
           disabled={isSubmitting || !contractFile || !receiptFile}
-          className="bg-orange-500 hover:bg-orange-600"
+          className="bg-blue-600 hover:bg-blue-700"
           size="lg"
         >
           {isSubmitting ? (

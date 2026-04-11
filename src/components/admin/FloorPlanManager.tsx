@@ -285,7 +285,7 @@ export default function FloorPlanManager() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     )
   }
@@ -295,8 +295,8 @@ export default function FloorPlanManager() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
-            <Map className="h-5 w-5 text-orange-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+            <Map className="h-5 w-5 text-blue-700" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-800">
@@ -307,7 +307,7 @@ export default function FloorPlanManager() {
             </p>
           </div>
         </div>
-        <Button onClick={handleCreate} className="gap-2 bg-orange-500 hover:bg-orange-600">
+        <Button onClick={handleCreate} className="gap-2 bg-blue-600 hover:bg-blue-700">
           <Plus className="h-4 w-4" />
           {t('admin.plans.createPlan')}
         </Button>
@@ -324,7 +324,7 @@ export default function FloorPlanManager() {
             <p className="mb-4 text-sm text-gray-400">
               {isRTL ? 'ابدأ بإنشاء مخطط أرضية جديد' : 'Create your first floor plan to get started'}
             </p>
-            <Button onClick={handleCreate} className="gap-2 bg-orange-500 hover:bg-orange-600">
+            <Button onClick={handleCreate} className="gap-2 bg-blue-600 hover:bg-blue-700">
               <Plus className="h-4 w-4" />
               {t('admin.plans.createPlan')}
             </Button>
@@ -377,7 +377,7 @@ export default function FloorPlanManager() {
                       <p className="font-bold text-green-700">{available}</p>
                     </div>
                     <div className="rounded-md bg-orange-50 px-2 py-1.5">
-                      <p className="text-xs text-orange-600">
+                      <p className="text-xs text-blue-700">
                         {isRTL ? 'محجوز' : 'Booked'}
                       </p>
                       <p className="font-bold text-orange-700">{booked}</p>
@@ -469,7 +469,7 @@ export default function FloorPlanManager() {
         <div className="fixed inset-0 z-50 flex flex-col bg-gray-50">
           {/* Editor Header Bar */}
           <div className="flex h-12 shrink-0 items-center gap-3 border-b bg-gray-900 px-4 shadow-sm">
-            <Map className="h-5 w-5 text-orange-500" />
+            <Map className="h-5 w-5 text-blue-600" />
             <h2 className="text-sm font-semibold text-white">
               {editingPlan
                 ? isRTL
@@ -534,7 +534,7 @@ export default function FloorPlanManager() {
             </Button>
             {previewPlan && (
               <Button
-                className="bg-orange-500 hover:bg-orange-600"
+                className="bg-blue-600 hover:bg-blue-700"
                 onClick={() => {
                   setPreviewPlan(null)
                   handleEdit(previewPlan)

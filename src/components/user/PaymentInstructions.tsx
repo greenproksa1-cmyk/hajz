@@ -52,18 +52,18 @@ export default function PaymentInstructions({ amount, currency }: PaymentInstruc
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Building2 className="h-5 w-5 text-orange-500" />
+            <Building2 className="h-5 w-5 text-blue-600" />
             {t('payment.bankInfo')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Bank Details */}
-          <div className="rounded-xl bg-gradient-to-br from-orange-50 to-white p-4 border border-orange-100">
+          <div className="rounded-xl bg-gradient-to-br from-orange-50 to-white p-4 border border-blue-50">
             {/* Bank Name */}
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
-                  <Building2 className="h-5 w-5 text-orange-600" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+                  <Building2 className="h-5 w-5 text-blue-700" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">
@@ -86,7 +86,7 @@ export default function PaymentInstructions({ amount, currency }: PaymentInstruc
                   variant="ghost"
                   size="sm"
                   onClick={handleCopyIBAN}
-                  className="h-7 gap-1.5 px-2 text-xs text-orange-600 hover:bg-orange-50"
+                  className="h-7 gap-1.5 px-2 text-xs text-blue-700 hover:bg-orange-50"
                 >
                   {copied ? (
                     <>
@@ -129,7 +129,7 @@ export default function PaymentInstructions({ amount, currency }: PaymentInstruc
           </div>
 
           {/* Payment Amount Highlight */}
-          <div className="rounded-lg bg-orange-500 p-4 text-center text-white">
+          <div className="rounded-lg bg-blue-600 p-4 text-center text-white">
             <p className="text-xs font-medium opacity-90">
               {isRTL ? 'المبلغ المطلوب' : 'Amount Due'}
             </p>
@@ -147,7 +147,7 @@ export default function PaymentInstructions({ amount, currency }: PaymentInstruc
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <FileText className="h-5 w-5 text-orange-500" />
+            <FileText className="h-5 w-5 text-blue-600" />
             {isRTL ? 'خطوات الدفع' : 'Payment Steps'}
           </CardTitle>
         </CardHeader>
@@ -155,7 +155,7 @@ export default function PaymentInstructions({ amount, currency }: PaymentInstruc
           <div className="space-y-3">
             {steps.map((step, index) => (
               <div key={index} className="flex gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-blue-700">
                   {index + 1}
                 </div>
                 <div className="flex items-center">
@@ -171,7 +171,7 @@ export default function PaymentInstructions({ amount, currency }: PaymentInstruc
       <div className="flex gap-3">
         <Button
           variant="outline"
-          className="flex-1 border-orange-200 text-orange-600 hover:bg-orange-50"
+          className="flex-1 border-orange-200 text-blue-700 hover:bg-orange-50"
           onClick={() => {
             toast.info(isRTL ? 'سيتم تحميل العقد قريباً' : 'Contract will be downloaded soon')
           }}
@@ -181,7 +181,7 @@ export default function PaymentInstructions({ amount, currency }: PaymentInstruc
         </Button>
         <Button
           variant="outline"
-          className="flex-1 border-orange-200 text-orange-600 hover:bg-orange-50"
+          className="flex-1 border-orange-200 text-blue-700 hover:bg-orange-50"
           onClick={() => {
             toast.info(isRTL ? 'سيتم تحميل العقد قريباً' : 'Contract will be downloaded soon')
           }}

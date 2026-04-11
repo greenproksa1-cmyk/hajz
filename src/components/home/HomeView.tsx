@@ -18,24 +18,22 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section - 2 Column Layout with Booth Image */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900">
-        <div className="absolute inset-0 opacity-10">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            }}
-          />
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-slate-950">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0 h-full w-full bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:40px_40px]"></div>
         </div>
+        
+        {/* Glow effect */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative container max-w-7xl mx-auto pt-24 pb-16 px-6">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20" dir="rtl">
             
             {/* Text Side (Right in RTL) */}
             <div className="flex-1 text-center lg:text-right">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-8">
-                <Calendar className="w-4 h-4 text-amber-400" />
-                <span className="text-sm text-white/90 font-medium">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 mb-8">
+                <Calendar className="w-4 h-4 text-blue-400" />
+                <span className="text-sm text-blue-100 font-medium">
                   15 - 18 مارس 2026 | الرياض، المملكة العربية السعودية
                 </span>
               </div>
@@ -43,10 +41,10 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
               <h1 className="text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
                 معرض مقاولين
                 <br />
-                <span className="text-amber-400">الرياض 2026</span>
+                <span className="text-blue-600">الرياض 2026</span>
               </h1>
 
-              <p className="text-lg lg:text-xl text-white/80 mb-10 max-w-2xl leading-relaxed">
+              <p className="text-lg lg:text-xl text-blue-100/80 mb-10 max-w-2xl leading-relaxed">
                 المنصة الرائدة لقطاع البناء والتشييد في المملكة العربية السعودية. احجز بوثك الآن وانضم إلى أكثر من 500 عارض.
               </p>
 
@@ -54,7 +52,7 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
                 <Button
                   onClick={() => onNavigate("map")}
                   size="lg"
-                  className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold rounded-xl px-8 py-6 text-lg hover:scale-105 transition-transform"
+                  className="bg-blue-600 hover:bg-blue-700 text-blue-950 font-bold rounded-xl px-8 py-6 text-lg hover:scale-105 transition-transform"
                 >
                   <MapPin className="w-5 h-5 ml-2" />
                   احجز بوثك الآن
@@ -62,7 +60,7 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="bg-transparent border-white/30 text-white hover:bg-white/10 rounded-xl px-8 py-6 text-lg"
+                  className="bg-transparent border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl px-8 py-6 text-lg"
                 >
                   تعرف على المزيد
                   <ArrowLeft className="w-5 h-5 mr-2" />
@@ -79,8 +77,8 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
 
             {/* Image Side (Left in RTL) */}
             <div className="flex-1 w-full relative">
-               <div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white/10 backdrop-blur-sm group">
-                  <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/80 to-transparent z-10 mix-blend-multiply opacity-50" />
+               <div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square rounded-[3rem] overflow-hidden border-8 border-white bg-white shadow-xl group">
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent z-10 opacity-10" />
                   {/* PLEASE ENSURE YOU UPLOAD YOUR BOOTH IMAGE TO public/hero-booth.jpg */}
                   <img 
                     src="/hero-booth.jpg" 
@@ -91,21 +89,21 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
                       (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1200&auto=format&fit=crop";
                     }}
                   />
-                  <div className="absolute bottom-6 left-6 right-6 z-20 bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-3xl">
+                  <div className="absolute bottom-6 left-6 right-6 z-20 bg-white/90 backdrop-blur-md border border-white p-6 rounded-3xl shadow-lg">
                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-amber-400 rounded-full flex items-center justify-center flex-shrink-0">
-                           <Star className="w-6 h-6 text-amber-900" />
+                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                           <Star className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                           <p className="text-white font-bold text-lg">أجنحة مخصصة للشركات</p>
-                           <p className="text-white/70 text-sm">مساحات مصممة بأعلى معايير الجودة</p>
+                           <p className="text-slate-900 font-bold text-lg">أجنحة مخصصة للشركات</p>
+                           <p className="text-slate-600 text-sm">مساحات مصممة بأعلى معايير الجودة</p>
                         </div>
                      </div>
                   </div>
                </div>
                
                {/* Decorative dots behind the image */}
-               <div className="absolute -z-10 -bottom-8 -left-8 w-64 h-64 bg-amber-400/20 rounded-full blur-[80px]" />
+               <div className="absolute -z-10 -bottom-8 -left-8 w-64 h-64 bg-blue-400/20 rounded-full blur-[80px]" />
             </div>
 
           </div>
@@ -156,16 +154,16 @@ function StatItem({ value, label }: { value: string; label: string }) {
   return (
     <div className="text-center text-white">
       <div className="text-2xl font-bold">{value}</div>
-      <div className="text-sm opacity-60">{label}</div>
+      <div className="text-sm opacity-60 font-medium">{label}</div>
     </div>
   );
 }
 
 function CategoryCard({ icon, title, price, color, features, onBook }: any) {
   const colorMap: any = {
-    amber: "bg-amber-500",
-    slate: "bg-slate-500",
-    emerald: "bg-emerald-500",
+    amber: "bg-blue-600",
+    slate: "bg-blue-500",
+    emerald: "bg-blue-400",
   };
   return (
     <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm hover:shadow-md transition-shadow">
@@ -177,7 +175,7 @@ function CategoryCard({ icon, title, price, color, features, onBook }: any) {
       <ul className="space-y-3 mb-8">
         {features.map((f: string) => (
           <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <CheckCircle2 className="w-4 h-4 text-blue-500" />
             {f}
           </li>
         ))}

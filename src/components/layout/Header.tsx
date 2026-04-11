@@ -2,7 +2,7 @@
 
 import { useTranslation } from '@/i18n'
 import { Button } from '@/components/ui/button'
-import { Globe, Shield, UserCircle, LogIn, LayoutDashboard, ListOrdered } from 'lucide-react'
+import { Globe, Shield, UserCircle, LogIn, LayoutDashboard, ListOrdered, MapPin } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -22,12 +22,12 @@ export default function Header({ currentView, onNavigate }: HeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-l from-orange-600 to-orange-500 shadow-lg">
+    <header className="sticky top-0 z-50 bg-gradient-to-l from-blue-700 to-blue-600 shadow-lg">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo / Exhibition Name */}
           <button
-            onClick={() => onNavigate('map')}
+            onClick={() => onNavigate('home')}
             className="flex items-center gap-3 transition-opacity hover:opacity-90"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
@@ -56,12 +56,22 @@ export default function Header({ currentView, onNavigate }: HeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onNavigate('map')}
+              onClick={() => onNavigate('home')}
               className={`text-white hover:bg-white/20 hover:text-white ${
-                currentView === 'map' ? 'bg-white/20' : ''
+                currentView === 'home' ? 'bg-white/20' : ''
               }`}
             >
               {t('nav.home')}
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onNavigate('map')}
+              className={`text-white hover:bg-white/20 hover:text-white`}
+            >
+              <MapPin className="ms-2 h-4 w-4" />
+              {lang === 'ar' ? 'احجز بوثك' : 'Book Booth'}
             </Button>
 
             <Button

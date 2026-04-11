@@ -178,8 +178,8 @@ function getStepColor(
   if (isCurrent) {
     return {
       ring: 'ring-orange-300 ring-4',
-      bg: 'bg-orange-500',
-      text: 'text-orange-600',
+      bg: 'bg-blue-600',
+      text: 'text-blue-700',
       line: 'bg-gray-200',
     }
   }
@@ -300,7 +300,7 @@ export default function BookingTracker({ booking, lang }: BookingTrackerProps) {
                     step.icon === 'cross'
                       ? 'text-red-500'
                       : isCurrentStep
-                        ? 'text-orange-600'
+                        ? 'text-blue-700'
                         : isCompleted
                           ? 'text-green-600'
                           : 'text-gray-400'

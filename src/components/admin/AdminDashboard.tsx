@@ -133,7 +133,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     { label: t('admin.totalBookings'), value: totalBookings, icon: ClipboardList, color: 'text-blue-600', bg: 'bg-blue-50' },
     { label: t('admin.pendingCount'), value: pendingBookings, icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-50' },
     { label: t('admin.approvedCount'), value: approvedBookings, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50' },
-    { label: t('admin.totalRevenue'), value: `${totalRevenue.toLocaleString()} ${t('common.sar')}`, icon: DollarSign, color: 'text-orange-600', bg: 'bg-orange-50' },
+    { label: t('admin.totalRevenue'), value: `${totalRevenue.toLocaleString()} ${t('common.sar')}`, icon: DollarSign, color: 'text-blue-700', bg: 'bg-orange-50' },
   ]
 
   const formatDate = (dateStr: string) => {
@@ -152,8 +152,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
-            <LayoutDashboard className="h-5 w-5 text-orange-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+            <LayoutDashboard className="h-5 w-5 text-blue-700" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-800">{t('admin.dashboard')}</h2>
@@ -206,7 +206,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <CardContent className="p-0">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
             </div>
           ) : filteredBookings.length === 0 ? (
             <div className="py-12 text-center text-gray-500">
@@ -239,7 +239,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                           <div>
                             <button
                               onClick={() => setExpandedId(isExpanded ? null : booking.id)}
-                              className="flex items-center gap-1 font-medium text-gray-800 hover:text-orange-600"
+                              className="flex items-center gap-1 font-medium text-gray-800 hover:text-blue-700"
                             >
                               {isExpanded ? (
                                 <ChevronUp className="h-4 w-4" />
@@ -382,7 +382,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 )}
                 <p className="mt-2 text-sm">
                   <span className="text-gray-500">{t('admin.totalPrice')}:</span>{' '}
-                  <span className="font-bold text-orange-600">{detailBooking.totalPrice.toLocaleString()} {t('common.sar')}</span>
+                  <span className="font-bold text-blue-700">{detailBooking.totalPrice.toLocaleString()} {t('common.sar')}</span>
                 </p>
               </div>
 
@@ -395,7 +395,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       href={detailBooking.contractPath}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-md bg-orange-50 px-3 py-2 text-sm text-orange-700 transition-colors hover:bg-orange-100"
+                      className="inline-flex items-center gap-1 rounded-md bg-orange-50 px-3 py-2 text-sm text-orange-700 transition-colors hover:bg-blue-50"
                     >
                       <FileText className="h-4 w-4" />
                       {t('admin.contractFile')}
@@ -406,7 +406,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       href={detailBooking.receiptPath}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-md bg-orange-50 px-3 py-2 text-sm text-orange-700 transition-colors hover:bg-orange-100"
+                      className="inline-flex items-center gap-1 rounded-md bg-orange-50 px-3 py-2 text-sm text-orange-700 transition-colors hover:bg-blue-50"
                     >
                       <ImageIcon className="h-4 w-4" />
                       {t('admin.receiptFile')}

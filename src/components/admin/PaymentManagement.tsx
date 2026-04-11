@@ -204,7 +204,7 @@ export default function PaymentManagement() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     )
   }
@@ -214,8 +214,8 @@ export default function PaymentManagement() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
-            <CreditCard className="h-5 w-5 text-orange-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+            <CreditCard className="h-5 w-5 text-blue-700" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-800">
@@ -379,7 +379,7 @@ export default function PaymentManagement() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="gap-1 text-orange-600 hover:bg-orange-50"
+                                className="gap-1 text-blue-700 hover:bg-orange-50"
                                 onClick={() => setReceiptDialog(payment)}
                               >
                                 {isImageFile(payment.receiptPath) ? (

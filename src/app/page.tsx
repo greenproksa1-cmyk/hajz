@@ -135,11 +135,23 @@ function AppContent() {
 
   const handleNavigate = useCallback(
     (view: string) => {
-      window.location.hash = view
-      if (view === 'admin' && isAdminLoggedIn) {
+      // If user navigates to 'map', just go to 'home' and the code will scroll to map
+      const targetView = view === 'map' ? 'home' : view
+      window.location.hash = targetView
+      if (targetView === 'admin' && isAdminLoggedIn) {
         setCurrentView('admin-new')
       } else {
-        setCurrentView(view as View)
+        setCurrentView(targetView as View)
+      }
+
+      // If they intended to go to the map, scroll down after rendering
+      if (view === 'map') {
+        setTimeout(() => {
+          const mapSection = document.getElementById('booth-map-section');
+          if (mapSection) {
+            mapSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
       }
     },
     [isAdminLoggedIn]
@@ -153,7 +165,7 @@ function AppContent() {
 
   const handleBookingComplete = useCallback(() => {
     setSelectedBoothIds([])
-    setCurrentView('map')
+    setCurrentView('home')
     fetchBooths()
   }, [fetchBooths])
 
@@ -164,7 +176,7 @@ function AppContent() {
 
   const handleAdminLogout = useCallback(() => {
     setIsAdminLoggedIn(false)
-    setCurrentView('map')
+    setCurrentView('home')
   }, [])
 
   const showAdminBar = currentView === 'admin-new' && isAdminLoggedIn
@@ -183,47 +195,50 @@ function AppContent() {
         )}
 
         {currentView === 'home' && (
-          <HomeView onNavigate={handleNavigate} />
-        )}
-
-        {currentView === 'map' && (
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
+          <>
+            <HomeView onNavigate={handleNavigate} />
+            <div id="booth-map-section" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+              <div className="text-center mb-10">
+                <h2 className="text-3xl font-black text-slate-900 mb-2">{isRTL ? 'المخطط التفاعلي للمعرض' : 'Interactive Exhibition Map'}</h2>
+                <p className="text-slate-500">{isRTL ? 'اختر جناحك المفضل لمعرض الرياض للمقاولين' : 'Choose your preferred booth for the Riyadh Contractors Exhibition'}</p>
               </div>
-            ) : booths.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 text-center">
-                 <div className="bg-orange-100 p-6 rounded-full mb-6">
-                    <Globe className="h-12 w-12 text-orange-600" />
-                 </div>
-                 <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                    {isRTL ? 'لا يوجد معرض نشط حالياً' : 'No Active Exhibition'}
-                 </h2>
-                 <p className="text-gray-500 max-w-md">
-                    {isRTL 
-                      ? 'يرجى مراجعة الموقع لاحقاً، المخطط الحالي قيد التحديث أو غير متاح.' 
-                      : 'Please check back later. The floor plan is currently being updated or is not available.'}
-                 </p>
-                 {isAdminLoggedIn && (
-                   <Button 
-                    onClick={() => setCurrentView('admin-new')}
-                    className="mt-6 bg-orange-500 hover:bg-orange-600"
-                   >
-                     {isRTL ? 'إنشاء أول مخطط' : 'Create First Plan'}
-                   </Button>
-                 )}
-              </div>
-            ) : (
-              <BoothMap
-                booths={booths}
-                selectedBoothIds={selectedBoothIds}
-                onSelectBooths={setSelectedBoothIds}
-                onBookNow={handleBookNow}
-                dimensions={floorPlanMetadata}
-              />
-            )}
-          </div>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+                </div>
+              ) : booths.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                   <div className="bg-blue-50 p-6 rounded-full mb-6">
+                      <Globe className="h-12 w-12 text-blue-700" />
+                   </div>
+                   <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                      {isRTL ? 'لا يوجد معرض نشط حالياً' : 'No Active Exhibition'}
+                   </h2>
+                   <p className="text-gray-500 max-w-md">
+                      {isRTL 
+                        ? 'يرجى مراجعة الموقع لاحقاً، المخطط الحالي قيد التحديث أو غير متاح.' 
+                        : 'Please check back later. The floor plan is currently being updated or is not available.'}
+                   </p>
+                   {isAdminLoggedIn && (
+                     <Button 
+                      onClick={() => setCurrentView('admin-new')}
+                      className="mt-6 bg-blue-600 hover:bg-blue-700"
+                     >
+                       {isRTL ? 'إنشاء أول مخطط' : 'Create First Plan'}
+                     </Button>
+                   )}
+                </div>
+              ) : (
+                <BoothMap
+                  booths={booths}
+                  selectedBoothIds={selectedBoothIds}
+                  onSelectBooths={setSelectedBoothIds}
+                  onBookNow={handleBookNow}
+                  dimensions={floorPlanMetadata}
+                />
+              )}
+            </div>
+          </>
         )}
 
         {currentView === 'booking' && (
@@ -232,7 +247,7 @@ function AppContent() {
               selectedBooths={booths.filter((b) => selectedBoothIds.includes(b.id))}
               onComplete={handleBookingComplete}
               onCancel={() => {
-                setCurrentView('map')
+                setCurrentView('home')
               }}
             />
           </div>
@@ -271,7 +286,7 @@ function AppContent() {
             <UserDashboard
               email={userTrackingEmail}
               onBack={() => {
-                setCurrentView('map')
+                setCurrentView('home')
               }}
             />
           </div>

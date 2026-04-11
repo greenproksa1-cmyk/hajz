@@ -137,7 +137,7 @@ export default function Step1Registration({ onComplete, initialData }: Step1Prop
     <form onSubmit={handleSubmit(onSubmit)}>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <User className="h-5 w-5 text-orange-500" />
+          <User className="h-5 w-5 text-blue-600" />
           {t('booking.yourInfo')}
         </CardTitle>
       </CardHeader>
@@ -169,7 +169,7 @@ export default function Step1Registration({ onComplete, initialData }: Step1Prop
         <div className="mt-6 flex justify-end">
           <Button
             type="submit"
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-blue-600 hover:bg-blue-700"
             size="lg"
             disabled={isSubmitting}
           >

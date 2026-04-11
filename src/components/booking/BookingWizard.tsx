@@ -99,7 +99,7 @@ export default function BookingWizard({ selectedBooths, onComplete, onCancel }: 
                 {index > 0 && (
                   <div
                     className={`h-0.5 flex-1 transition-colors ${
-                      isCompleted ? 'bg-orange-500' : 'bg-gray-200'
+                      isCompleted ? 'bg-blue-600' : 'bg-gray-200'
                     }`}
                   />
                 )}
@@ -107,9 +107,9 @@ export default function BookingWizard({ selectedBooths, onComplete, onCancel }: 
                   <div
                     className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all ${
                       isActive
-                        ? 'border-orange-500 bg-orange-500 text-white'
+                        ? 'border-blue-600 bg-blue-600 text-white'
                         : isCompleted
-                        ? 'border-orange-500 bg-orange-500 text-white'
+                        ? 'border-blue-600 bg-blue-600 text-white'
                         : 'border-gray-300 bg-white text-gray-400'
                     }`}
                   >
@@ -121,7 +121,7 @@ export default function BookingWizard({ selectedBooths, onComplete, onCancel }: 
                   </div>
                   <span
                     className={`mt-2 hidden text-xs sm:block ${
-                      isActive ? 'font-semibold text-orange-600' : 'text-gray-500'
+                      isActive ? 'font-semibold text-blue-700' : 'text-gray-500'
                     }`}
                   >
                     {step.title}

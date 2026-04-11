@@ -163,7 +163,7 @@ export default function FilePreview({
               variant="outline"
               size="sm"
               onClick={handleView}
-              className="flex-1 text-orange-600 border-orange-200 hover:bg-orange-50"
+              className="flex-1 text-blue-700 border-orange-200 hover:bg-orange-50"
             >
               <Eye className="me-1.5 h-3.5 w-3.5" />
               {isRTL ? 'عرض' : 'View'}

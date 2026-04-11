@@ -40,9 +40,9 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50">
       {/* Decorative gradient blobs */}
-      <div className="absolute top-[-10%] left-[-10%] h-[500px] w-[500px] animate-pulse rounded-full bg-orange-400/20 mix-blend-multiply blur-[100px] duration-10000" />
+      <div className="absolute top-[-10%] left-[-10%] h-[500px] w-[500px] animate-pulse rounded-full bg-blue-500/20 mix-blend-multiply blur-[100px] duration-10000" />
       <div className="absolute right-[-10%] top-[20%] h-[400px] w-[400px] animate-pulse rounded-full bg-amber-300/20 mix-blend-multiply blur-[100px] duration-10000" style={{ animationDelay: '2s' }} />
-      <div className="absolute bottom-[-10%] left-[20%] h-[600px] w-[600px] animate-pulse rounded-full bg-orange-500/10 mix-blend-multiply blur-[120px] duration-10000" style={{ animationDelay: '4s' }} />
+      <div className="absolute bottom-[-10%] left-[20%] h-[600px] w-[600px] animate-pulse rounded-full bg-blue-600/10 mix-blend-multiply blur-[120px] duration-10000" style={{ animationDelay: '4s' }} />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -50,7 +50,7 @@ export default function LoginPage() {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="relative z-10 w-full max-w-md p-10 bg-white/70 backdrop-blur-2xl rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/60"
       >
-        <Link href="/" className="inline-flex items-center text-sm font-medium text-orange-600 hover:text-orange-500 transition-colors mb-6 group" dir="rtl">
+        <Link href="/" className="inline-flex items-center text-sm font-medium text-blue-700 hover:text-blue-600 transition-colors mb-6 group" dir="rtl">
           <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
           العودة للرئيسية
         </Link>
@@ -60,7 +60,7 @@ export default function LoginPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="w-16 h-16 bg-gradient-to-tr from-orange-600 to-orange-400 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-orange-500/30"
+            className="w-16 h-16 bg-gradient-to-tr from-blue-700 to-blue-500 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-blue-600/30"
           >
             <LogIn className="w-8 h-8 text-white" />
           </motion.div>
@@ -88,14 +88,14 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="اسم المستخدم"
               required
-              className="text-right h-12 bg-white/50 border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-all rounded-xl"
+              className="text-right h-12 bg-white/50 border-gray-200 focus:border-blue-600 focus:ring-blue-600/20 transition-all rounded-xl"
             />
           </div>
 
           <div className="space-y-1.5">
              <div className="flex justify-between items-center">
                <Label htmlFor="password" className="text-gray-700 font-medium">كلمة المرور</Label>
-               <Link href="#" className="text-xs text-orange-600 hover:text-orange-500 font-medium">نسيت كلمة المرور؟</Link>
+               <Link href="#" className="text-xs text-blue-700 hover:text-blue-600 font-medium">نسيت كلمة المرور؟</Link>
              </div>
             <Input
               id="password"
@@ -104,14 +104,14 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="text-right h-12 bg-white/50 border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-all rounded-xl"
+              className="text-right h-12 bg-white/50 border-gray-200 focus:border-blue-600 focus:ring-blue-600/20 transition-all rounded-xl"
             />
           </div>
 
           <Button 
             type="submit" 
             disabled={loading}
-            className="w-full h-12 text-base font-semibold bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 shadow-xl shadow-orange-500/20 rounded-xl transition-all hover:scale-[1.02] active:scale-95"
+            className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-700 to-blue-600 hover:from-orange-700 hover:to-blue-700 shadow-xl shadow-blue-600/20 rounded-xl transition-all hover:scale-[1.02] active:scale-95"
           >
             {loading ? "جاري الدخول..." : "تسجيل الدخول"}
           </Button>
@@ -119,7 +119,7 @@ export default function LoginPage() {
 
         <div className="mt-8 text-center text-sm text-gray-600">
           ليس لديك حساب؟{" "}
-          <Link href="/register" className="font-semibold text-orange-600 hover:text-orange-500 transition-colors">
+          <Link href="/register" className="font-semibold text-blue-700 hover:text-blue-600 transition-colors">
             إنشاء حساب جديد
           </Link>
         </div>

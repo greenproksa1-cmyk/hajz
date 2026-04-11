@@ -96,7 +96,7 @@ export default function Step3Contract({
       />
 
       <div className="text-center">
-        <FileText className="mx-auto mb-4 h-16 w-16 text-orange-500" />
+        <FileText className="mx-auto mb-4 h-16 w-16 text-blue-600" />
         <h3 className="text-lg font-semibold text-gray-800">{t('contract.title')}</h3>
         <p className="text-sm text-gray-500 mt-1">
           عقدك المزدوج (عربي/إنجليزي) جاهز الآن. قم بمراجعة البيانات ثم استخراج العقد للمتابعة.
@@ -104,7 +104,7 @@ export default function Step3Contract({
       </div>
 
       {/* ملخص الحجز السريع للعميل قبل التحميل */}
-      <Card className="border-orange-100 bg-orange-50/30">
+      <Card className="border-blue-50 bg-orange-50/30">
         <CardContent className="p-4">
           <h4 className="mb-3 font-bold text-gray-800 flex items-center gap-2">
             <CheckCircle className="h-4 w-4 text-green-500" />
@@ -160,7 +160,7 @@ export default function Step3Contract({
               <TableRow className="bg-gray-50/50 font-bold text-lg">
                 <TableCell>{t('contract.total')}</TableCell>
                 <TableCell>{totalArea} {t('boothMap.sqm')}</TableCell>
-                <TableCell className="text-end text-orange-600">
+                <TableCell className="text-end text-blue-700">
                   {totalPrice.toLocaleString()} {t('common.sar')}
                 </TableCell>
               </TableRow>
@@ -175,7 +175,7 @@ export default function Step3Contract({
           <Button
             onClick={handleDownloadAndProceed}
             disabled={isGenerating}
-            className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto px-10 py-6 text-lg shadow-lg shadow-orange-200"
+            className="bg-blue-700 hover:bg-orange-700 w-full sm:w-auto px-10 py-6 text-lg shadow-lg shadow-orange-200"
             size="lg"
           >
             {isGenerating ? (
@@ -198,7 +198,7 @@ export default function Step3Contract({
                <Button
                 variant="outline"
                 onClick={handleDownloadAndProceed}
-                className="text-orange-600 border-orange-300"
+                className="text-blue-700 border-orange-300"
               >
                 <Download className="me-2 h-4 w-4" />
                 تحميل مرة أخرى

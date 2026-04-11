@@ -59,10 +59,10 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
 
   return (
     <div className="mx-auto max-w-md">
-      <Card className="border-orange-100">
+      <Card className="border-blue-50">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-100">
-            <Shield className="h-8 w-8 text-orange-600" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
+            <Shield className="h-8 w-8 text-blue-700" />
           </div>
           <CardTitle className="text-xl">{t('admin.login')}</CardTitle>
           <p className="text-sm text-gray-500">
@@ -106,7 +106,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-orange-500 hover:bg-orange-600"
+              className="w-full bg-blue-600 hover:bg-blue-700"
               size="lg"
             >
               {isLoading ? (

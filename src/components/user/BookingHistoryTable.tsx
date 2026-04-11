@@ -124,7 +124,7 @@ export default function BookingHistoryTable({
 
           {/* Price */}
           <div className="mt-3 flex items-center justify-between border-t pt-3">
-            <span className="text-sm font-bold text-orange-600">
+            <span className="text-sm font-bold text-blue-700">
               {booking.totalPrice.toLocaleString()} {t('common.sar')}
             </span>
             <div className="flex items-center gap-1">
@@ -132,7 +132,7 @@ export default function BookingHistoryTable({
                 variant="ghost"
                 size="sm"
                 onClick={() => onViewDetails(booking)}
-                className="h-8 px-2 text-orange-600 hover:bg-orange-50"
+                className="h-8 px-2 text-blue-700 hover:bg-orange-50"
               >
                 <Eye className="h-4 w-4" />
               </Button>
@@ -141,7 +141,7 @@ export default function BookingHistoryTable({
                   variant="ghost"
                   size="sm"
                   onClick={() => onDownloadContract(booking)}
-                  className="h-8 px-2 text-orange-600 hover:bg-orange-50"
+                  className="h-8 px-2 text-blue-700 hover:bg-orange-50"
                 >
                   <Download className="h-4 w-4" />
                 </Button>
@@ -152,7 +152,7 @@ export default function BookingHistoryTable({
           {/* Expand toggle */}
           <button
             onClick={() => setExpandedId(isExpanded ? null : booking.id)}
-            className="mt-2 flex w-full items-center justify-center gap-1 text-xs text-gray-500 hover:text-orange-600"
+            className="mt-2 flex w-full items-center justify-center gap-1 text-xs text-gray-500 hover:text-blue-700"
           >
             {isExpanded ? (
               <>
@@ -248,7 +248,7 @@ export default function BookingHistoryTable({
                           onClick={() =>
                             setExpandedId(isExpanded ? null : booking.id)
                           }
-                          className="font-medium text-gray-800 hover:text-orange-600"
+                          className="font-medium text-gray-800 hover:text-blue-700"
                         >
                           {booking.entityName}
                         </button>
@@ -295,7 +295,7 @@ export default function BookingHistoryTable({
                           variant="ghost"
                           size="sm"
                           onClick={() => onViewDetails(booking)}
-                          className="h-8 px-2 text-orange-600 hover:bg-orange-50"
+                          className="h-8 px-2 text-blue-700 hover:bg-orange-50"
                           title={isRTL ? 'عرض التفاصيل' : 'View Details'}
                         >
                           <Eye className="h-4 w-4" />
@@ -305,7 +305,7 @@ export default function BookingHistoryTable({
                             variant="ghost"
                             size="sm"
                             onClick={() => onDownloadContract(booking)}
-                            className="h-8 px-2 text-orange-600 hover:bg-orange-50"
+                            className="h-8 px-2 text-blue-700 hover:bg-orange-50"
                             title={isRTL ? 'تحميل العقد' : 'Download Contract'}
                           >
                             <Download className="h-4 w-4" />
@@ -358,7 +358,7 @@ export default function BookingHistoryTable({
                 onClick={() => setCurrentPage(page)}
                 className={`h-8 w-8 p-0 ${
                   currentPage === page
-                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
                     : ''
                 }`}
               >

@@ -734,7 +734,7 @@ export default function FloorPlanEditor({
 
             <Button
               size="sm"
-              className="h-8 gap-1.5 bg-orange-500 hover:bg-orange-600"
+              className="h-8 gap-1.5 bg-blue-600 hover:bg-blue-700"
               onClick={handleSave}
               disabled={isSaving}
             >

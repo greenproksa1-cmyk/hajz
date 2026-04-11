@@ -76,7 +76,7 @@ interface EditFormData {
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
   available: { label: 'admin.boothMap.legend.available', color: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20', icon: CheckCircle },
   pending: { label: 'admin.pending', color: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20', icon: Clock },
-  booked: { label: 'admin.approved', color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20', icon: Box },
+  booked: { label: 'admin.approved', color: 'bg-blue-600/10 text-blue-700 dark:text-blue-500 border-blue-600/20', icon: Box },
 }
 
 export default function BoothManagement() {
@@ -255,7 +255,7 @@ export default function BoothManagement() {
           { label: isRTL ? 'الإجمالي' : 'Total', count: statusCounts.all, icon: Box, color: 'bg-blue-500', text: 'text-blue-600 dark:text-blue-400' },
           { label: isRTL ? 'متاح' : 'Available', count: statusCounts.available, icon: CheckCircle, color: 'bg-green-500', text: 'text-green-600 dark:text-green-400' },
           { label: isRTL ? 'قيد الحجز' : 'Pending', count: statusCounts.pending, icon: Clock, color: 'bg-yellow-500', text: 'text-yellow-600 dark:text-yellow-400' },
-          { label: isRTL ? 'محجوز' : 'Booked', count: statusCounts.booked, icon: Box, color: 'bg-orange-500', text: 'text-orange-600 dark:text-orange-400' }
+          { label: isRTL ? 'محجوز' : 'Booked', count: statusCounts.booked, icon: Box, color: 'bg-blue-600', text: 'text-blue-700 dark:text-blue-500' }
         ].map((stat, i) => (
           <div key={i} className="relative group overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-1">
             <div className={cn("absolute left-0 top-0 h-1 w-full opacity-70", stat.color)} />

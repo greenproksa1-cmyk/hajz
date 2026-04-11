@@ -116,7 +116,7 @@ export default function Step2OTP({ email, onComplete, onBack }: Step2Props) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <ShieldCheck className="mx-auto mb-4 h-16 w-16 text-orange-500" />
+        <ShieldCheck className="mx-auto mb-4 h-16 w-16 text-blue-600" />
         <h3 className="text-lg font-semibold text-gray-800">{t('booking.step2Title')}</h3>
         <p className="mt-2 text-sm text-gray-500">
           {t('otp.enterCode')}
@@ -138,7 +138,7 @@ export default function Step2OTP({ email, onComplete, onBack }: Step2Props) {
           <Button
             onClick={sendOtp}
             disabled={isSending}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-blue-600 hover:bg-blue-700"
             size="lg"
           >
             <Send className="me-2 h-4 w-4" />
@@ -155,13 +155,13 @@ export default function Step2OTP({ email, onComplete, onBack }: Step2Props) {
           {/* Demo mode notice */}
           {isDemoMode && (
             <div className="flex w-full items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
               <div>
                 <p className="text-sm font-medium text-amber-800">{t('otp.demoModeNotice')}</p>
                 {demoOtp && (
-                  <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-amber-100 px-3 py-1.5">
+                  <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-blue-50 px-3 py-1.5">
                     <span className="text-sm text-amber-700">{t('otp.demoOtp')}</span>
-                    <span className="text-lg font-bold tracking-widest text-amber-900" dir="ltr">{demoOtp}</span>
+                    <span className="text-lg font-bold tracking-widest text-blue-900" dir="ltr">{demoOtp}</span>
                   </div>
                 )}
               </div>
@@ -202,7 +202,7 @@ export default function Step2OTP({ email, onComplete, onBack }: Step2Props) {
               {t('otp.resendIn')} {countdown} {t('otp.seconds')}
             </p>
           ) : (
-            <Button variant="outline" onClick={handleResend} className="text-orange-600 border-orange-300">
+            <Button variant="outline" onClick={handleResend} className="text-blue-700 border-orange-300">
               {t('otp.resend')}
             </Button>
           )}
@@ -216,7 +216,7 @@ export default function Step2OTP({ email, onComplete, onBack }: Step2Props) {
             <Button
               onClick={verifyOtp}
               disabled={otp.length !== 4 || isVerifying}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               {isVerifying ? t('common.loading') : t('otp.verify')}
             </Button>

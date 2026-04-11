@@ -35,7 +35,7 @@ export default function AdminDashboardNew({ onLogout }: AdminDashboardNewProps) 
 
   return (
     <div dir={dir} className="flex h-screen overflow-hidden bg-background text-foreground relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-background to-purple-600/5 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-background to-purple-600/5 pointer-events-none" />
       
       <AdminSidebar
         activeTab={activeTab}
@@ -119,8 +119,8 @@ function OverviewPanel() {
     {
       label: t('admin.totalRevenue'),
       value: `${totalRevenue.toLocaleString()} ${t('common.sar')}`,
-      color: 'text-orange-600 dark:text-orange-400',
-      bg: 'bg-orange-500',
+      color: 'text-blue-700 dark:text-blue-500',
+      bg: 'bg-blue-600',
     },
   ]
 
@@ -189,9 +189,9 @@ function OverviewPanel() {
             </div>
           </div>
           <div className="flex-1 space-y-4 w-full sm:w-auto">
-            <div className="flex items-center justify-between rounded-lg bg-orange-500/10 px-4 py-2">
+            <div className="flex items-center justify-between rounded-lg bg-blue-600/10 px-4 py-2">
               <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]" />
+                <div className="h-3 w-3 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(249,115,22,0.6)]" />
                 <span className="font-medium text-foreground">{isRTL ? 'محجوز' : 'Booked'}</span>
               </div>
               <span className="font-bold text-foreground">{bookedBooths}</span>
@@ -371,7 +371,7 @@ function BookingsPanel() {
                       {booking.booths.map((booth: any) => (
                         <span
                           key={booth.id}
-                          className="inline-flex items-center rounded-md bg-orange-500/10 px-2.5 py-1 text-xs font-semibold text-orange-600 dark:text-orange-400 border border-orange-500/20"
+                          className="inline-flex items-center rounded-md bg-blue-600/10 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:text-blue-500 border border-blue-600/20"
                         >
                           {booth.label}
                         </span>
