@@ -110,10 +110,17 @@ export default function DashboardClient({ user, userBookings }: { user: any, use
                       #{booking.id.substring(0, 8)}
                     </span>
                     <span className={`text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 ${
-                      booking.status === 'confirmed' ? 'bg-emerald-100 text-slate-700' : 'bg-blue-50 text-orange-700'
+                      booking.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                      booking.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                      'bg-blue-50 text-orange-700'
                     }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${booking.status === 'confirmed' ? 'bg-slate-500' : 'bg-blue-600 animate-pulse'}`} />
-                      {booking.status === 'confirmed' ? 'مؤكد' : 'معلق'}
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        booking.status === 'approved' ? 'bg-emerald-500' :
+                        booking.status === 'rejected' ? 'bg-red-500' :
+                        'bg-blue-600 animate-pulse'
+                      }`} />
+                      {booking.status === 'approved' ? 'موافق عليه' : 
+                       booking.status === 'rejected' ? 'مرفوض' : 'معلق'}
                     </span>
                   </div>
                   

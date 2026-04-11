@@ -97,7 +97,6 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
       dir={isRTL ? 'rtl' : 'ltr'}
       style={{
         background: 'linear-gradient(to bottom, #f8fafc 0%, #eff6ff 100%)',
-        fontFamily: "'Cairo', sans-serif",
       }}
     >
       {/* Animated background grid */}

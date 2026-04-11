@@ -57,7 +57,6 @@ export const ContractTemplate: React.FC<ContractTemplateProps> = ({ booking }) =
         minHeight: '1123px',
         backgroundColor: '#ffffff',
         padding: '30px 40px',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
         color: '#1f2937',
         display: 'none', // Hidden during normal execution
       }}
