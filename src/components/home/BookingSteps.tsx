@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { MapPin, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
+import { MapPin, ArrowLeft, ArrowRight, Sparkles, Trophy } from 'lucide-react'
 
 interface BookingStepsProps {
   onNavigate: (view: string) => void
@@ -258,31 +258,65 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
           })}
         </motion.div>
 
-        {/* Final CTA Banner */}
+        {/* Final CTA Banner - Premium Redesign */}
         <motion.div
-           initial={{ opacity: 0, y: 40 }}
-           whileInView={{ opacity: 1, y: 0 }}
+           initial={{ opacity: 0, scale: 0.95 }}
+           whileInView={{ opacity: 1, scale: 1 }}
            viewport={{ once: true }}
-           transition={{ duration: 0.8, delay: 0.2 }}
-           className="mt-20 text-center p-12 rounded-3xl border border-blue-100 bg-white shadow-xl relative overflow-hidden"
+           transition={{ duration: 0.8 }}
+           className="mt-24 relative rounded-[2.5rem] overflow-hidden group"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-white -z-10" />
-          <div className="text-5xl mb-4">🏆</div>
-          <h3 className="text-3xl font-black text-slate-900 mb-4">
-            {isRTL ? 'جاهز لتأمين مكانك؟' : 'Ready to Secure Your Spot?'}
-          </h3>
-          <p className="text-slate-600 text-lg mb-8 max-w-xl mx-auto">
-            {isRTL
-              ? 'انضم إلى أكثر من 500 شركة رائدة في القطاع. الأماكن محدودة، لا تفوّت الفرصة.'
-              : 'Join over 500 leading companies in the sector. Spaces are limited — don\'t miss the opportunity.'}
-          </p>
-          <Button
-            onClick={() => onNavigate('map')}
-            size="lg"
-            className="bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white font-black px-12 py-6 text-xl rounded-2xl shadow-2xl shadow-blue-600/40 hover:scale-105 transition-all duration-300"
-          >
-            {isRTL ? 'ابدأ حجزك الآن ←' : '→ Start Booking Now'}
-          </Button>
+          {/* Main Background with Deep Gradient */}
+          <div className="absolute inset-0 bg-slate-900" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-800/40 via-blue-900/10 to-indigo-900/40" />
+          
+          {/* Decorative Pattern Layer */}
+          <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+          
+          {/* Glowing Accents */}
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/30 rounded-full blur-[100px] group-hover:bg-blue-500/40 transition-colors duration-700" />
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-600/30 rounded-full blur-[100px] group-hover:bg-indigo-500/40 transition-colors duration-700" />
+
+          <div className="relative z-10 p-12 lg:p-16 text-center max-w-4xl mx-auto">
+            {/* Animated Icon with Glow */}
+            <motion.div 
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 mb-8 shadow-2xl"
+            >
+              <Trophy className="w-10 h-10 text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.5)]" />
+            </motion.div>
+
+            <h3 className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight tracking-tight">
+              {isRTL ? 'جاهز لتأمين مكانك المخصص؟' : 'Ready to Secure Your Exclusive Spot?'}
+            </h3>
+            
+            <p className="text-blue-100/70 text-lg lg:text-xl mb-12 leading-relaxed font-medium">
+              {isRTL
+                ? 'انضم إلى نخبة الشركات في أكبر تجمع لقطاع المقاولات. الأماكن المتميزة يتم حجزها بسرعة، كن جزءاً من الحدث الآن.'
+                : 'Join elite companies in the largest gathering of the contracting sector. Premier spots are booking fast—be part of the event today.'}
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <Button
+                onClick={() => onNavigate('map')}
+                className="group relative bg-white text-blue-900 hover:bg-blue-50 font-black px-12 py-7 text-xl rounded-2xl shadow-2xl transition-all duration-300 overflow-hidden active:scale-95"
+              >
+                <span className="relative z-10 flex items-center gap-3">
+                  {isRTL ? 'ابدأ حجزك الآن' : 'Start Your Booking Now'}
+                  {isRTL ? '←' : '→'}
+                </span>
+                {/* Subtle button shine */}
+                <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white/40 opacity-40 group-hover:animate-shine" />
+              </Button>
+            </div>
+            
+            {/* Urgency Badge */}
+            <div className="mt-8 flex items-center justify-center gap-2 text-blue-400/80 text-sm font-semibold uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+              {isRTL ? 'متبقي 15% فقط من المساحات المتاحة' : 'Only 15% of spaces remaining'}
+            </div>
+          </div>
         </motion.div>
 
       </div>

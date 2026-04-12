@@ -5,8 +5,9 @@ import { useTranslation } from '@/i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ZoomIn, ZoomOut, RotateCcw, ShoppingCart, Info } from 'lucide-react'
+import { ZoomIn, ZoomOut, RotateCcw, ShoppingCart, Info, Map as MapIcon, Layers, Settings2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { motion, AnimatePresence } from 'framer-motion'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { cn } from '@/lib/utils'
 
@@ -74,17 +75,22 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
   
   if (isBooked) {
     fillUrl = 'url(#grad-disabled)'
-    textColor = '#4b5563'
+    textColor = '#64748b'
   } else if (isVIPSafe) {
     fillUrl = 'url(#grad-vip)'
+    textColor = '#451a03'
   } else if (isSP) {
     fillUrl = 'url(#grad-sp)'
-    textColor = '#1f2937'
+    textColor = '#334155'
   }
 
   return (
-    <g
-      className={cn("booth-item group transition-transform duration-300", !isInteracting && "hover:scale-[1.03]")}
+    <motion.g
+      initial={false}
+      animate={{ 
+        scale: isInteracting ? 1 : (isSelected ? 1.05 : 1),
+      }}
+      className={cn("booth-item group transition-all duration-300", !isInteracting && "hover:filter-[url(#booth-shadow-hover)]")}
       style={{ 
         cursor: isBooked ? 'not-allowed' : 'pointer',
         transformOrigin: 'center',
@@ -93,21 +99,27 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
       onClick={(e) => onClick(booth, e)}
     >
       {/* Selection Glow Ring */}
-      {isSelected && (
-        <rect
-          x={booth.x - 4}
-          y={booth.y - 4}
-          width={booth.width + 8}
-          height={booth.height + 8}
-          rx={16}
-          ry={16}
-          fill="none"
-          stroke="#0ea5e9"
-          strokeWidth={3}
-          filter="url(#neon-glow)"
-          className="animate-pulse"
-        />
-      )}
+      <AnimatePresence>
+        {isSelected && (
+          <motion.rect
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            x={booth.x - 6}
+            y={booth.y - 6}
+            width={booth.width + 12}
+            height={booth.height + 12}
+            rx={18}
+            ry={18}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth={3}
+            strokeDasharray="4 2"
+            filter="url(#neon-glow)"
+            className="animate-[spin_20s_linear_infinite]"
+          />
+        )}
+      </AnimatePresence>
 
       {/* Main Elevated Surface */}
       <rect
@@ -118,36 +130,11 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
         rx={12}
         ry={12}
         fill={fillUrl}
-        stroke="rgba(255,255,255,0.5)"
-        strokeWidth={1.5}
+        stroke={isSelected ? "#3b82f6" : "rgba(255,255,255,0.4)"}
+        strokeWidth={isSelected ? 3 : 1.5}
         filter={isInteracting ? undefined : "url(#booth-shadow)"}
-        className="booth-rect transition-all duration-300 group-hover:filter-hover-shadow"
+        className="booth-rect transition-all duration-300 shadow-inner"
       />
-
-      {/* Category Icons */}
-      {!isBooked && (isVIPSafe || isSP) && (
-        <svg
-          x={booth.x + booth.width / 2 - 10}
-          y={booth.y + booth.height / 2 - 24}
-          width={20}
-          height={20}
-          viewBox="0 0 24 24"
-        >
-          {isVIPSafe ? (
-            <path
-              d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"
-              fill={textColor}
-              opacity={0.9}
-            />
-          ) : (
-            <path
-              d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-              fill={textColor}
-              opacity={0.9}
-            />
-          )}
-        </svg>
-      )}
 
       {/* Labels */}
       <text
@@ -156,10 +143,10 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
         textAnchor="middle"
         dominantBaseline="central"
         fontSize={14}
-        fontWeight="800"
+        fontWeight="900"
         fill={textColor}
         style={{ pointerEvents: 'none' }}
-        className="font-sans"
+        className="font-sans select-none"
       >
         {booth?.label || ''}
       </text>
@@ -170,14 +157,28 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
         textAnchor="middle"
         dominantBaseline="central"
         fontSize={10}
-        fontWeight="600"
+        fontWeight="700"
         fill={textColor}
-        opacity={0.75}
+        opacity={0.8}
         style={{ pointerEvents: 'none' }}
-        className="font-sans"
+        className="font-sans select-none tracking-tight"
       >
         {booth.area} {t('boothMap.sqm') || 'm²'}
       </text>
+
+      {/* Iconography */}
+      {!isBooked && (isVIPSafe || isSP) && (
+        <text
+           x={booth.x + booth.width / 2}
+           y={booth.y + booth.height / 2 - 22}
+           textAnchor="middle"
+           dominantBaseline="central"
+           fontSize={12}
+           style={{ pointerEvents: 'none' }}
+        >
+          {isVIPSafe ? '✨' : '⭐'}
+        </text>
+      )}
 
       {/* Lock icon if booked */}
       {isBooked && (
@@ -188,13 +189,13 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
           dominantBaseline="central"
           fontSize={16}
           fill={textColor}
-          opacity={0.6}
+          opacity={0.4}
           style={{ pointerEvents: 'none' }}
         >
           🔒
         </text>
       )}
-    </g>
+    </motion.g>
   )
 }, (prev, next) => {
   return prev.booth.id === next.booth.id && 
@@ -288,34 +289,44 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
 
   return (
     <ErrorBoundary>
-      <div className="flex flex-col gap-4 lg:flex-row animate-in fade-in duration-700">
-        {/* Map Area */}
-        <div className="flex-1">
-          <Card className="overflow-hidden border-border bg-card shadow-xl rounded-2xl">
-            <CardHeader className="border-b bg-muted/30 pb-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl font-bold">{t('boothMap.title')}</CardTitle>
-                  <p className="mt-1 text-sm text-muted-foreground">{t('boothMap.subtitle')}</p>
+      <div className="flex flex-col gap-6 lg:flex-row animate-in fade-in duration-1000">
+        {/* Map Area - Dashboard Style */}
+        <div className="flex-1 min-w-0">
+          <Card className="overflow-hidden border-slate-200 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] rounded-[2.5rem] border-0 outline-none ring-1 ring-slate-100">
+            <CardHeader className="border-b border-slate-50 bg-slate-50/50 px-8 py-6">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200">
+                    <MapIcon className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-black text-slate-900 tracking-tight">{t('boothMap.title')}</CardTitle>
+                    <div className="flex items-center gap-2 mt-0.5">
+                       <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                       <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('boothMap.subtitle')}</p>
+                    </div>
+                  </div>
                 </div>
-                {/* Zoom Controls */}
-                <div className="flex items-center gap-1.5 bg-background p-1.5 rounded-xl border border-border shadow-sm">
-                  <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-muted" onClick={handleZoomIn} title={t('boothMap.zoom.in')}>
-                    <ZoomIn className="h-4 w-4" />
+                
+                {/* Modern Zoom Controls */}
+                <div className="flex items-center gap-1 bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm">
+                  <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-slate-50 rounded-xl transition-all" onClick={handleZoomIn} title={t('boothMap.zoom.in')}>
+                    <ZoomIn className="h-5 w-5 text-slate-600" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-muted" onClick={handleZoomOut} title={t('boothMap.zoom.out')}>
-                    <ZoomOut className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-slate-50 rounded-xl transition-all" onClick={handleZoomOut} title={t('boothMap.zoom.out')}>
+                    <ZoomOut className="h-5 w-5 text-slate-600" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-muted" onClick={handleReset} title={t('boothMap.zoom.reset')}>
-                    <RotateCcw className="h-4 w-4" />
+                  <div className="w-px h-6 bg-slate-100 mx-1" />
+                  <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-slate-50 rounded-xl transition-all" onClick={handleReset} title={t('boothMap.zoom.reset')}>
+                    <RotateCcw className="h-5 w-5 text-slate-600" />
                   </Button>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
               <div
-                className="relative overflow-hidden bg-slate-200/50"
-                style={{ minHeight: 500 }}
+                className="relative overflow-hidden bg-[#f8fafc] group/map"
+                style={{ minHeight: 600 }}
                 ref={svgRef as React.RefObject<HTMLDivElement>}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -323,84 +334,71 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
               >
                 <svg
                   viewBox={`0 0 ${effectiveDim.width} ${effectiveDim.height}`}
-                  className={`w-full h-full ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
+                  className={`w-full h-full transition-opacity duration-500 ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
                   onMouseDown={handleMouseDown}
                   style={{ minWidth: 400 }}
                 >
                   <defs>
                     <filter id="booth-shadow" x="-30%" y="-30%" width="160%" height="160%">
-                      <feDropShadow dx="0" dy="4" stdDeviation="4" floodOpacity="0.15" />
-                      <feDropShadow dx="0" dy="1" stdDeviation="2" floodOpacity="0.1" />
+                      <feDropShadow dx="0" dy="6" stdDeviation="6" floodOpacity="0.08" />
+                      <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.04" />
                     </filter>
                     <filter id="booth-shadow-hover" x="-30%" y="-30%" width="160%" height="160%">
-                      <feDropShadow dx="0" dy="12" stdDeviation="8" floodOpacity="0.25" />
-                      <feDropShadow dx="0" dy="4" stdDeviation="4" floodOpacity="0.1" />
+                      <feDropShadow dx="0" dy="12" stdDeviation="12" floodOpacity="0.12" />
                     </filter>
-                    <filter id="neon-glow" x="-30%" y="-30%" width="160%" height="160%">
-                      <feGaussianBlur stdDeviation="3" result="blur" />
+                    <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur stdDeviation="4" result="blur" />
                       <feMerge>
-                        <feMergeNode in="blur" />
                         <feMergeNode in="blur" />
                         <feMergeNode in="SourceGraphic" />
                       </feMerge>
                     </filter>
 
-                    <linearGradient id="grad-vip" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#FFD700', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#D4AF37', stopOpacity: 1 }} />
+                    <linearGradient id="grad-vip" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: '#fef3c7', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: '#f59e0b', stopOpacity: 1 }} />
                     </linearGradient>
 
                     <linearGradient id="grad-sp" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#F8FAFC', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#94A3B8', stopOpacity: 1 }} />
+                      <stop offset="0%" style={{ stopColor: '#f8fafc', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: '#cbd5e1', stopOpacity: 1 }} />
                     </linearGradient>
 
                     <linearGradient id="grad-standard" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#10B981', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#047857', stopOpacity: 1 }} />
+                      <stop offset="0%" style={{ stopColor: '#ecfdf5', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: '#10b981', stopOpacity: 1 }} />
                     </linearGradient>
 
                     <linearGradient id="grad-disabled" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#E5E7EB', stopOpacity: 0.9 }} />
-                      <stop offset="100%" style={{ stopColor: '#9CA3AF', stopOpacity: 0.9 }} />
+                      <stop offset="0%" style={{ stopColor: '#f1f5f9', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: '#94a3b8', stopOpacity: 1 }} />
                     </linearGradient>
 
-                    <style>
-                      {`
-                        .hover\\:filter-hover-shadow:hover {
-                          filter: url(#booth-shadow-hover) !important;
-                        }
-                      `}
-                    </style>
-
-                    <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5" />
+                    <pattern id="grid-pattern" width="60" height="60" patternUnits="userSpaceOnUse">
+                      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#cbd5e1" strokeWidth="0.5" opacity="0.4" />
                     </pattern>
                   </defs>
 
                   <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
-                    {/* Background */}
+                    {/* Background Surface */}
                     <rect x="0" y="0" width={effectiveDim.width} height={effectiveDim.height} fill="#ffffff" rx="12" />
-                    <rect x="0" y="0" width={effectiveDim.width} height={effectiveDim.height} fill="url(#grid-pattern)" opacity="0.05" />
+                    <rect x="0" y="0" width={effectiveDim.width} height={effectiveDim.height} fill="url(#grid-pattern)" />
+
+                    {/* Floor Plan Boundaries */}
+                    <rect x="20" y="20" width={effectiveDim.width - 40} height={effectiveDim.height - 40} fill="none" stroke="#e2e8f0" strokeWidth="2" strokeDasharray="10 10" rx="10" />
 
                     {/* Floor label */}
-                    <text x={effectiveDim.width / 2} y="30" textAnchor="middle" fontSize="14" fill="#64748b" fontWeight="600" className="uppercase tracking-widest">
-                      {effectiveDim.name || (isRTL ? 'مخطط أرضية المعرض' : 'Exhibition Floor Plan')}
+                    <text x={effectiveDim.width / 2} y="50" textAnchor="middle" fontSize="12" fill="#94a3b8" fontWeight="800" className="uppercase tracking-[0.2em] select-none">
+                      {effectiveDim.name || (isRTL ? 'مخطط أرضية المعرض الرئيسي' : 'Main Exhibition Floor Plan')}
                     </text>
-
-                    {/* Grid lines for visual reference */}
-                    <g opacity={0.3}>
-                      <line x1="30" y1="50" x2={effectiveDim.width - 30} y2="50" stroke="#cbd5e1" strokeWidth="1" />
-                      <line x1="30" y1="160" x2={effectiveDim.width - 30} y2="160" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="4" />
-                      <line x1="30" y1="280" x2={effectiveDim.width - 30} y2="280" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="4" />
-                      <line x1="30" y1="400" x2={effectiveDim.width - 30} y2="400" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="4" />
-                    </g>
 
                     {/* Entrance indicator */}
-                    <rect x={effectiveDim.width / 2 - 50} y={effectiveDim.height - 26} width="100" height="16" rx="4" fill="#f97316" opacity="0.2" />
-                    <text x={effectiveDim.width / 2} y={effectiveDim.height - 14} textAnchor="middle" fontSize="9" fill="#f97316" fontWeight="600">
-                      {isRTL ? '↓ المدخل الرئيسي' : 'Main Entrance ↓'}
-                    </text>
+                    <g transform={`translate(${effectiveDim.width / 2 - 60}, ${effectiveDim.height - 40})`}>
+                       <rect width="120" height="30" rx="15" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+                       <text x="60" y="20" textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="800" className="select-none uppercase tracking-widest">
+                         {isRTL ? 'المدخل الرئيسي ↓' : '↓ Main Entrance'}
+                       </text>
+                    </g>
 
                     {/* Render all booths */}
                     {booths.map((booth) => (
@@ -416,123 +414,158 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
                     ))}
                   </g>
                 </svg>
+                
+                {/* Floating Map Info Overlay */}
+                <div className="absolute bottom-6 left-6 flex items-center gap-3 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl border border-white shadow-lg pointer-events-none opacity-0 group-hover/map:opacity-100 transition-opacity">
+                   <Info className="h-4 w-4 text-blue-600" />
+                   <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest">
+                     {isRTL ? 'استخدم الماوس للتحريك والتكبير' : 'Drag to pan, Scroll to zoom'}
+                   </span>
+                </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Dynamic UI Sidebar (Right Side) */}
-      <div className="w-full lg:w-[340px] shrink-0">
-        <div className="sticky top-24 rounded-[24px] border border-white/50 bg-white/70 p-6 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-          <div className="mb-8 text-center pb-4 border-b border-gray-100">
-             <h3 className="text-gray-500 font-medium text-sm">{isRTL ? 'تفاصيل البوت' : 'Booth Details'}</h3>
-          </div>
+      <div className="w-full lg:w-[380px] shrink-0">
+        <div className="sticky top-24 space-y-6">
+          <div className="rounded-[2.5rem] bg-white border border-slate-100 p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] relative overflow-hidden">
+             {/* Background glow */}
+             <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/5 rounded-full blur-[60px]" />
+             
+             <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-8 pb-4 border-b border-slate-50">
+                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                      <Layers className="h-4 w-4" />
+                   </div>
+                   <h3 className="text-slate-900 font-black text-sm uppercase tracking-widest">{isRTL ? 'تفاصيل الحجز' : 'Booking Details'}</h3>
+                </div>
 
-          {selectedBooths.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="mb-4 text-gray-300">
-                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-              </div>
-              <h4 className="text-lg font-bold text-gray-800 mb-2">{isRTL ? 'اختر بوثاً من الخريطة' : 'Select a booth from the map'}</h4>
-              <p className="text-sm text-gray-400 max-w-[220px] mx-auto leading-relaxed">{isRTL ? 'انقر على أي بوث متاح لعرض تفاصيله وحجزه' : 'Click on any available booth to view its details and book it.'}</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {selectedBooths.map((booth, idx) => {
-                const typeStr = (booth?.boothType || '').toLowerCase()
-                const isVIP = typeStr === 'vip' || typeStr.includes('vip') || (booth?.label?.startsWith('VIP') || false)
-                const isSP = typeStr === 'sponsor' || typeStr === 'راعي' || typeStr.includes('sponsor') || (booth?.label?.startsWith('SP') || false)
-                const catLabel = isVIP ? 'VIP' : (isSP ? (isRTL ? 'راعي' : 'Sponsor') : (isRTL ? 'عادي' : 'Standard'))
-                
-                return (
-                  <div key={booth.id} className={idx > 0 ? "pt-6 border-t border-gray-100" : ""}>
-                    {/* Header: Status badge & Title */}
-                    <div className="flex items-start justify-between mb-2">
-                       <Badge className="bg-[#e6f7ef] text-[#059669] hover:bg-[#e6f7ef] rounded-full border-none px-3 font-semibold shadow-none">
-                         {isRTL ? 'متاح' : 'Available'}
-                       </Badge>
-                       <div className="flex flex-col items-end">
-                          <div className="flex items-center gap-2 text-2xl font-bold text-gray-900" dir="ltr">
-                            {booth.label}
-                            {isVIP && <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-[#D4AF37]"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>}
-                            {isSP && <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-[#A0AEC0]"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>}
-                          </div>
-                          <p className="text-xs text-gray-400 mt-1">{isVIP ? (isRTL ? 'بوث VIP حصري' : 'Exclusive VIP Booth') : (isSP ? (isRTL ? 'مساحة رعاة' : 'Sponsor Space') : (isRTL ? 'مساحة عادية' : 'Standard Space'))}</p>
-                       </div>
-                    </div>
+                {selectedBooths.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <motion.div 
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                      className="mb-8 w-24 h-24 bg-blue-50 rounded-[2rem] flex items-center justify-center text-blue-200"
+                    >
+                      <MapIcon className="h-10 w-10" />
+                    </motion.div>
+                    <h4 className="text-xl font-black text-slate-900 mb-3 tracking-tight">{isRTL ? 'اختر موقعك المفضل' : 'Choose Your Spot'}</h4>
+                    <p className="text-sm text-slate-500 max-w-[240px] mx-auto leading-relaxed font-medium">
+                      {isRTL 
+                        ? 'انقر على أي بوث متاح في المخطط التفاعلي لعرض تفاصيله وبدء عملية الحجز الفوري.' 
+                        : 'Click on any available booth in the interactive map to view details and start booking.'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <AnimatePresence mode="popLayout">
+                      {selectedBooths.map((booth, idx) => {
+                        const typeStr = (booth?.boothType || '').toLowerCase()
+                        const isVIP = typeStr === 'vip' || typeStr.includes('vip') || (booth?.label?.startsWith('VIP') || false)
+                        const isSP = typeStr === 'sponsor' || typeStr === 'راعي' || typeStr.includes('sponsor') || (booth?.label?.startsWith('SP') || false)
+                        
+                        return (
+                          <motion.div 
+                            key={booth.id}
+                            initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="space-y-6"
+                          >
+                            <div className="flex items-center justify-between">
+                               <div className="flex flex-col">
+                                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{isRTL ? 'رقم البوث' : 'Booth Ref'}</span>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-3xl font-black text-slate-900 tracking-tighter">{booth.label}</span>
+                                     {isVIP && <span className="h-5 w-5 flex items-center justify-center text-lg">✨</span>}
+                                  </div>
+                               </div>
+                               <Badge className="bg-emerald-50 text-emerald-600 hover:bg-emerald-50 rounded-xl px-4 py-1.5 border-emerald-100/50 shadow-none font-black text-[10px] uppercase tracking-widest">
+                                 {isRTL ? 'متاح الآن' : 'Available'}
+                               </Badge>
+                            </div>
 
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-3 mt-6">
-                       <div className="bg-gray-50/80 rounded-2xl p-4 flex flex-col items-center justify-center border border-gray-100/50 transition-colors hover:bg-gray-100/80">
-                         <span className="text-xs text-gray-400 mb-1">{isRTL ? 'الفئة' : 'Category'}</span>
-                         <span className="text-sm font-bold text-gray-800">{catLabel}</span>
+                            <div className="grid grid-cols-2 gap-4">
+                               <div className="bg-slate-50 rounded-2xl p-4 transition-colors hover:bg-slate-100/80">
+                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">{isRTL ? 'المساحة' : 'Total Area'}</span>
+                                 <div className="flex items-baseline gap-1">
+                                    <span className="text-xl font-black text-slate-900">{booth.area}</span>
+                                    <span className="text-[10px] font-bold text-slate-500">{t('boothMap.sqm') || 'm²'}</span>
+                                 </div>
+                               </div>
+                               <div className="bg-slate-50 rounded-2xl p-4 transition-colors hover:bg-slate-100/80">
+                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">{isRTL ? 'الفئة' : 'Category'}</span>
+                                 <span className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                                   {isVIP ? 'VIP' : (isSP ? (isRTL ? 'راعي' : 'Sponsor') : (isRTL ? 'عادي' : 'Standard'))}
+                                 </span>
+                               </div>
+                            </div>
+                          </motion.div>
+                        )
+                      })}
+                    </AnimatePresence>
+
+                    <div className="pt-6 border-t border-slate-50">
+                       <div className="flex items-center justify-between mb-6">
+                         <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">{isRTL ? 'إجمالي التكلفة' : 'Estimated Cost'}</span>
+                         <div className="flex items-baseline gap-2">
+                           <span className="text-3xl font-black text-slate-900 tracking-tighter">
+                             {PRICE_PER_SQM ? totalPrice.toLocaleString() : '---'}
+                           </span>
+                           <span className="text-sm font-bold text-slate-500">{isRTL ? 'ريال' : 'SAR'}</span>
+                         </div>
                        </div>
-                       <div className="bg-gray-50/80 rounded-2xl p-4 flex flex-col items-center justify-center border border-gray-100/50 transition-colors hover:bg-gray-100/80">
-                         <span className="text-xs text-gray-400 mb-1">{isRTL ? 'المساحة' : 'Area'}</span>
-                         <span className="text-sm font-bold text-gray-800" dir="ltr">{booth.area} {t('boothMap.sqm') || 'm²'}</span>
-                       </div>
-                       <div className="bg-gray-50/80 rounded-2xl p-4 flex flex-col items-center justify-center border border-gray-100/50 col-span-2 transition-colors hover:bg-gray-100/80">
-                         <span className="text-xs text-gray-400 mb-1">{isRTL ? 'السعر' : 'Price'}</span>
-                         <span className="text-base font-bold text-gray-800" dir="ltr">{isRTL ? 'SAR' : ''} {PRICE_PER_SQM ? (booth.area * PRICE_PER_SQM).toLocaleString() : '---'} {!isRTL ? 'SAR' : ''}</span>
-                       </div>
+                       
+                       <Button
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-200 rounded-2xl h-16 text-lg font-black transition-all active:scale-95 group/btn"
+                        disabled={selectedBooths.length === 0}
+                        onClick={onBookNow}
+                      >
+                        <div className="flex items-center gap-3">
+                          <ShoppingCart className="h-5 w-5 transition-transform group-hover/btn:-rotate-12" />
+                          {isRTL ? 'تأكيد وحجز الآن' : 'Confirm & Book Now'}
+                        </div>
+                      </Button>
+                      <p className="text-center text-[10px] text-slate-400 mt-4 font-bold uppercase tracking-widest">
+                         {isRTL ? 'سيتم حجز الموقع مؤقتاً لمدة 10 دقائق' : 'Spots are held for 10 minutes only'}
+                      </p>
                     </div>
                   </div>
-                )
-              })}
-
-              <Button
-                className="w-full bg-[#059669] hover:bg-[#047857] text-white shadow-[0_8px_20px_rgba(5,150,105,0.25)] rounded-[16px] h-14 text-[15px] font-bold transition-transform active:scale-95 mt-4"
-                disabled={selectedBooths.length === 0}
-                onClick={onBookNow}
-              >
-                <div className="flex items-center gap-2">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                  {isRTL ? 'احجز الآن (قفل مؤقت 10 دقائق)' : 'Book Now (10 Min Lock)'}
-                </div>
-              </Button>
-            </div>
-          )}
-
-          {/* Legend section */}
-          <div className="mt-8 pt-6 border-t border-gray-100">
-             <h4 className="text-xs text-gray-400 font-medium mb-4 text-end w-full pr-2">{isRTL ? 'دليل الألوان' : 'Color Legend'}</h4>
-             <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-xs text-gray-600 font-medium px-2">
-               {/* VIP */}
-               <div className="flex items-center justify-end gap-3">
-                 <span>VIP</span>
-                 <div className="flex items-center justify-center w-7 h-7 rounded-md bg-gradient-to-br from-[#FFD700] to-[#D4AF37] text-white shadow-sm">
-                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z"/></svg>
-                 </div>
-               </div>
-               {/* Standard */}
-               <div className="flex items-center justify-end gap-3">
-                 <span>{isRTL ? 'عادي' : 'Standard'}</span>
-                 <div className="flex items-center justify-center w-7 h-7 rounded-md bg-gradient-to-br from-[#10B981] to-[#047857] text-white shadow-sm">
-                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/></svg>
-                 </div>
-               </div>
-               {/* SP */}
-               <div className="flex items-center justify-end gap-3">
-                 <span>{isRTL ? 'راعي' : 'Sponsor'}</span>
-                 <div className="flex items-center justify-center w-7 h-7 rounded-md bg-gradient-to-br from-[#E2E8F0] to-[#94A3B8] text-gray-700 shadow-sm">
-                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                 </div>
-               </div>
-               {/* Reserved */}
-               <div className="flex items-center justify-end gap-3">
-                 <span>{isRTL ? 'محجوز مؤقتاً' : 'Reserved'}</span>
-                 <div className="flex items-center justify-center w-7 h-7 rounded-md bg-gradient-to-br from-[#E5E7EB] to-[#9CA3AF] text-gray-500 shadow-sm opacity-80">
-                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                 </div>
-               </div>
+                )}
              </div>
+          </div>
+
+          {/* New Modern Legend */}
+          <div className="rounded-[2.5rem] bg-slate-900 p-8 shadow-2xl relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-[40px]" />
+             <div className="relative z-10 flex flex-col gap-6">
+                <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+                   <Settings2 className="h-4 w-4 text-blue-400" />
+                   <h4 className="text-white font-black text-xs uppercase tracking-[0.2em]">{isRTL ? 'دليل الألوان الشامل' : 'Color Spectrum Guide'}</h4>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                   <LegendItem color="bg-gradient-to-br from-emerald-400 to-emerald-600" label={isRTL ? 'متاح ريادي' : 'Available'} isRTL={isRTL} />
+                   <LegendItem color="bg-gradient-to-br from-amber-300 to-orange-500" label="VIP Package" isRTL={isRTL} />
+                   <LegendItem color="bg-gradient-to-br from-slate-200 to-slate-400" label={isRTL ? 'مخصص للرعاة' : 'Sponsors'} isRTL={isRTL} />
+                   <LegendItem color="bg-gradient-to-br from-slate-700 to-slate-800 opacity-50" label={isRTL ? 'محجوز رسمياً' : 'Reserved'} isRTL={isRTL} />
+                </div>
+             </div>
+          </div>
           </div>
         </div>
       </div>
-    </div>
     </ErrorBoundary>
+  )
+}
+
+function LegendItem({ color, label, isRTL }: { color: string, label: string, isRTL: boolean }) {
+  return (
+    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+       <div className={`h-4 w-4 rounded-md ${color} ring-2 ring-white/10`} />
+       <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{label}</span>
+    </div>
   )
 }
