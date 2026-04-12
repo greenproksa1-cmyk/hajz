@@ -43,6 +43,8 @@ interface FloorPlan {
   name: string
   description?: string
   booths: BoothShape[]
+  width: number
+  height: number
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -142,14 +144,14 @@ export default function FloorPlanManager() {
     }
   }
 
-  const handleEditorSave = async (booths: BoothShape[], name: string): Promise<boolean> => {
+  const handleEditorSave = async (booths: BoothShape[], name: string, width: number, height: number): Promise<boolean> => {
     try {
       if (editingPlan) {
         // Editing: update name, delete old booths, create new booths
         const patchRes = await fetch(`/api/floor-plans/${editingPlan.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name }),
+          body: JSON.stringify({ name, width, height }),
         })
         const patchData = await patchRes.json()
         if (!patchData.success) {
@@ -196,6 +198,8 @@ export default function FloorPlanManager() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name,
+            width,
+            height,
             booths: booths.map((b) => ({
               label: b.label,
               area: b.area,
@@ -466,24 +470,30 @@ export default function FloorPlanManager() {
 
       {/* Editor - Full Screen Overlay */}
       {editorOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-gray-50">
-          {/* Editor Header Bar */}
-          <div className="flex h-12 shrink-0 items-center gap-3 border-b bg-gray-900 px-4 shadow-sm">
-            <Map className="h-5 w-5 text-blue-600" />
-            <h2 className="text-sm font-semibold text-white">
-              {editingPlan
-                ? isRTL
-                  ? `تعديل: ${editingPlan.name}`
-                  : `Edit: ${editingPlan.name}`
-                : t('admin.plans.createPlan')}
-            </h2>
+        <div className="fixed inset-0 z-50 flex flex-col bg-slate-950 animate-in fade-in duration-300">
+          {/* Editor Header Bar - Premium Dark Mode */}
+          <div className="flex h-14 shrink-0 items-center gap-4 bg-slate-900 border-b border-white/5 px-6 shadow-2xl relative z-30">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 shadow-lg shadow-blue-500/20">
+               <Map className="h-4 w-4 text-white" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{isRTL ? 'وضع التحرير' : 'Studio Mode'}</span>
+              <h2 className="text-sm font-bold text-white leading-tight">
+                {editingPlan
+                  ? isRTL
+                    ? `تعديل: ${editingPlan.name}`
+                    : `Edit: ${editingPlan.name}`
+                  : t('admin.plans.createPlan')}
+              </h2>
+            </div>
             <Button
               variant="ghost"
-              size="icon"
-              className="ms-auto h-8 w-8 text-gray-400 hover:bg-white/10 hover:text-white"
+              size="sm"
+              className="ms-auto h-9 gap-2 text-slate-400 hover:bg-white/5 hover:text-white rounded-xl px-4 transition-all"
               onClick={() => setEditorOpen(false)}
             >
-              <XCircle className="h-5 w-5" />
+              <XCircle className="h-4 w-4" />
+              <span className="text-xs font-bold uppercase tracking-wider">{t('common.close')}</span>
             </Button>
           </div>
           {/* Editor Content - fills remaining space */}
@@ -493,6 +503,8 @@ export default function FloorPlanManager() {
                 planId={editingPlan?.id}
                 planName={editingPlan?.name}
                 initialBooths={editingPlan?.booths || []}
+                initialWidth={editingPlan?.width}
+                initialHeight={editingPlan?.height}
                 onSave={handleEditorSave}
                 onCancel={() => setEditorOpen(false)}
               />
@@ -524,6 +536,8 @@ export default function FloorPlanManager() {
                 <FloorPlanEditor
                   initialBooths={previewPlan.booths || []}
                   planName={previewPlan.name}
+                  initialWidth={previewPlan.width}
+                  initialHeight={previewPlan.height}
                 />
               </div>
             </div>

@@ -102,9 +102,17 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
       <AnimatePresence>
         {isSelected && (
           <motion.rect
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ 
+              opacity: [0.4, 0.8, 0.4],
+              scale: [0.98, 1.02, 0.98],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            exit={{ opacity: 0, scale: 0.95 }}
             x={booth.x - 6}
             y={booth.y - 6}
             width={booth.width + 12}
@@ -113,10 +121,12 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
             ry={18}
             fill="none"
             stroke="#3b82f6"
-            strokeWidth={3}
-            strokeDasharray="4 2"
+            strokeWidth={2}
             filter="url(#neon-glow)"
-            className="animate-[spin_20s_linear_infinite]"
+            style={{ 
+              transformOrigin: 'center',
+              transformBox: 'fill-box'
+            }}
           />
         )}
       </AnimatePresence>
