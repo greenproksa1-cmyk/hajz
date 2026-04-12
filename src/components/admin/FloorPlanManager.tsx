@@ -472,13 +472,13 @@ export default function FloorPlanManager() {
       {editorOpen && (
         <div className="fixed inset-0 z-50 flex flex-col bg-slate-950 animate-in fade-in duration-300">
           {/* Editor Header Bar - Premium Dark Mode */}
-          <div className="flex h-14 shrink-0 items-center gap-4 bg-slate-900 border-b border-white/5 px-6 shadow-2xl relative z-30">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 shadow-lg shadow-blue-500/20">
+          <div className="flex h-14 shrink-0 items-center gap-3 bg-slate-900 border-b border-white/5 px-4 sm:px-6 shadow-2xl relative z-30">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 shadow-lg shadow-blue-500/20 shrink-0">
                <Map className="h-4 w-4 text-white" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{isRTL ? 'وضع التحرير' : 'Studio Mode'}</span>
-              <h2 className="text-sm font-bold text-white leading-tight">
+            <div className="flex flex-col min-w-0">
+              <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest">{isRTL ? 'وضع التحرير' : 'Studio'}</span>
+              <h2 className="text-xs sm:text-sm font-bold text-white leading-tight truncate">
                 {editingPlan
                   ? isRTL
                     ? `تعديل: ${editingPlan.name}`
@@ -489,11 +489,11 @@ export default function FloorPlanManager() {
             <Button
               variant="ghost"
               size="sm"
-              className="ms-auto h-9 gap-2 text-slate-400 hover:bg-white/5 hover:text-white rounded-xl px-4 transition-all"
+              className="ms-auto h-9 gap-2 text-slate-400 hover:bg-white/5 hover:text-white rounded-xl px-2 sm:px-4 transition-all"
               onClick={() => setEditorOpen(false)}
             >
               <XCircle className="h-4 w-4" />
-              <span className="text-xs font-bold uppercase tracking-wider">{t('common.close')}</span>
+              <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">{t('common.close')}</span>
             </Button>
           </div>
           {/* Editor Content - fills remaining space */}
@@ -515,7 +515,7 @@ export default function FloorPlanManager() {
 
       {/* Preview Dialog */}
       <Dialog open={!!previewPlan} onOpenChange={() => setPreviewPlan(null)}>
-        <DialogContent className="flex h-[90vh] max-w-none w-[96vw] flex-col gap-0 p-0 sm:!max-w-none">
+        <DialogContent className="flex h-[100dvh] max-w-none w-full flex-col gap-0 p-0 sm:h-[90vh] sm:w-[96vw] sm:!max-w-none border-none sm:border">
           <DialogHeader>
             <DialogTitle>{previewPlan?.name}</DialogTitle>
           </DialogHeader>

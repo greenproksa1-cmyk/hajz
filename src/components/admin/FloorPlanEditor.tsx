@@ -662,25 +662,25 @@ export default function FloorPlanEditor({
       {/* Canvas Area */}
       <div className="flex min-w-0 min-h-0 flex-1 flex-col">
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-3 border-b bg-white px-6 py-3 shadow-sm relative z-20">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-nowrap items-center gap-3 border-b bg-white px-4 py-3 shadow-sm relative z-20 overflow-x-auto scrollbar-hide shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-200">
               <Map className="h-5 w-5 text-white" />
             </div>
-            <div className="relative">
+            <div className="relative shrink-0">
               <Input
                 value={planName}
                 onChange={(e) => setPlanName(e.target.value)}
                 placeholder={isRTL ? 'اسم المخطط' : 'Plan Name'}
-                className="h-10 w-64 border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all rounded-xl font-bold"
+                className="h-10 w-40 sm:w-64 border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all rounded-xl font-bold text-xs sm:text-sm"
                 dir={isRTL ? 'rtl' : 'ltr'}
               />
             </div>
           </div>
 
-          <div className="h-8 w-px bg-slate-200 mx-2 hidden sm:block" />
+          <div className="h-8 w-px bg-slate-200 mx-1 shrink-0" />
 
-          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl shrink-0">
             <Button
               variant={mode === 'select' ? 'default' : 'ghost'}
               size="sm"
@@ -703,40 +703,32 @@ export default function FloorPlanEditor({
 
           <div className="h-8 w-px bg-slate-200 mx-2 hidden lg:block" />
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 shrink-0">
             <div className="flex items-center bg-slate-100 rounded-xl p-0.5">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-lg hover:bg-white hover:shadow-sm transition-all"
+                className="h-8 w-8 rounded-lg hover:bg-white hover:shadow-sm"
                 onClick={() => setZoom((z) => Math.min(z + 0.1, 2))}
               >
                 <ZoomIn className="h-4 w-4 text-slate-600" />
               </Button>
-              <div className="px-2 min-w-[50px] text-center">
-                <span className="text-[10px] font-black text-slate-500 tabular-nums">{Math.round(zoom * 100)}%</span>
+              <div className="px-1.5 min-w-[40px] text-center">
+                <span className="text-[9px] font-black text-slate-500 tabular-nums">{Math.round(zoom * 100)}%</span>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-lg hover:bg-white hover:shadow-sm transition-all"
+                className="h-8 w-8 rounded-lg hover:bg-white hover:shadow-sm"
                 onClick={() => setZoom((z) => Math.max(z - 0.1, 0.3))}
               >
                 <ZoomOut className="h-4 w-4 text-slate-600" />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg hover:bg-white hover:shadow-sm transition-all"
-                onClick={() => setZoom(1)}
-              >
-                <RotateCcw className="h-4 w-4 text-slate-600" />
-              </Button>
             </div>
           </div>
 
-          <div className="ms-auto flex items-center gap-3">
-            <div className="flex items-center gap-2 mr-2">
+          <div className="ms-auto flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 mr-1">
               <Button
                 variant="outline"
                 size="sm"
@@ -810,7 +802,7 @@ export default function FloorPlanEditor({
       </div>
 
       {/* Properties Panel */}
-      <div className="w-full shrink-0 border-s bg-slate-50/50 p-6 lg:w-[320px] lg:border-t-0 overflow-y-auto max-h-screen">
+      <div className="w-full shrink-0 border-s bg-slate-50/50 p-4 sm:p-6 lg:w-[320px] lg:border-t-0 overflow-y-auto lg:max-h-screen">
         <div className="flex items-center gap-2 mb-6">
           <div className="h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
           <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">
@@ -982,15 +974,15 @@ export default function FloorPlanEditor({
                    <span className="text-[10px] font-bold text-slate-400">{t('common.sar')}</span>
                 </div>
 
-                <div className="mt-6 flex gap-4 border-t border-white/10 pt-4">
+                <div className="mt-4 flex gap-4 border-t border-white/10 pt-4">
                    <div>
-                      <p className="text-[9px] font-bold text-slate-500 uppercase">{isRTL ? 'الأجنحة' : 'Booths'}</p>
-                      <p className="text-sm font-black">{booths.length}</p>
+                      <p className="text-[8px] font-bold text-slate-500 uppercase">{isRTL ? 'الأجنحة' : 'Booths'}</p>
+                      <p className="text-xs font-black">{booths.length}</p>
                    </div>
-                   <div className="w-px h-8 bg-white/10" />
+                   <div className="w-px h-6 bg-white/10" />
                    <div>
-                      <p className="text-[9px] font-bold text-slate-500 uppercase">{isRTL ? 'المساحة' : 'Total Area'}</p>
-                      <p className="text-sm font-black">{booths.reduce((s, b) => s + b.area, 0).toFixed(1)} <span className="text-[9px]">m²</span></p>
+                      <p className="text-[8px] font-bold text-slate-500 uppercase">{isRTL ? 'المساحة' : 'Area'}</p>
+                      <p className="text-xs font-black">{booths.reduce((s, b) => s + b.area, 0).toFixed(1)} <span className="text-[8px]">m²</span></p>
                    </div>
                 </div>
              </div>
