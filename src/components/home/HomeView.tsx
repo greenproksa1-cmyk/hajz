@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Gem,
+  Globe,
 } from "lucide-react";
 
 interface HomeViewProps {
@@ -26,40 +27,60 @@ export default function HomeView({ onNavigate, isRTL = true }: HomeViewProps) {
           <div className="absolute inset-0 h-full w-full bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:40px_40px]"></div>
         </div>
         
-        {/* Glow effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
+        {/* Glow effects - More dynamic for mobile */}
+        <div className="absolute top-0 left-0 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-blue-600/20 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-[200px] h-[200px] sm:w-[400px] sm:h-[400px] bg-indigo-600/10 rounded-full blur-[60px] sm:blur-[100px] pointer-events-none translate-x-1/4 translate-y-1/4" />
 
         <div className="relative container max-w-7xl mx-auto pt-24 pb-16 px-6">
-          <div className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-20 ${isRTL ? 'flex-row' : 'flex-row-reverse'}`} dir={isRTL ? "rtl" : "ltr"}>
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20" dir={isRTL ? "rtl" : "ltr"}>
             
             {/* Text Side */}
-            <div className={`flex-1 text-center ${isRTL ? 'lg:text-right' : 'lg:text-left'}`}>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 mb-8">
+            <div className={`flex-1 text-center ${isRTL ? 'lg:text-right' : 'lg:text-left'} z-20`}>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 backdrop-blur-md border border-blue-500/20 mb-8"
+              >
                 <Calendar className="w-4 h-4 text-blue-400" />
-                <span className="text-sm text-blue-100 font-medium">
-                  {isRTL ? '15 - 18 مارس 2026 | الرياض، المملكة العربية السعودية' : '15 - 18 March 2026 | Riyadh, Saudi Arabia'}
+                <span className="text-xs sm:text-sm text-blue-100 font-bold uppercase tracking-wider">
+                  {isRTL ? '15 - 18 مارس 2026 | الرياض' : '15 - 18 March 2026 | Riyadh'}
                 </span>
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+              </motion.div>
+ 
+               <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-4xl sm:text-5xl lg:text-7xl font-black text-white mb-6 leading-[1.1] tracking-tight"
+              >
                 {isRTL ? (
-                  <>معرض مقاولين<br /><span className="text-blue-600">الرياض 2026</span></>
+                  <>معرض مقاولي<br /><span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">الرياض 2026</span></>
                 ) : (
-                  <>Riyadh Contractors<br /><span className="text-blue-600">Exhibition 2026</span></>
+                  <>Riyadh Construction<br /><span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Exhibition 2026</span></>
                 )}
-              </h1>
-
-              <p className="text-lg lg:text-xl text-blue-100/80 mb-10 max-w-2xl leading-relaxed">
+              </motion.h1>
+ 
+               <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-base sm:text-lg lg:text-xl text-blue-100/70 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed"
+              >
                 {isRTL 
-                  ? 'المنصة الرائدة لقطاع البناء والتشييد في المملكة العربية السعودية. احجز جناحك الآن وانضم إلى أكثر من 500 عارض.'
-                  : 'The leading platform for the construction and building sector in Saudi Arabia. Book your booth now and join over 500 exhibitors.'}
-              </p>
-
-              <div className={`flex flex-col sm:flex-row items-center justify-center ${isRTL ? 'lg:justify-start' : 'lg:justify-start'} gap-4`}>
+                  ? 'المنصة الرائدة لقطاع البناء والتشييد في المملكة. احجز جناحك الآن وانضم إلى رواد الصناعة.'
+                  : 'The leading platform for the construction sector in the Kingdom. Book your booth now and join industry leaders.'}
+              </motion.p>
+ 
+               <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className={`flex flex-col sm:flex-row items-center justify-center ${isRTL ? 'lg:justify-start' : 'lg:justify-start'} gap-4`}
+              >
                 <Button
                   onClick={() => onNavigate("map")}
                   size="lg"
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-blue-950 font-bold rounded-xl px-8 py-6 text-lg hover:scale-105 transition-transform"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl px-10 py-7 text-lg shadow-xl shadow-blue-600/20 active:scale-95 transition-all"
                 >
                   <MapPin className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                   {isRTL ? 'احجز بوثك الآن' : 'Book Booth Now'}
@@ -67,48 +88,57 @@ export default function HomeView({ onNavigate, isRTL = true }: HomeViewProps) {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto bg-transparent border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl px-8 py-6 text-lg"
+                  className="w-full sm:w-auto bg-white/5 backdrop-blur-md border-white/20 text-white hover:bg-white/10 rounded-2xl px-10 py-7 text-lg active:scale-95 transition-all"
                 >
                   {isRTL ? 'تعرف على المزيد' : 'Learn More'}
                   <ArrowLeft className={`w-5 h-5 ${isRTL ? 'mr-2' : 'ml-2'} ${isRTL ? '' : 'rotate-180'}`} />
                 </Button>
-              </div>
-
-              {/* Simple Stats */}
-              <div className={`grid grid-cols-2 sm:flex gap-6 sm:gap-8 mt-12 sm:mt-16 pt-8 sm:pt-10 border-t border-white/10 justify-center ${isRTL ? 'lg:justify-start' : 'lg:justify-start'}`}>
-                <StatItem value="500+" label={isRTL ? "عارض" : "Exhibitors"} />
-                <StatItem value="40+" label={isRTL ? "دولة" : "Countries"} />
-                <StatItem value="50K+" label={isRTL ? "زائر" : "Visitors"} />
-              </div>
+              </motion.div>
+ 
+               {/* Simple Stats - Perfectly arranged 3 columns */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className={`grid grid-cols-3 gap-4 sm:gap-8 mt-16 pt-10 border-t border-white/10`}
+              >
+                <StatItem value="500+" label={isRTL ? "عارض" : "Exhibitors"} icon={<Building2 className="w-4 h-4 text-blue-400 mb-1" />} />
+                <StatItem value="40+" label={isRTL ? "دولة" : "Countries"} icon={<Globe className="w-4 h-4 text-blue-400 mb-1" />} />
+                <StatItem value="50K+" label={isRTL ? "زائر" : "Visitors"} icon={<Star className="w-4 h-4 text-blue-400 mb-1" />} />
+              </motion.div>
             </div>
-
-            {/* Image Side (Left in RTL) */}
-            <div className="flex-1 w-full relative">
-               <div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square rounded-3xl lg:rounded-[3rem] overflow-hidden border-4 sm:border-8 border-white bg-white shadow-xl group">
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent z-10 opacity-10" />
-                  {/* Generated Booth Image */}
+ 
+             {/* Image Side - Integrated Background Style */}
+            <div className="flex-1 w-full relative group">
+               <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 }}
+                className="relative w-full aspect-square sm:aspect-[4/3] lg:aspect-square rounded-[2rem] sm:rounded-[4rem] overflow-hidden border border-white/10 shadow-2xl"
+              >
                   <img 
                     src="/images/modern_booth.png" 
                     alt="معرض البوثات والمقاولين" 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
                   />
-                  <div className={`absolute bottom-4 left-4 right-4 sm:bottom-6 ${isRTL ? 'sm:left-6 sm:right-6 lg:left-auto' : 'sm:left-6 sm:right-6 lg:right-auto'} z-20 bg-white/90 backdrop-blur-md border border-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg`}>
-                     <div className="flex items-center gap-3 sm:gap-4">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                           <Star className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-                        </div>
-                        <div>
-                           <p className="text-slate-900 font-bold text-base sm:text-lg leading-tight">{isRTL ? 'أجنحة مخصصة للشركات' : 'Custom Corporate Booths'}</p>
-                           <p className="text-slate-600 text-[10px] sm:text-sm">{isRTL ? 'مساحات مصممة بأعلى معايير الجودة' : 'Designed with the highest quality standards'}</p>
-                        </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
+                  
+                  {/* Integrated Badge instead of overlay card */}
+                  <div className={`absolute bottom-8 ${isRTL ? 'right-8' : 'left-8'} flex items-center gap-3 bg-white/10 backdrop-blur-xl border border-white/20 p-4 rounded-2xl shadow-2xl`}>
+                     <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <Gem className="w-5 h-5 text-white" />
+                     </div>
+                     <div>
+                        <p className="text-white font-bold text-sm leading-none mb-1">{isRTL ? 'أجنحة النخبة' : 'Elite Booths'}</p>
+                        <p className="text-white/60 text-[10px] uppercase tracking-widest">{isRTL ? 'مساحات ملكية' : 'Royal Spaces'}</p>
                      </div>
                   </div>
-               </div>
+               </motion.div>
                
-               {/* Decorative dots behind the image */}
-               <div className="absolute -z-10 -bottom-8 -left-8 w-64 h-64 bg-blue-400/20 rounded-full blur-[80px]" />
+               {/* Decorative glow behind image */}
+               <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-600/20 rounded-full blur-[100px] opacity-50" />
             </div>
-
+ 
           </div>
         </div>
       </section>
@@ -181,11 +211,14 @@ export default function HomeView({ onNavigate, isRTL = true }: HomeViewProps) {
   );
 }
 
-function StatItem({ value, label }: { value: string; label: string }) {
+function StatItem({ value, label, icon }: { value: string; label: string; icon: React.ReactNode }) {
   return (
-    <div className="text-center text-white">
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="text-sm opacity-60 font-medium">{label}</div>
+    <div className="text-center group">
+       <div className="flex justify-center transition-transform group-hover:-translate-y-1">
+          {icon}
+       </div>
+      <div className="text-xl sm:text-2xl font-black text-white tracking-tight">{value}</div>
+      <div className="text-[10px] sm:text-xs text-blue-100/50 font-bold uppercase tracking-widest">{label}</div>
     </div>
   );
 }
@@ -210,7 +243,7 @@ function CategoryCard({ icon, title, price, color, features, onBook, isRTL, feat
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.15 }}
       whileHover={{ y: -10 }}
-      className={`relative group bg-white rounded-3xl lg:rounded-[2.5rem] p-6 lg:p-10 border-2 transition-all duration-500 shadow-2xl shadow-slate-200/50 ${featured ? 'border-cyan-500/20 md:scale-105 z-10' : 'border-transparent ' + borderGlow[color]}`}
+      className={`relative group bg-white rounded-3xl lg:rounded-[2.5rem] p-6 sm:p-8 lg:p-10 border-2 transition-all duration-500 shadow-xl shadow-slate-200/40 ${featured ? 'border-blue-500/20 md:scale-105 z-10 ring-4 ring-blue-50/50' : 'border-slate-100 hover:border-blue-200'}`}
     >
       {featured && (
         <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-xs font-black px-6 py-2 rounded-full uppercase tracking-widest shadow-lg">

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useTranslation } from '@/i18n'
 import { Button } from '@/components/ui/button'
-import { Globe, Shield, UserCircle, LogIn, LayoutDashboard, ListOrdered, MapPin, Menu, X } from 'lucide-react'
+import { Globe, Shield, UserCircle, LogIn, LayoutDashboard, ListOrdered, MapPin, Menu, X, CheckCircle2, Gem } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -31,9 +31,9 @@ export default function Header({ currentView, onNavigate }: HeaderProps) {
   ]
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-l from-blue-700 to-blue-600 shadow-lg">
+    <header className="sticky top-0 z-50 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-20 items-center justify-between">
           <button
             onClick={() => onNavigate('home')}
             className="flex items-center gap-4 transition-opacity hover:opacity-90 py-1"
@@ -129,56 +129,56 @@ export default function Header({ currentView, onNavigate }: HeaderProps) {
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="xl:hidden border-t border-white/10 bg-blue-700 p-4 space-y-2 animate-in slide-in-from-top duration-300">
+        <div className="xl:hidden border-t border-white/10 bg-blue-700/95 backdrop-blur-2xl p-6 space-y-3 animate-in slide-in-from-top duration-300">
            {navItems.map((item) => (
              <Button
                 key={item.id}
                 variant="ghost"
-                className="w-full justify-start text-white hover:bg-white/10 text-lg py-6"
+                className="w-full justify-start text-white hover:bg-white/10 text-xl font-bold py-8 rounded-2xl"
                 onClick={() => {
                   onNavigate(item.id)
                   setIsMenuOpen(false)
                 }}
              >
-                {item.icon && <item.icon className="ms-3 h-5 w-5" />}
+                {item.icon && <item.icon className="ms-4 h-6 w-6" />}
                 {item.label}
              </Button>
            ))}
-           <div className="h-px bg-white/10 my-4" />
+           <div className="h-px bg-white/10 my-6" />
            {session ? (
               <Button
                 variant="ghost"
-                className="w-full justify-start text-white hover:bg-white/10 text-lg py-6"
+                className="w-full justify-start text-white hover:bg-white/10 text-xl font-bold py-8 rounded-2xl"
                 onClick={() => {
                   router.push('/dashboard')
                   setIsMenuOpen(false)
                 }}
               >
-                <LayoutDashboard className="ms-3 h-5 w-5" />
+                <LayoutDashboard className="ms-4 h-6 w-6" />
                 {t('admin.user.myBookings') || (lang === 'ar' ? 'حجوزاتي' : 'My Bookings')}
               </Button>
            ) : (
               <Button
                 variant="ghost"
-                className="w-full justify-start text-white hover:bg-white/10 text-lg py-6"
+                className="w-full justify-start text-white hover:bg-white/10 text-xl font-bold py-8 rounded-2xl"
                 onClick={() => {
                   router.push('/login')
                   setIsMenuOpen(false)
                 }}
               >
-                <LogIn className="ms-3 h-5 w-5" />
+                <LogIn className="ms-4 h-6 w-6" />
                 {lang === 'ar' ? 'تسجيل الدخول' : 'Login'}
               </Button>
            )}
            <Button
               variant="ghost"
-              className="w-full justify-start text-white hover:bg-white/10 text-lg py-6"
+              className="w-full justify-start text-white hover:bg-white/10 text-xl font-bold py-8 rounded-2xl"
               onClick={() => {
                 onNavigate(currentView === 'admin-dashboard' ? 'admin-dashboard' : 'admin')
                 setIsMenuOpen(false)
               }}
             >
-              <Shield className="ms-3 h-5 w-5" />
+              <Shield className="ms-4 h-6 w-6" />
               {t('nav.admin')}
             </Button>
         </div>
