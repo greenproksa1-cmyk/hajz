@@ -802,7 +802,7 @@ export default function FloorPlanEditor({
       </div>
 
       {/* Properties Panel */}
-      <div className="w-full shrink-0 border-s bg-slate-50/50 p-4 sm:p-6 lg:w-[320px] lg:border-t-0 overflow-y-auto lg:max-h-screen">
+      <div className="w-full shrink-0 border-t lg:border-t-0 lg:border-s bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md p-4 sm:p-6 lg:w-[320px] overflow-y-auto h-[45vh] lg:h-auto lg:max-h-screen">
         <div className="flex items-center gap-2 mb-6">
           <div className="h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
           <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">

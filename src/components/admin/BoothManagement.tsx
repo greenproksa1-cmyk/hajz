@@ -315,9 +315,10 @@ export default function BoothManagement() {
               <p className="font-medium">{t('common.noData')}</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-muted/50">
+            <>
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-muted/50">
                   <TableRow className="hover:bg-transparent border-border">
                     <TableHead className="font-bold py-4">{t('admin.editor.label')}</TableHead>
                     <TableHead className="font-bold">{isRTL ? 'النوع' : 'Type'}</TableHead>
@@ -417,10 +418,116 @@ export default function BoothManagement() {
                         </TableCell>
                       </TableRow>
                     )
-                  })}
+                  ))}
                 </TableBody>
               </Table>
             </div>
+
+            {/* Mobile Cards */}
+            <div className="grid gap-4 md:hidden p-4">
+              {filteredBooths.map((booth) => {
+                const statusCfg = STATUS_CONFIG[booth.status] || STATUS_CONFIG.available
+                const StatusIcon = statusCfg.icon
+                return (
+                  <Card key={booth.id} className="border-border shadow-sm overflow-hidden">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground block mb-1">
+                            {isRTL ? 'رقم مسلصل:' : 'ID:'} {booth.id.substring(0, 8)}
+                          </span>
+                          <h3 className="font-bold text-foreground text-lg">{booth.label}</h3>
+                        </div>
+                        <Badge variant="outline" className={cn("px-2.5 py-1 flex items-center gap-1.5", statusCfg.color)}>
+                          <StatusIcon className="h-3 w-3" />
+                          <span className="text-[10px] font-bold">{t(statusCfg.label)}</span>
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-muted/30 rounded-xl">
+                        <div>
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold mb-0.5">{isRTL ? 'المساحة' : 'Area'}</p>
+                          <p className="text-sm font-black text-foreground">{booth.area} m²</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold mb-0.5">{isRTL ? 'السعر' : 'Price'}</p>
+                          <p className="text-sm font-black text-foreground">{Math.round(booth.area * 1700).toLocaleString()} <span className="text-[10px] font-normal">{t('common.sar')}</span></p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 border-t border-border pt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors gap-2"
+                          onClick={() => handleEdit(booth)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                          <span className="text-xs font-bold">{isRTL ? 'تعديل' : 'Edit'}</span>
+                        </Button>
+
+                        {booth.status === 'available' ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 rounded-xl text-yellow-600 hover:bg-yellow-500/10 transition-colors gap-2"
+                            onClick={() => handleStatusChange(booth.id, 'booked')}
+                          >
+                            <Clock className="h-4 w-4" />
+                            <span className="text-xs font-bold">{isRTL ? 'حجز' : 'Book'}</span>
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 rounded-xl text-green-600 hover:bg-green-500/10 transition-colors gap-2"
+                            onClick={() => handleStatusChange(booth.id, 'available')}
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                            <span className="text-xs font-bold">{isRTL ? 'إتاحة' : 'Available'}</span>
+                          </Button>
+                        )}
+
+                        <AlertDialog open={deleteId === booth.id} onOpenChange={(o) => !o && setDeleteId(null)}>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-10 px-0 rounded-xl border-red-200 text-red-500 hover:bg-red-500/10 transition-colors"
+                              onClick={() => setDeleteId(booth.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="rounded-2xl border-border bg-background shadow-2xl">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-xl font-bold">
+                                {isRTL ? 'حذف الجناح' : 'Delete Booth'}
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className="text-base">
+                                {isRTL
+                                  ? `هل أنت متأكد من حذف الجناح "${booth.label}"؟ لا يمكن التراجع عن هذا الإجراء.`
+                                  : `Are you sure you want to delete booth "${booth.label}"? This action cannot be undone.`}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="mt-4 gap-2">
+                              <AlertDialogCancel className="rounded-xl border-border">{t('common.cancel')}</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(booth.id)}
+                                className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
+                              >
+                                {t('admin.booths.delete')}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+            </>
           )}
         </CardContent>
       </Card>
