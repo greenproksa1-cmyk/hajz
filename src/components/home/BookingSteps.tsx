@@ -132,7 +132,7 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
           </div>
 
           <h1
-            className="text-5xl lg:text-7xl font-black text-slate-900 mb-6 leading-tight"
+            className="text-4xl lg:text-7xl font-black text-slate-900 mb-6 leading-tight"
           >
             {isRTL ? (
               <>
@@ -183,11 +183,11 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
                 key={step.number}
                 variants={cardVariants}
                 whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
-                className={`relative flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-8 lg:gap-16 p-8 rounded-3xl border border-slate-200 bg-white shadow-sm hover:border-blue-200 hover:shadow-xl transition-all duration-500`}
+                className={`relative flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-8 lg:gap-16 p-6 sm:p-8 rounded-3xl border border-slate-200 bg-white shadow-sm hover:border-blue-200 hover:shadow-xl transition-all duration-500`}
               >
                 {/* Step Number - Background */}
                 <div
-                  className="absolute top-4 opacity-[0.03] text-slate-900 font-black text-[120px] leading-none pointer-events-none select-none"
+                  className="absolute top-4 opacity-[0.03] text-slate-900 font-black text-[80px] sm:text-[120px] leading-none pointer-events-none select-none hidden sm:block"
                   style={{ [isRTL ? 'right' : 'left']: isEven ? '1rem' : undefined, [isRTL ? 'left' : 'right']: !isEven ? '1rem' : undefined }}
                 >
                   {step.number}
@@ -203,7 +203,7 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
                   <motion.div
                     animate={{ y: [0, -12, 0] }}
                     transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: index * 0.5 }}
-                    className="relative w-full h-full"
+                    className="relative w-full h-full p-4 lg:p-0"
                   >
                     <img
                       src={step.icon}
@@ -300,7 +300,7 @@ export default function BookingSteps({ onNavigate, isRTL = true }: BookingStepsP
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <Button
                 onClick={() => onNavigate('map')}
-                className="group relative bg-white text-blue-900 hover:bg-blue-50 font-black px-12 py-7 text-xl rounded-2xl shadow-2xl transition-all duration-300 overflow-hidden active:scale-95"
+                className="group relative w-full sm:w-auto bg-white text-blue-900 hover:bg-blue-50 font-black px-12 py-7 text-xl rounded-2xl shadow-2xl transition-all duration-300 overflow-hidden active:scale-95"
               >
                 <span className="relative z-10 flex items-center gap-3">
                   {isRTL ? 'ابدأ حجزك الآن' : 'Start Your Booking Now'}

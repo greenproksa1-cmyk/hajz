@@ -302,8 +302,8 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
       <div className="flex flex-col gap-6 lg:flex-row animate-in fade-in duration-1000">
         {/* Map Area - Dashboard Style */}
         <div className="flex-1 min-w-0">
-          <Card className="overflow-hidden border-slate-200 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] rounded-[2.5rem] border-0 outline-none ring-1 ring-slate-100">
-            <CardHeader className="border-b border-slate-50 bg-slate-50/50 px-8 py-6">
+          <Card className="overflow-hidden border-slate-200 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] rounded-[2rem] lg:rounded-[2.5rem] border-0 outline-none ring-1 ring-slate-100">
+            <CardHeader className="border-b border-slate-50 bg-slate-50/50 px-5 py-4 sm:px-8 sm:py-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200">
@@ -335,8 +335,7 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
             </CardHeader>
             <CardContent className="p-0">
               <div
-                className="relative overflow-hidden bg-[#f8fafc] group/map"
-                style={{ minHeight: 600 }}
+                className="relative overflow-hidden bg-[#f8fafc] group/map min-h-[400px] lg:min-h-[600px]"
                 ref={svgRef as React.RefObject<HTMLDivElement>}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -346,7 +345,6 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
                   viewBox={`0 0 ${effectiveDim.width} ${effectiveDim.height}`}
                   className={`w-full h-full transition-opacity duration-500 ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
                   onMouseDown={handleMouseDown}
-                  style={{ minWidth: 400 }}
                 >
                   <defs>
                     <filter id="booth-shadow" x="-30%" y="-30%" width="160%" height="160%">
@@ -440,7 +438,7 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
       {/* Dynamic UI Sidebar (Right Side) */}
       <div className="w-full lg:w-[380px] shrink-0">
         <div className="sticky top-24 space-y-6">
-          <div className="rounded-[2.5rem] bg-white border border-slate-100 p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] relative overflow-hidden">
+          <div className="rounded-[2rem] lg:rounded-[2.5rem] bg-white border border-slate-100 p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] relative overflow-hidden">
              {/* Background glow */}
              <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/5 rounded-full blur-[60px]" />
              
@@ -548,7 +546,7 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
           </div>
 
           {/* New Modern Legend */}
-          <div className="rounded-[2.5rem] bg-slate-900 p-8 shadow-2xl relative overflow-hidden">
+          <div className="rounded-[2rem] lg:rounded-[2.5rem] bg-slate-900 p-6 sm:p-8 shadow-2xl relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-[40px]" />
              <div className="relative z-10 flex flex-col gap-6">
                 <div className="flex items-center gap-3 pb-4 border-b border-white/5">
