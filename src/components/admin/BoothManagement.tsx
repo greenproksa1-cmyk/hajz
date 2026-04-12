@@ -418,7 +418,7 @@ export default function BoothManagement() {
                         </TableCell>
                       </TableRow>
                     )
-                  ))}
+                  })}
                 </TableBody>
               </Table>
             </div>
