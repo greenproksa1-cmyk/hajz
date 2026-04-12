@@ -41,7 +41,7 @@ export default function Header({ currentView, onNavigate }: HeaderProps) {
             <img 
               src="/images/logo.png" 
               alt={lang === 'ar' ? 'معرض مقاولي الرياض 2026' : 'Riyadh Contractors Exhibition 2026'} 
-              className="h-12 w-auto object-contain"
+              className="h-9 sm:h-12 w-auto object-contain"
             />
           </button>
 

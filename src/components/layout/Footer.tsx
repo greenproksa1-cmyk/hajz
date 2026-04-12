@@ -8,10 +8,10 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-gray-200 bg-gray-900 text-gray-300">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-3 text-center md:text-start">
           {/* Exhibition Info */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col items-center md:items-start gap-4">
             <img 
               src="/images/logo.png" 
               alt={lang === 'ar' ? 'معرض مقاولي الرياض 2026' : 'Riyadh Contractors Exhibition 2026'} 

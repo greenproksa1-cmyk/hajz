@@ -197,15 +197,15 @@ function AppContent() {
         {currentView === 'home' && (
           <>
             <HomeView onNavigate={handleNavigate} isRTL={isRTL} />
-            <div id="booth-map-section" className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
-              <div className="text-center mb-16">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold mb-4 uppercase tracking-widest">
+            <div id="booth-map-section" className="mx-auto max-w-7xl px-4 py-16 sm:py-24 sm:px-6 lg:px-8">
+              <div className="text-center mb-10 sm:mb-16">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-[10px] sm:text-xs font-bold mb-4 uppercase tracking-widest">
                    {isRTL ? 'الحجز المباشر' : 'Live Booking'}
                 </div>
-                <h2 className="text-4xl lg:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+                <h2 className="text-3xl lg:text-5xl font-black text-slate-900 mb-4 sm:mb-6 tracking-tight">
                   {isRTL ? 'المخطط التفاعلي للمعرض' : 'Interactive Exhibition Map'}
                 </h2>
-                <p className="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+                <p className="text-base sm:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
                   {isRTL 
                     ? 'محاكاة حقيقية لأرض المعرض تتيح لك اختيار وتأمين موقعك الاستراتيجي في ثوانٍ معدودة.' 
                     : 'A real-time simulation of the exhibition floor, allowing you to choose and secure your strategic spot in seconds.'}

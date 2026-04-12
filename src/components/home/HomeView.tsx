@@ -41,7 +41,7 @@ export default function HomeView({ onNavigate, isRTL = true }: HomeViewProps) {
                 </span>
               </div>
 
-              <h1 className="text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-7xl font-bold text-white mb-6 leading-tight">
                 {isRTL ? (
                   <>معرض مقاولين<br /><span className="text-blue-600">الرياض 2026</span></>
                 ) : (
@@ -59,7 +59,7 @@ export default function HomeView({ onNavigate, isRTL = true }: HomeViewProps) {
                 <Button
                   onClick={() => onNavigate("map")}
                   size="lg"
-                  className="bg-blue-600 hover:bg-blue-700 text-blue-950 font-bold rounded-xl px-8 py-6 text-lg hover:scale-105 transition-transform"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-blue-950 font-bold rounded-xl px-8 py-6 text-lg hover:scale-105 transition-transform"
                 >
                   <MapPin className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                   {isRTL ? 'احجز بوثك الآن' : 'Book Booth Now'}
@@ -67,7 +67,7 @@ export default function HomeView({ onNavigate, isRTL = true }: HomeViewProps) {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="bg-transparent border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl px-8 py-6 text-lg"
+                  className="w-full sm:w-auto bg-transparent border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl px-8 py-6 text-lg"
                 >
                   {isRTL ? 'تعرف على المزيد' : 'Learn More'}
                   <ArrowLeft className={`w-5 h-5 ${isRTL ? 'mr-2' : 'ml-2'} ${isRTL ? '' : 'rotate-180'}`} />
@@ -75,7 +75,7 @@ export default function HomeView({ onNavigate, isRTL = true }: HomeViewProps) {
               </div>
 
               {/* Simple Stats */}
-              <div className={`flex gap-8 mt-16 pt-10 border-t border-white/10 justify-center ${isRTL ? 'lg:justify-start' : 'lg:justify-start'}`}>
+              <div className={`grid grid-cols-2 sm:flex gap-6 sm:gap-8 mt-12 sm:mt-16 pt-8 sm:pt-10 border-t border-white/10 justify-center ${isRTL ? 'lg:justify-start' : 'lg:justify-start'}`}>
                 <StatItem value="500+" label={isRTL ? "عارض" : "Exhibitors"} />
                 <StatItem value="40+" label={isRTL ? "دولة" : "Countries"} />
                 <StatItem value="50K+" label={isRTL ? "زائر" : "Visitors"} />
@@ -84,7 +84,7 @@ export default function HomeView({ onNavigate, isRTL = true }: HomeViewProps) {
 
             {/* Image Side (Left in RTL) */}
             <div className="flex-1 w-full relative">
-               <div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square rounded-[3rem] overflow-hidden border-8 border-white bg-white shadow-xl group">
+               <div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square rounded-3xl lg:rounded-[3rem] overflow-hidden border-4 sm:border-8 border-white bg-white shadow-xl group">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent z-10 opacity-10" />
                   {/* Generated Booth Image */}
                   <img 
@@ -92,14 +92,14 @@ export default function HomeView({ onNavigate, isRTL = true }: HomeViewProps) {
                     alt="معرض البوثات والمقاولين" 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className={`absolute bottom-6 ${isRTL ? 'left-6 right-6 lg:left-auto' : 'left-6 right-6 lg:right-auto'} z-20 bg-white/90 backdrop-blur-md border border-white p-6 rounded-3xl shadow-lg`}>
-                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                           <Star className="w-6 h-6 text-blue-600" />
+                  <div className={`absolute bottom-4 left-4 right-4 sm:bottom-6 ${isRTL ? 'sm:left-6 sm:right-6 lg:left-auto' : 'sm:left-6 sm:right-6 lg:right-auto'} z-20 bg-white/90 backdrop-blur-md border border-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg`}>
+                     <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                           <Star className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                         </div>
                         <div>
-                           <p className="text-slate-900 font-bold text-lg">{isRTL ? 'أجنحة مخصصة للشركات' : 'Custom Corporate Booths'}</p>
-                           <p className="text-slate-600 text-sm">{isRTL ? 'مساحات مصممة بأعلى معايير الجودة' : 'Designed with the highest quality standards'}</p>
+                           <p className="text-slate-900 font-bold text-base sm:text-lg leading-tight">{isRTL ? 'أجنحة مخصصة للشركات' : 'Custom Corporate Booths'}</p>
+                           <p className="text-slate-600 text-[10px] sm:text-sm">{isRTL ? 'مساحات مصممة بأعلى معايير الجودة' : 'Designed with the highest quality standards'}</p>
                         </div>
                      </div>
                   </div>
@@ -210,7 +210,7 @@ function CategoryCard({ icon, title, price, color, features, onBook, isRTL, feat
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.15 }}
       whileHover={{ y: -10 }}
-      className={`relative group bg-white rounded-[2.5rem] p-8 lg:p-10 border-2 transition-all duration-500 shadow-2xl shadow-slate-200/50 ${featured ? 'border-cyan-500/20 scale-105 z-10' : 'border-transparent ' + borderGlow[color]}`}
+      className={`relative group bg-white rounded-3xl lg:rounded-[2.5rem] p-6 lg:p-10 border-2 transition-all duration-500 shadow-2xl shadow-slate-200/50 ${featured ? 'border-cyan-500/20 md:scale-105 z-10' : 'border-transparent ' + borderGlow[color]}`}
     >
       {featured && (
         <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-xs font-black px-6 py-2 rounded-full uppercase tracking-widest shadow-lg">
