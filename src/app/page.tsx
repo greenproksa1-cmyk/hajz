@@ -15,6 +15,9 @@ import BookingSteps from '@/components/home/BookingSteps'
 import { Button } from '@/components/ui/button'
 import { Globe, ArrowLeft, ArrowRight } from 'lucide-react'
 import { Loader2 } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 type View =
   | 'home'
@@ -72,6 +75,8 @@ function AdminBar({
 
 function AppContent() {
   const { t, dir, isRTL } = useTranslation()
+  const { data: session } = useSession()
+  const router = useRouter()
   const [currentView, setCurrentView] = useState<View>('home')
   const [booths, setBooths] = useState<BoothData[]>([])
   const [selectedBoothIds, setSelectedBoothIds] = useState<string[]>([])
@@ -165,9 +170,14 @@ function AppContent() {
 
   const handleBookNow = useCallback(() => {
     if (selectedBoothIds.length > 0) {
+      if (!session) {
+        toast.error(isRTL ? 'يرجى تسجيل الدخول أولاً للحجز' : 'Please login first to book')
+        router.push('/login?callbackUrl=%23map')
+        return
+      }
       setCurrentView('booking')
     }
-  }, [selectedBoothIds])
+  }, [selectedBoothIds, session, router, isRTL])
 
   const handleBookingComplete = useCallback(() => {
     setSelectedBoothIds([])

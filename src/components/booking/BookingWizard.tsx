@@ -5,6 +5,7 @@ import { useTranslation } from '@/i18n'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Check, User, ShieldCheck, FileText, CreditCard, ArrowRight, ArrowLeft } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import Step1Registration from './Step1Registration'
 import Step2OTP from './Step2OTP'
 import Step3Contract from './Step3Contract'
@@ -32,20 +33,32 @@ const PRICE_PER_SQM = 1700
 
 export default function BookingWizard({ selectedBooths, onComplete, onCancel }: BookingWizardProps) {
   const { t, isRTL } = useTranslation()
+  const { data: session } = useSession()
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState<BookingFormData>({
     entityName: '',
     unifiedNumber: '',
     address: '',
-    contactName: '',
+    contactName: session?.user?.name || '',
     jobTitle: '',
     mobile: '',
     phone: '',
-    email: '',
+    email: session?.user?.email || '',
   })
   const [otpVerified, setOtpVerified] = useState(false)
   const [contractGenerated, setContractGenerated] = useState(false)
   const [contractData, setContractData] = useState<string | null>(null)
+
+  // Pre-fill form data when session becomes available
+  React.useEffect(() => {
+    if (session?.user) {
+      setFormData(prev => ({
+        ...prev,
+        email: prev.email || session.user?.email || '',
+        contactName: prev.contactName || session.user?.name || '',
+      }))
+    }
+  }, [session])
 
   const steps = [
     { num: 1, title: t('booking.step1Title'), icon: User },

@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Upload, Building2, CheckCircle, ArrowLeft, ArrowRight, Loader2, Copy, Check } from 'lucide-react'
+import { Upload, Building2, CheckCircle, ArrowLeft, ArrowRight, Loader2, Copy, Check, LayoutDashboard } from 'lucide-react'
 import { toast } from 'sonner'
 import type { BookingFormData } from './BookingWizard'
 import type { BoothData } from '../booth/BoothMap'
@@ -118,17 +118,27 @@ export default function Step4Payment({
 
   if (isSuccess) {
     return (
-      <div className="flex flex-col items-center gap-6 py-8">
+      <div className="flex flex-col items-center gap-6 py-8 text-center">
         <CheckCircle className="h-20 w-20 text-green-500" />
         <h3 className="text-xl font-bold text-gray-800">{t('payment.successTitle')}</h3>
-        <p className="max-w-md text-center text-gray-600">{t('payment.successMessage')}</p>
-        <Button
-          onClick={onComplete}
-          className="bg-blue-600 hover:bg-blue-700"
-          size="lg"
-        >
-          {t('payment.backToMap')}
-        </Button>
+        <p className="max-w-md text-gray-600">{t('payment.successMessage')}</p>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button
+            onClick={() => window.location.href = '/dashboard'}
+            className="bg-blue-600 hover:bg-blue-700"
+            size="lg"
+          >
+            <LayoutDashboard className="me-2 h-4 w-4" />
+            {isRTL ? 'الانتقال للوحة التحكم' : 'Go to Dashboard'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={onComplete}
+            size="lg"
+          >
+            {t('payment.backToMap')}
+          </Button>
+        </div>
       </div>
     )
   }

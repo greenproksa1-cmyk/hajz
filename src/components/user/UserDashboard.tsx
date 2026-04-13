@@ -88,11 +88,7 @@ export default function UserDashboard({ email, onBack }: UserDashboardProps) {
       const res = await fetch('/api/bookings')
       const data = await res.json()
       if (data.success) {
-        // Filter by email client-side
-        const userBookings = data.data.filter(
-          (b: Booking) => b.email.toLowerCase() === email.toLowerCase()
-        )
-        setBookings(userBookings)
+        setBookings(data.data)
       }
     } catch {
       toast.error(t('common.error'))

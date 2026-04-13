@@ -8,7 +8,16 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 // GET: Return all bookings (for admin)
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const isAdmin = (session.user as any).role === 'admin';
+    const userId = (session.user as any).id;
+
     const bookings = await db.booking.findMany({
+      where: isAdmin ? {} : { userId },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -134,10 +143,13 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await getServerSession(authOptions);
-    let userId = null;
-    if (session && session.user) {
-      userId = (session.user as any).id;
+    if (!session || !session.user) {
+      return NextResponse.json(
+        { success: false, error: 'You must be logged in to create a booking' },
+        { status: 401 }
+      );
     }
+    const userId = (session.user as any).id;
 
     // Create booking
     const booking = await db.booking.create({
