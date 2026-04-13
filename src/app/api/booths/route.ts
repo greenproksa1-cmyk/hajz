@@ -57,11 +57,15 @@ export async function GET() {
         height: activePlan.height
       }
     });
-  } catch (error) {
-    console.error('Error fetching booths:', error);
+  } catch (error: any) {
+    console.error('Error fetching booths:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch booths' },
+      {
+        success: false,
+        error: error.message || 'Failed to fetch booths',
+        code: error.code || 'UNKNOWN_ERROR',
+      },
       { status: 500 }
-    );
+    )
   }
 }
