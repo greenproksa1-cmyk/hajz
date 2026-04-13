@@ -80,20 +80,26 @@ function AppContent() {
   const [floorPlanId, setFloorPlanId] = useState<string | null>(null)
   const [userTrackingEmail, setUserTrackingEmail] = useState<string | null>(null)
   const [floorPlanMetadata, setFloorPlanMetadata] = useState<{ width: number; height: number; name: string } | null>(null)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const fetchBooths = useCallback(async () => {
     try {
+      setFetchError(null)
       const res = await fetch('/api/booths')
+      if (!res.ok) throw new Error(`Server returned ${res.status}`)
       const data = await res.json()
       if (data.success) {
         setBooths(data.data)
         if (data.floorPlan) {
           setFloorPlanMetadata(data.floorPlan)
         }
+      } else {
+        throw new Error(data.error || 'Failed to load data')
       }
-    } catch {
-      // Silently fail on refresh
+    } catch (err: any) {
+      setFetchError(err.message)
+      console.error('Fetch error:', err)
     } finally {
       setIsLoading(false)
     }
@@ -214,6 +220,24 @@ function AppContent() {
               {isLoading ? (
                 <div className="flex items-center justify-center py-20">
                   <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+                </div>
+              ) : fetchError ? (
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                   <div className="bg-red-50 p-6 rounded-full mb-6 text-red-600">
+                      <Globe className="h-12 w-12" />
+                   </div>
+                   <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                      {isRTL ? 'خطأ في الاتصال بقاعدة البيانات' : 'Database Connection Error'}
+                   </h2>
+                   <p className="text-red-500 max-w-md font-mono text-sm bg-red-50 p-3 rounded-lg border border-red-100 mb-6">
+                      {fetchError}
+                   </p>
+                   <Button 
+                    onClick={() => fetchBooths()}
+                    className="bg-red-600 hover:bg-red-700"
+                   >
+                     {isRTL ? 'إعادة المحاولة' : 'Try Again'}
+                   </Button>
                 </div>
               ) : booths.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
