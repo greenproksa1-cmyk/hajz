@@ -12,26 +12,55 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Enrich bookings with booth details
-    const enrichedBookings = await Promise.all(
-      bookings.map(async (booking) => {
-        let boothDetails: { id: string; label: string; area: number }[] = [];
-        try {
-          const boothIds: string[] = JSON.parse(booking.boothIds);
-          boothDetails = await db.booth.findMany({
-            where: { id: { in: boothIds } },
-            select: { id: true, label: true, area: true },
-          });
-        } catch {
-          // boothIds might not be valid JSON
-        }
+    // Fetch all active floor plans to know which booths to include
+    const activeFloorPlans = await db.floorPlan.findMany({
+      where: { isActive: true },
+      select: { id: true },
+    });
+    const activePlanIds = activeFloorPlans.map(fp => fp.id);
 
-        return {
+    // 1. Gather all unique booth IDs to prevent N+1 queries
+    const allBoothIds = new Set<string>();
+    const parsedBoothsMap = new Map<string, string[]>();
+    
+    for (const booking of bookings) {
+      try {
+        const ids = JSON.parse(booking.boothIds);
+        if (Array.isArray(ids)) {
+          parsedBoothsMap.set(booking.id, ids);
+          ids.forEach(id => allBoothIds.add(id));
+        }
+      } catch {
+        // boothIds might not be valid JSON
+      }
+    }
+
+    // 2. Fetch all involved booths in one fast aggregated query
+    const boothsList = await db.booth.findMany({
+      where: { id: { in: Array.from(allBoothIds) } },
+      select: { id: true, label: true, area: true, floorPlanId: true },
+    });
+
+    const boothsById = new Map<string, any>();
+    boothsList.forEach(b => boothsById.set(b.id, b));
+
+    const enrichedBookings = [];
+
+    // 3. Process bookings purely in-memory
+    for (const booking of bookings) {
+      const ids = parsedBoothsMap.get(booking.id) || [];
+      const boothDetails = ids.map(id => boothsById.get(id)).filter(Boolean);
+      
+      // A booking is active if ANY of its booths belong to an active floor plan
+      const isBookingActive = boothDetails.some(b => b.floorPlanId && activePlanIds.includes(b.floorPlanId));
+
+      if (isBookingActive) {
+        enrichedBookings.push({
           ...booking,
           booths: boothDetails,
-        };
-      })
-    );
+        });
+      }
+    }
 
     return NextResponse.json({
       success: true,

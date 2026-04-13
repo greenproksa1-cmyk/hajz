@@ -37,6 +37,8 @@ import {
   Loader2,
   Map,
   XCircle,
+  Upload,
+  Image as ImageIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -64,15 +66,15 @@ interface FloorPlanEditorProps {
 }
 
 const BOOTH_TYPE_COLORS: Record<string, string> = {
-  standard: '#10b981', // emerald
-  vip: '#f59e0b',      // amber
-  sponsor: '#64748b',  // slate
+  standard: '#0ea5e9', // Saturated Sky Blue
+  vip: '#f97316',      // Saturated Orange
+  sponsor: '#8b5cf6',  // Saturated Violet
 }
 
 const BOOTH_TYPE_FILL: Record<string, string> = {
-  standard: 'rgba(16, 185, 129, 0.12)',
-  vip: 'rgba(245, 158, 11, 0.12)',
-  sponsor: 'rgba(100, 116, 139, 0.12)',
+  standard: 'rgba(14, 165, 233, 0.15)',
+  vip: 'rgba(249, 115, 22, 0.15)',
+  sponsor: 'rgba(139, 92, 246, 0.15)',
 }
 
 const PRICE_PER_SQM = 1700
@@ -100,8 +102,8 @@ export default function FloorPlanEditor({
   planId,
   planName: initialPlanName = '',
   initialBooths = [],
-  initialWidth = 1200,
-  initialHeight = 800,
+  initialWidth = 1000,
+  initialHeight = 1400,
   onSave,
   onCancel,
 }: FloorPlanEditorProps) {
@@ -110,13 +112,63 @@ export default function FloorPlanEditor({
   const containerRef = useRef<HTMLDivElement>(null)
 
   const [booths, setBooths] = useState<BoothShape[]>(Array.isArray(initialBooths) ? initialBooths : [])
-  const [selectedBoothId, setSelectedBoothId] = useState<string | null>(null)
+  const [selectedBoothIds, setSelectedBoothIds] = useState<string[]>([])
   const [mode, setMode] = useState<'draw' | 'select'>('select')
   const [zoom, setZoom] = useState(1)
   const [planName, setPlanName] = useState(initialPlanName || '')
   const [planWidth, setPlanWidth] = useState(initialWidth)
   const [planHeight, setPlanHeight] = useState(initialHeight)
   const [isSaving, setIsSaving] = useState(false)
+  const [isExtracting, setIsExtracting] = useState(false)
+
+  // Background Image State
+  const [bgImageSrc, setBgImageSrc] = useState<string | null>(null)
+  const [bgImageObj, setBgImageObj] = useState<HTMLImageElement | null>(null)
+  const [bgOpacity, setBgOpacity] = useState(0.5)
+  const [bgScale, setBgScale] = useState(1)
+  const [bgOffsetX, setBgOffsetX] = useState(0)
+  const [bgOffsetY, setBgOffsetY] = useState(0)
+
+  // Load image object when src changes
+  useEffect(() => {
+    if (!bgImageSrc) {
+      setBgImageObj(null)
+      return
+    }
+    const img = new Image()
+    img.onload = () => setBgImageObj(img)
+    img.src = bgImageSrc
+  }, [bgImageSrc])
+
+  // History for Undo/Redo
+  const [history, setHistory] = useState<BoothShape[][]>([Array.isArray(initialBooths) ? initialBooths : []])
+  const [historyIndex, setHistoryIndex] = useState(0)
+
+  const pushToHistory = useCallback((newBooths: BoothShape[]) => {
+    setHistory(prev => {
+      const nextHistory = prev.slice(0, historyIndex + 1)
+      return [...nextHistory, newBooths].slice(-50)
+    })
+    setHistoryIndex(prev => prev + 1)
+  }, [historyIndex])
+
+  const undo = useCallback(() => {
+    if (historyIndex > 0) {
+      const nextIndex = historyIndex - 1
+      setHistoryIndex(nextIndex)
+      setBooths(history[nextIndex])
+      setSelectedBoothIds([])
+    }
+  }, [historyIndex, history])
+
+  const redo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const nextIndex = historyIndex + 1
+      setHistoryIndex(nextIndex)
+      setBooths(history[nextIndex])
+      setSelectedBoothIds([])
+    }
+  }, [historyIndex, history])
 
   // Drawing state
   const [isDrawing, setIsDrawing] = useState(false)
@@ -132,7 +184,8 @@ export default function FloorPlanEditor({
   const [resizeHandle, setResizeHandle] = useState<string | null>(null)
   const rafRef = useRef<number | null>(null)
 
-  const selectedBooth = booths.find((b) => b.id === selectedBoothId) || null
+  const selectedBooths = booths.filter((b) => selectedBoothIds.includes(b.id))
+  const lastSelectedBooth = selectedBooths[selectedBooths.length - 1] || null
 
   const snapToGrid = useCallback((v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE, [])
 
@@ -214,6 +267,20 @@ export default function FloorPlanEditor({
     ctx.lineWidth = 2 / zoom
     ctx.strokeRect(0, 0, planWidth, planHeight)
 
+    // Draw Blueprint Layer (Background Image)
+    if (bgImageObj) {
+      ctx.save()
+      ctx.globalAlpha = bgOpacity
+      ctx.drawImage(
+        bgImageObj,
+        bgOffsetX,
+        bgOffsetY,
+        bgImageObj.width * bgScale,
+        bgImageObj.height * bgScale
+      )
+      ctx.restore()
+    }
+
     // Subtle Grid
     ctx.strokeStyle = '#f1f5f9'
     ctx.lineWidth = 0.5
@@ -277,10 +344,36 @@ export default function FloorPlanEditor({
       let bh = booth.height
 
       // Override with active drag/resize coordinates
-      if (isDragging && booth.id === selectedBoothId && dragPosRef.current) {
-        bx = dragPosRef.current.x
-        by = dragPosRef.current.y
-      } else if (isResizing && booth.id === selectedBoothId && resizeRef.current) {
+      const isSelected = selectedBoothIds.includes(booth.id)
+      
+      if (isDragging && isSelected && dragPosRef.current) {
+        // For multi-move, we use the delta
+        const dx = dragPosRef.current.x - (selectedBooths.find(b => b.id === selectedBoothIds[0])?.x || 0)
+        const dy = dragPosRef.current.y - (selectedBooths.find(b => b.id === selectedBoothIds[0])?.y || 0)
+        
+        // This is a bit simplified for drawing preview: 
+        // if it's the primary dragged one, use dragPosRef, else use offset
+        if (booth.id === selectedBoothIds[0]) {
+           bx = dragPosRef.current.x
+           by = dragPosRef.current.y
+        } else {
+           bx = booth.x + (dragPosRef.current.x - dragOffsetRef.current.x - (selectedBooths.find(b => b.id === selectedBoothIds[0])?.x || 0) + dragOffsetRef.current.x)
+           // Actually, it's easier to just track the primary dragged one and calculate deltas
+           // Let's refine the move logic in handleMouseMove to update all positions in a ref or state
+        }
+      } 
+      
+      // Let's stick to a simpler drawing for now: if dragging, update bx/by via deltas in drawCanvas
+      const primaryId = selectedBoothIds[0]
+      if (isDragging && isSelected && dragPosRef.current && primaryId) {
+          const primaryBooth = booths.find(b => b.id === primaryId)
+          if (primaryBooth) {
+             const dx = dragPosRef.current.x - primaryBooth.x
+             const dy = dragPosRef.current.y - primaryBooth.y
+             bx = booth.x + dx
+             by = booth.y + dy
+          }
+      } else if (isResizing && booth.id === primaryId && resizeRef.current) {
         bx = resizeRef.current.x
         by = resizeRef.current.y
         bw = resizeRef.current.width
@@ -296,7 +389,7 @@ export default function FloorPlanEditor({
 
       // Border
       ctx.strokeStyle = color
-      ctx.lineWidth = booth.id === selectedBoothId ? 2.5 : 1.5
+      ctx.lineWidth = isSelected ? 2.5 : 1.5
       ctx.strokeRect(bx, by, bw, bh)
 
       // Label
@@ -311,7 +404,7 @@ export default function FloorPlanEditor({
       )
 
       // Area
-      const areaVal = (isResizing && booth.id === selectedBoothId && resizeRef.current) 
+      const areaVal = (isResizing && booth.id === primaryId && resizeRef.current) 
         ? Math.round((bw * bh) / 100) / 100 
         : booth.area
 
@@ -324,7 +417,7 @@ export default function FloorPlanEditor({
       )
 
       // Selection handles
-      if (booth.id === selectedBoothId) {
+      if (isSelected) {
         const handles = [
           { cx: bx, cy: by },
           { cx: bx + bw, cy: by },
@@ -373,7 +466,7 @@ export default function FloorPlanEditor({
     }
 
     ctx.restore()
-  }, [booths, selectedBoothId, zoom, isDrawing, drawStart, drawCurrent, isRTL])
+  }, [booths, selectedBoothIds, zoom, isDrawing, drawStart, drawCurrent, isRTL, bgImageObj, bgOpacity, bgScale, bgOffsetX, bgOffsetY, planWidth, planHeight])
 
   // Resize canvas
   useEffect(() => {
@@ -412,8 +505,9 @@ export default function FloorPlanEditor({
 
       // Select mode
       // Check resize handles first
-      if (selectedBoothId) {
-        const booth = booths.find((b) => b.id === selectedBoothId)
+      const primaryId = selectedBoothIds[0]
+      if (primaryId) {
+        const booth = booths.find((b) => b.id === primaryId)
         if (booth) {
           const handle = getResizeHandle(pos.x, pos.y, booth)
           if (handle) {
@@ -427,7 +521,21 @@ export default function FloorPlanEditor({
       // Check booth click
       const clickedBooth = getBoothAtPoint(pos.x, pos.y)
       if (clickedBooth) {
-        setSelectedBoothId(clickedBooth.id)
+        const isSelected = selectedBoothIds.includes(clickedBooth.id)
+        const isMulti = e.shiftKey || e.ctrlKey || e.metaKey
+
+        if (isMulti) {
+          if (isSelected) {
+            setSelectedBoothIds(prev => prev.filter(id => id !== clickedBooth.id))
+          } else {
+            setSelectedBoothIds(prev => [...prev, clickedBooth.id])
+          }
+        } else {
+          if (!isSelected) {
+            setSelectedBoothIds([clickedBooth.id])
+          }
+        }
+
         setIsDragging(true)
         dragOffsetRef.current = {
           x: pos.x - clickedBooth.x,
@@ -435,10 +543,12 @@ export default function FloorPlanEditor({
         }
         dragPosRef.current = { x: clickedBooth.x, y: clickedBooth.y }
       } else {
-        setSelectedBoothId(null)
+        if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
+          setSelectedBoothIds([])
+        }
       }
     },
-    [mode, selectedBoothId, booths, screenToCanvas, getBoothAtPoint, getResizeHandle]
+    [mode, selectedBoothIds, booths, screenToCanvas, getBoothAtPoint, getResizeHandle]
   )
 
   const handleMouseMove = useCallback(
@@ -450,7 +560,7 @@ export default function FloorPlanEditor({
         return
       }
 
-      if (isDragging && selectedBoothId) {
+      if (isDragging && selectedBoothIds.length > 0) {
         const nx = snapToGrid(pos.x - dragOffsetRef.current.x)
         const ny = snapToGrid(pos.y - dragOffsetRef.current.y)
         dragPosRef.current = { x: nx, y: ny }
@@ -459,8 +569,8 @@ export default function FloorPlanEditor({
         return
       }
 
-      if (isResizing && selectedBoothId && resizeHandle) {
-        const booth = booths.find(b => b.id === selectedBoothId)
+      if (isResizing && selectedBoothIds.length > 0 && resizeHandle) {
+        const booth = booths.find(b => b.id === selectedBoothIds[0])
         if (!booth) return
         
         let { x, y, width, height } = booth
@@ -496,8 +606,8 @@ export default function FloorPlanEditor({
         canvas.style.cursor = 'crosshair'
         return
       }
-      if (selectedBoothId) {
-        const booth = booths.find((b) => b.id === selectedBoothId)
+      if (selectedBoothIds.length > 0) {
+        const booth = booths.find((b) => b.id === selectedBoothIds[0])
         if (booth) {
           const handle = getResizeHandle(pos.x, pos.y, booth)
           if (handle) {
@@ -513,7 +623,7 @@ export default function FloorPlanEditor({
       const overBooth = getBoothAtPoint(pos.x, pos.y)
       canvas.style.cursor = overBooth ? 'move' : 'default'
     },
-    [isDrawing, drawStart, isDragging, isResizing, selectedBoothId, resizeHandle, mode, booths, screenToCanvas, getBoothAtPoint, getResizeHandle]
+    [isDrawing, drawStart, isDragging, isResizing, selectedBoothIds, resizeHandle, mode, booths, screenToCanvas, getBoothAtPoint, getResizeHandle]
   )
 
   const handleMouseUp = useCallback(() => {
@@ -542,8 +652,10 @@ export default function FloorPlanEditor({
           width: sw,
           height: sh,
         }
-        setBooths((prev) => [...prev, newBooth])
-        setSelectedBoothId(newBooth.id)
+        const newBooths = [...booths, newBooth]
+        setBooths(newBooths)
+        pushToHistory(newBooths)
+        setSelectedBoothIds([newBooth.id])
         setMode('select')
       }
 
@@ -552,25 +664,35 @@ export default function FloorPlanEditor({
       setDrawCurrent(null)
     }
 
-    if (isDragging && selectedBoothId && dragPosRef.current) {
-      setBooths((prev) =>
-        prev.map((b) =>
-          b.id === selectedBoothId
-            ? { ...b, x: dragPosRef.current!.x, y: dragPosRef.current!.y }
-            : b
-        )
-      )
+    if (isDragging && selectedBoothIds.length > 0 && dragPosRef.current) {
+      const primaryId = selectedBoothIds[0]
+      const primaryBooth = booths.find(b => b.id === primaryId)
+      if (primaryBooth) {
+        const dx = dragPosRef.current.x - primaryBooth.x
+        const dy = dragPosRef.current.y - primaryBooth.y
+        
+        if (dx !== 0 || dy !== 0) {
+          const nextBooths = booths.map(b => 
+            selectedBoothIds.includes(b.id) 
+              ? { ...b, x: b.x + dx, y: b.y + dy } 
+              : b
+          )
+          setBooths(nextBooths)
+          pushToHistory(nextBooths)
+        }
+      }
     }
 
-    if (isResizing && selectedBoothId && resizeRef.current) {
-      setBooths((prev) =>
-        prev.map((b) => {
-          if (b.id !== selectedBoothId) return b
-          const { x, y, width, height } = resizeRef.current!
-          const area = Math.round((width * height) / 100) / 100
-          return { ...b, x, y, width, height, area }
-        })
-      )
+    if (isResizing && selectedBoothIds.length > 0 && resizeRef.current) {
+      const primaryId = selectedBoothIds[0]
+      const nextBooths = booths.map((b) => {
+        if (b.id !== primaryId) return b
+        const { x, y, width, height } = resizeRef.current!
+        const area = Math.round((width * height) / 100) / 100
+        return { ...b, x, y, width, height, area }
+      })
+      setBooths(nextBooths)
+      pushToHistory(nextBooths)
     }
 
     setIsDragging(false)
@@ -579,17 +701,52 @@ export default function FloorPlanEditor({
     dragPosRef.current = null
     resizeRef.current = null
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
-  }, [isDrawing, drawStart, drawCurrent, booths, isDragging, isResizing, selectedBoothId, drawCanvas])
+  }, [isDrawing, drawStart, drawCurrent, booths, isDragging, isResizing, selectedBoothIds, pushToHistory, drawCanvas])
 
-  const handleDeleteSelected = () => {
-    if (!selectedBoothId) return
-    setBooths((prev) => prev.filter((b) => b.id !== selectedBoothId))
-    setSelectedBoothId(null)
-  }
+  const handleDuplicate = useCallback(() => {
+    if (selectedBoothIds.length === 0) return
+    
+    // Determine offset
+    const offset = 20
+    const newBoothsToInert: BoothShape[] = []
+    
+    // Sort selected booths to maintain order if needed, or just iterate
+    const currentSelected = booths.filter(b => selectedBoothIds.includes(b.id))
+    
+    // We need to generate labels carefully
+    let tempBooths = [...booths]
+    const newSelectedIds: string[] = []
+
+    for (const booth of currentSelected) {
+      const newBooth: BoothShape = {
+        ...booth,
+        id: generateId(),
+        label: getNextLabel(tempBooths),
+        x: booth.x + offset,
+        y: booth.y + offset,
+      }
+      tempBooths.push(newBooth)
+      newBoothsToInert.push(newBooth)
+      newSelectedIds.push(newBooth.id)
+    }
+
+    setBooths(tempBooths)
+    pushToHistory(tempBooths)
+    setSelectedBoothIds(newSelectedIds)
+    toast.success(isRTL ? 'تم تكرار الأجنحة بنجاح' : 'Booths duplicated successfully')
+  }, [booths, selectedBoothIds, pushToHistory, isRTL])
+
+  const handleDeleteSelected = useCallback(() => {
+    if (selectedBoothIds.length === 0) return
+    const nextBooths = booths.filter((b) => !selectedBoothIds.includes(b.id))
+    setBooths(nextBooths)
+    pushToHistory(nextBooths)
+    setSelectedBoothIds([])
+  }, [booths, selectedBoothIds, pushToHistory])
 
   const handleClearAll = () => {
     setBooths([])
-    setSelectedBoothId(null)
+    setSelectedBoothIds([])
   }
 
   const handleUpdateBooth = (id: string, updates: Partial<BoothShape>) => {
@@ -648,17 +805,89 @@ export default function FloorPlanEditor({
     }
   }
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      setBgImageSrc(event.target?.result as string)
+      setBgOffsetX(0)
+      setBgOffsetY(0)
+      setBgScale(1)
+      setBgOpacity(0.5)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleAIExtract = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsExtracting(true)
+    try {
+      const formData = new FormData()
+      formData.append('blueprint', file)
+
+      const res = await fetch('/api/analyze-blueprint', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+      if (data.success && data.data) {
+        const newBooths = [...booths, ...data.data]
+        setBooths(newBooths)
+        pushToHistory(newBooths)
+        toast.success(isRTL ? 'تم استخراج المخطط وتحويله بنجاح!' : 'Blueprint extracted successfully!')
+      } else {
+        toast.error(data.error || t('common.error'))
+      }
+    } catch {
+      toast.error(t('common.error'))
+    } finally {
+      setIsExtracting(false)
+      // Reset input so they can upload same file again if desired
+      e.target.value = ''
+    }
+  }
+
+  const removeBackgroundImage = () => {
+    setBgImageSrc(null)
+    setBgImageObj(null)
+  }
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      if (document.activeElement?.tagName === 'INPUT') return
+
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (document.activeElement?.tagName === 'INPUT') return
         handleDeleteSelected()
       }
       if (e.key === 'Escape') {
-        setSelectedBoothId(null)
+        setSelectedBoothIds([])
+      }
+      
+      const isCtrl = e.ctrlKey || e.metaKey
+      
+      if (isCtrl && e.key.toLowerCase() === 'z') {
+        if (e.shiftKey) redo()
+        else undo()
+        e.preventDefault()
+      }
+      if (isCtrl && e.key.toLowerCase() === 'y') {
+        redo()
+        e.preventDefault()
+      }
+      if (isCtrl && e.key.toLowerCase() === 'd') {
+        handleDuplicate()
+        e.preventDefault()
+      }
+      if (isCtrl && e.key.toLowerCase() === 'a') {
+        setSelectedBoothIds(booths.map(b => b.id))
+        e.preventDefault()
       }
     },
-    [selectedBoothId, handleDeleteSelected]
+    [booths, undo, redo, handleDuplicate, handleDeleteSelected]
   )
 
   useEffect(() => {
@@ -718,6 +947,31 @@ export default function FloorPlanEditor({
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 rounded-lg hover:bg-white hover:shadow-sm"
+                onClick={undo}
+                disabled={historyIndex === 0}
+              >
+                <RotateCcw className="h-4 w-4 text-slate-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg hover:bg-white hover:shadow-sm -scale-x-100"
+                onClick={redo}
+                disabled={historyIndex >= history.length - 1}
+              >
+                <RotateCcw className="h-4 w-4 text-slate-600" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="h-8 w-px bg-slate-200 mx-1 shrink-0" />
+
+          <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center bg-slate-100 rounded-xl p-0.5">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg hover:bg-white hover:shadow-sm"
                 onClick={() => setZoom((z) => Math.min(z + 0.1, 2))}
               >
                 <ZoomIn className="h-4 w-4 text-slate-600" />
@@ -741,9 +995,20 @@ export default function FloorPlanEditor({
               <Button
                 variant="outline"
                 size="sm"
+                className="h-10 gap-2 border-blue-50 text-blue-600 hover:bg-blue-50 rounded-xl px-4 transition-all"
+                onClick={handleDuplicate}
+                disabled={selectedBoothIds.length === 0}
+              >
+                <Save className="h-4 w-4" />
+                <span className="hidden xl:inline text-xs font-bold">{t('admin.editor.duplicate')}</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
                 className="h-10 gap-2 border-red-100 text-red-600 hover:bg-red-50 rounded-xl px-4 transition-all"
                 onClick={handleDeleteSelected}
-                disabled={!selectedBoothId}
+                disabled={selectedBoothIds.length === 0}
               >
                 <Trash2 className="h-4 w-4" />
                 <span className="hidden xl:inline text-xs font-bold">{t('admin.editor.deleteBooth')}</span>
@@ -819,20 +1084,56 @@ export default function FloorPlanEditor({
           </h3>
         </div>
 
-        {selectedBooth ? (
+        {selectedBooths.length > 1 ? (
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="flex flex-col items-center justify-center py-10 rounded-2xl bg-blue-50 border border-blue-100 text-center px-4">
+              <div className="h-12 w-12 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
+                 <MousePointer2 className="h-6 w-6 text-blue-600" />
+              </div>
+              <h4 className="text-blue-900 font-bold mb-1">
+                 {isRTL ? `${selectedBooths.length} أجنحة مختارة` : `${selectedBooths.length} Booths Selected`}
+              </h4>
+              <p className="text-blue-600/70 text-[10px] font-medium uppercase tracking-wider">
+                {isRTL ? 'وضع التعديل الجماعي' : 'Bulk Editing Active'}
+              </p>
+            </div>
+            
+            <div className="space-y-4 rounded-2xl bg-white p-4 shadow-sm border border-slate-100">
+               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">{isRTL ? 'إجراءات جماعية' : 'Bulk Actions'}</span>
+               <Button
+                variant="outline"
+                size="sm"
+                className="w-full h-10 gap-2 border-blue-100 text-blue-600 hover:bg-blue-50 rounded-xl px-4"
+                onClick={handleDuplicate}
+              >
+                <Save className="h-3.5 w-3.5" />
+                <span className="text-xs font-bold">{isRTL ? 'تكرار الاختيار' : 'Duplicate Selection'}</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full h-10 gap-2 border-red-100 text-red-600 hover:bg-red-50 rounded-xl px-4"
+                onClick={handleDeleteSelected}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span className="text-xs font-bold">{isRTL ? 'حذف الاختيار' : 'Delete Selection'}</span>
+              </Button>
+            </div>
+          </div>
+        ) : lastSelectedBooth ? (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
             {/* ID & Label Section */}
             <div className="space-y-4 rounded-2xl bg-white p-4 shadow-sm border border-slate-100">
                <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{isRTL ? 'رقم الجناح' : 'Booth Identity'}</span>
-                  <span className="text-[10px] font-mono text-slate-300">ID: {selectedBooth.id}</span>
+                  <span className="text-[10px] font-mono text-slate-300">ID: {lastSelectedBooth.id}</span>
                </div>
                <div>
                 <Label className="mb-1.5 block text-[11px] font-bold text-slate-700">{t('admin.editor.label')}</Label>
                 <Input
-                  value={selectedBooth.label}
+                  value={lastSelectedBooth.label}
                   onChange={(e) =>
-                    handleUpdateBooth(selectedBooth.id, { label: e.target.value })
+                    handleUpdateBooth(lastSelectedBooth.id, { label: e.target.value })
                   }
                   className="h-10 text-sm border-slate-200 focus:border-blue-500 focus:ring-blue-500/10 rounded-xl bg-slate-50/30"
                   dir={isRTL ? 'rtl' : 'ltr'}
@@ -848,9 +1149,9 @@ export default function FloorPlanEditor({
                 <div className="relative">
                   <Input
                     type="number"
-                    value={selectedBooth.area}
+                    value={lastSelectedBooth.area}
                     onChange={(e) =>
-                      handleUpdateBooth(selectedBooth.id, { area: parseFloat(e.target.value) || 0 })
+                      handleUpdateBooth(lastSelectedBooth.id, { area: parseFloat(e.target.value) || 0 })
                     }
                     className="h-10 text-sm border-slate-200 focus:border-blue-500 rounded-xl bg-slate-50/30 font-mono"
                     dir="ltr"
@@ -862,11 +1163,11 @@ export default function FloorPlanEditor({
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-2.5">
                   <span className="block text-[9px] text-slate-400 uppercase font-bold mb-0.5">{isRTL ? 'العرض' : 'Width'}</span>
-                  <span className="text-sm font-mono font-bold text-slate-700">{Math.round(selectedBooth.width)}px</span>
+                  <span className="text-sm font-mono font-bold text-slate-700">{Math.round(lastSelectedBooth.width)}px</span>
                 </div>
                 <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-2.5">
                   <span className="block text-[9px] text-slate-400 uppercase font-bold mb-0.5">{isRTL ? 'الارتفاع' : 'Height'}</span>
-                  <span className="text-sm font-mono font-bold text-slate-700">{Math.round(selectedBooth.height)}px</span>
+                  <span className="text-sm font-mono font-bold text-slate-700">{Math.round(lastSelectedBooth.height)}px</span>
                 </div>
               </div>
             </div>
@@ -877,9 +1178,9 @@ export default function FloorPlanEditor({
                <div>
                 <Label className="mb-1.5 block text-[11px] font-bold text-slate-700">{t('admin.editor.type')}</Label>
                 <Select
-                  value={selectedBooth.boothType}
+                  value={lastSelectedBooth.boothType}
                   onValueChange={(v) =>
-                    handleUpdateBooth(selectedBooth.id, {
+                    handleUpdateBooth(lastSelectedBooth.id, {
                       boothType: v as 'standard' | 'vip' | 'sponsor',
                     })
                   }
@@ -899,10 +1200,10 @@ export default function FloorPlanEditor({
                 <div
                   className="h-4 w-4 rounded-md shadow-sm"
                   style={{
-                    backgroundColor: BOOTH_TYPE_COLORS[selectedBooth.boothType],
+                    backgroundColor: BOOTH_TYPE_COLORS[lastSelectedBooth.boothType],
                   }}
                 />
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{selectedBooth.boothType}</span>
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{lastSelectedBooth.boothType}</span>
               </div>
             </div>
 
@@ -915,9 +1216,9 @@ export default function FloorPlanEditor({
                 </Label>
                 <Input
                   type="number"
-                  value={selectedBooth.price}
+                  value={lastSelectedBooth.price}
                   onChange={(e) =>
-                    handleUpdateBooth(selectedBooth.id, {
+                    handleUpdateBooth(lastSelectedBooth.id, {
                       price: parseFloat(e.target.value) || 0,
                     })
                   }
@@ -938,7 +1239,7 @@ export default function FloorPlanEditor({
                 onClick={handleDeleteSelected}
               >
                 <Trash2 className="h-4 w-4" />
-                <span className="text-xs font-bold">{isRTL ? 'حذف هذا الجناح' : 'Delete this Booth'}</span>
+                <span className="text-xs font-bold">{isRTL ? 'حذف الجناح' : 'Delete Booth'}</span>
               </Button>
           </div>
         ) : (
@@ -1049,6 +1350,135 @@ export default function FloorPlanEditor({
              <p className="text-[10px] text-slate-400 italic">
                 {isRTL ? '* هذه الأبعاد ستحدد منطقة العرض النهائية للعملاء.' : '* These dimensions define the final view area for customers.'}
              </p>
+          </div>
+
+          {/* AI Auto-Extraction Settings */}
+          <div className="mt-6 flex items-center gap-2 mb-6">
+            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">
+              {isRTL ? 'الاستخراج الذكي (AI)' : 'AI Auto-Extract'}
+            </h3>
+          </div>
+
+          <div className="space-y-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 p-4 shadow-sm border border-emerald-100 relative overflow-hidden">
+             {isExtracting && (
+                <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+                   <Loader2 className="h-8 w-8 text-emerald-600 animate-spin mb-2" />
+                   <p className="text-xs font-bold text-emerald-800 animate-pulse">
+                      {isRTL ? 'يقوم الذكاء الاصطناعي بالتحليل...' : 'AI is analyzing blueprint...'}
+                   </p>
+                </div>
+             )}
+             <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-emerald-200 rounded-xl bg-white relative group hover:border-emerald-400 transition-colors">
+                <div className="h-10 w-10 bg-emerald-100 rounded-xl shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                   <Map className="h-5 w-5 text-emerald-600" />
+                </div>
+                <p className="text-xs font-bold text-emerald-900 mb-1">{isRTL ? 'استخراج الأجنحة تلقائياً' : 'Auto-Extract Booths'}</p>
+                <p className="text-[10px] text-emerald-600/70 text-center max-w-[180px]">
+                   {isRTL ? 'ارفع ملف PDF أو صورة وسيقوم النظام بتحويله لأجنحة برمجية.' : 'Upload PDF/Image and let AI convert it to programmable booths.'}
+                </p>
+                <Input 
+                   type="file" 
+                   accept="image/*,application/pdf" 
+                   className="absolute inset-0 opacity-0 cursor-pointer"
+                   onChange={handleAIExtract}
+                   disabled={isExtracting}
+                />
+             </div>
+          </div>
+
+          {/* Blueprint Layer Settings */}
+          <div className="mt-10 flex items-center gap-2 mb-6 pt-10 border-t border-slate-200">
+            <div className="h-2 w-2 rounded-full bg-purple-500" />
+            <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">
+              {isRTL ? 'خلفية مرجعية يدوية' : 'Manual Blueprint Layer'}
+            </h3>
+          </div>
+
+          <div className="space-y-4 rounded-2xl bg-white p-4 shadow-sm border border-slate-100">
+             {!bgImageSrc ? (
+                <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 relative group hover:border-purple-300 transition-colors">
+                   <div className="h-10 w-10 bg-white rounded-xl shadow-sm flex items-center justify-center mb-3">
+                      <ImageIcon className="h-5 w-5 text-purple-600" />
+                   </div>
+                   <p className="text-xs font-bold text-slate-600 mb-1">{isRTL ? 'رفع مخطط' : 'Upload Blueprint'}</p>
+                   <p className="text-[10px] text-slate-400 text-center max-w-[150px]">
+                      {isRTL ? 'ارفع صورة للمخطط لترسم فوقها بدقة' : 'Upload an image to trace over it'}
+                   </p>
+                   <Input 
+                      type="file" 
+                      accept="image/*" 
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      onChange={handleImageUpload}
+                   />
+                </div>
+             ) : (
+                <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
+                   {/* Actions */}
+                   <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                      <span className="text-[10px] font-bold text-purple-600 uppercase tracking-wider flex items-center gap-1.5">
+                         <ImageIcon className="h-3 w-3" />
+                         {isRTL ? 'صورة نشطة' : 'Active Image'}
+                      </span>
+                      <Button variant="ghost" size="sm" onClick={removeBackgroundImage} className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md text-[10px] font-bold">
+                         {isRTL ? 'إزالة' : 'Remove'}
+                      </Button>
+                   </div>
+
+                   {/* Opacity & Scale */}
+                   <div className="grid grid-cols-2 gap-4">
+                      <div>
+                         <Label className="mb-1.5 block text-[10px] font-bold text-slate-700">{isRTL ? 'الشفافية' : 'Opacity'}</Label>
+                         <Input 
+                            type="range"
+                            min="0.1"
+                            max="1"
+                            step="0.1"
+                            value={bgOpacity}
+                            onChange={(e) => setBgOpacity(parseFloat(e.target.value))}
+                            className="w-full h-8 accent-purple-600"
+                         />
+                      </div>
+                      <div>
+                         <Label className="mb-1.5 block text-[10px] font-bold text-slate-700">{isRTL ? 'الحجم' : 'Scale'} ({bgScale}x)</Label>
+                         <Input 
+                            type="range"
+                            min="0.1"
+                            max="5"
+                            step="0.1"
+                            value={bgScale}
+                            onChange={(e) => setBgScale(parseFloat(e.target.value))}
+                            className="w-full h-8 accent-purple-600"
+                         />
+                      </div>
+                   </div>
+
+                   {/* Offset X & Y */}
+                   <div className="grid grid-cols-2 gap-4">
+                      <div>
+                         <Label className="mb-1.5 block text-[10px] font-bold text-slate-700">{isRTL ? 'إزاحة أفقية' : 'Offset X'}</Label>
+                         <Input 
+                            type="number"
+                            value={bgOffsetX}
+                            onChange={(e) => setBgOffsetX(parseInt(e.target.value) || 0)}
+                            className="h-9 text-xs border-slate-200 focus:border-purple-500 rounded-xl bg-slate-50/30"
+                         />
+                      </div>
+                      <div>
+                         <Label className="mb-1.5 block text-[10px] font-bold text-slate-700">{isRTL ? 'إزاحة عمودية' : 'Offset Y'}</Label>
+                         <Input 
+                            type="number"
+                            value={bgOffsetY}
+                            onChange={(e) => setBgOffsetY(parseInt(e.target.value) || 0)}
+                            className="h-9 text-xs border-slate-200 focus:border-purple-500 rounded-xl bg-slate-50/30"
+                         />
+                      </div>
+                   </div>
+                   <p className="text-[10px] text-slate-400 italic">
+                      {isRTL ? '* ضع المخطط خلف الشبكة وابدأ بنسخ الأجنحة فوقه.' : '* Align the blueprint behind the grid and trace.'}
+                   </p>
+                </div>
+             )}
           </div>
         </div>
       </div>

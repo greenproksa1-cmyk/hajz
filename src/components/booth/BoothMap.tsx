@@ -363,18 +363,18 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
                     </filter>
 
                     <linearGradient id="grad-vip" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#fef3c7', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#f59e0b', stopOpacity: 1 }} />
+                      <stop offset="0%" style={{ stopColor: '#ffedd5', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: '#f97316', stopOpacity: 1 }} />
                     </linearGradient>
 
                     <linearGradient id="grad-sp" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#f8fafc', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#cbd5e1', stopOpacity: 1 }} />
+                      <stop offset="0%" style={{ stopColor: '#ede9fe', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: '#8b5cf6', stopOpacity: 1 }} />
                     </linearGradient>
 
                     <linearGradient id="grad-standard" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#ecfdf5', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#10b981', stopOpacity: 1 }} />
+                      <stop offset="0%" style={{ stopColor: '#e0f2fe', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: '#0ea5e9', stopOpacity: 1 }} />
                     </linearGradient>
 
                     <linearGradient id="grad-disabled" x1="0%" y1="0%" x2="0%" y2="100%">
