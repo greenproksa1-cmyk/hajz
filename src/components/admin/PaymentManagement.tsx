@@ -229,11 +229,11 @@ export default function PaymentManagement() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
-              <CreditCard className="h-5 w-5 text-gray-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+              <CreditCard className="h-5 w-5 text-blue-600" />
             </div>
             <div>
               <p className="text-xs text-gray-500">{isRTL ? 'الإجمالي' : 'Total'}</p>
@@ -275,29 +275,29 @@ export default function PaymentManagement() {
           </CardContent>
         </Card>
       </div>
-
+ 
       {/* Revenue Summary */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Card className="border-green-200 bg-green-50/50">
           <CardContent className="flex items-center justify-between p-4">
             <div>
               <p className="text-sm text-green-600">{isRTL ? 'إيرادات محققة' : 'Verified Revenue'}</p>
-              <p className="text-2xl font-bold text-green-700">
+              <p className="text-xl sm:text-2xl font-bold text-green-700">
                 {totalVerified.toLocaleString()} {t('common.sar')}
               </p>
             </div>
-            <CheckCircle className="h-10 w-10 text-green-300" />
+            <CheckCircle className="h-10 w-10 text-green-300 opacity-50 sm:opacity-100" />
           </CardContent>
         </Card>
         <Card className="border-yellow-200 bg-yellow-50/50">
           <CardContent className="flex items-center justify-between p-4">
             <div>
               <p className="text-sm text-yellow-600">{isRTL ? 'بانتظار المراجعة' : 'Pending Amount'}</p>
-              <p className="text-2xl font-bold text-yellow-700">
+              <p className="text-xl sm:text-2xl font-bold text-yellow-700">
                 {totalPending.toLocaleString()} {t('common.sar')}
               </p>
             </div>
-            <Clock className="h-10 w-10 text-yellow-300" />
+            <Clock className="h-10 w-10 text-yellow-300 opacity-50 sm:opacity-100" />
           </CardContent>
         </Card>
       </div>

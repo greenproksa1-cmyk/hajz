@@ -43,7 +43,7 @@ export default function HomeView({ onNavigate, isRTL = true }: HomeViewProps) {
               >
                 <Calendar className="w-4 h-4 text-blue-400" />
                 <span className="text-xs sm:text-sm text-blue-100 font-bold uppercase tracking-wider">
-                  {isRTL ? '15 - 18 مارس 2026 | الرياض' : '15 - 18 March 2026 | Riyadh'}
+                  {isRTL ? '15 - 17 يونيو 2026 | الرياض' : '15 - 17 June 2026 | Riyadh'}
                 </span>
               </motion.div>
  

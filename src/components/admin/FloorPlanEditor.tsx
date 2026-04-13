@@ -134,6 +134,8 @@ export default function FloorPlanEditor({
 
   const selectedBooth = booths.find((b) => b.id === selectedBoothId) || null
 
+  const snapToGrid = useCallback((v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE, [])
+
   const screenToCanvas = useCallback(
     (clientX: number, clientY: number): { x: number; y: number } => {
       const canvas = canvasRef.current
@@ -449,7 +451,9 @@ export default function FloorPlanEditor({
       }
 
       if (isDragging && selectedBoothId) {
-        dragPosRef.current = { x: pos.x - dragOffsetRef.current.x, y: pos.y - dragOffsetRef.current.y }
+        const nx = snapToGrid(pos.x - dragOffsetRef.current.x)
+        const ny = snapToGrid(pos.y - dragOffsetRef.current.y)
+        dragPosRef.current = { x: nx, y: ny }
         if (rafRef.current) cancelAnimationFrame(rafRef.current)
         rafRef.current = requestAnimationFrame(drawCanvas)
         return
@@ -463,20 +467,20 @@ export default function FloorPlanEditor({
         const minSize = 20
 
         if (resizeHandle.includes('w')) {
-          const newX = Math.min(pos.x, booth.x + booth.width - minSize)
+          const newX = snapToGrid(Math.min(pos.x, booth.x + booth.width - minSize))
           width = booth.x + booth.width - newX
           x = newX
         }
         if (resizeHandle.includes('e')) {
-          width = Math.max(minSize, pos.x - booth.x)
+          width = snapToGrid(Math.max(minSize, pos.x - booth.x))
         }
         if (resizeHandle.includes('n')) {
-          const newY = Math.min(pos.y, booth.y + booth.height - minSize)
+          const newY = snapToGrid(Math.min(pos.y, booth.y + booth.height - minSize))
           height = booth.y + booth.height - newY
           y = newY
         }
         if (resizeHandle.includes('s')) {
-          height = Math.max(minSize, pos.y - booth.y)
+          height = snapToGrid(Math.max(minSize, pos.y - booth.y))
         }
 
         resizeRef.current = { x, y, width, height }
@@ -520,7 +524,12 @@ export default function FloorPlanEditor({
       const height = Math.abs(drawCurrent.y - drawStart.y)
 
       if (width > 15 && height > 15) {
-        const area = Math.round((width * height) / 100) / 100
+        const sx = snapToGrid(x)
+        const sy = snapToGrid(y)
+        const sw = snapToGrid(width)
+        const sh = snapToGrid(height)
+        
+        const area = Math.round((sw * sh) / 100) / 100
         const newBooth: BoothShape = {
           id: generateId(),
           label: getNextLabel(booths),
@@ -528,10 +537,10 @@ export default function FloorPlanEditor({
           status: 'available',
           boothType: 'standard',
           price: Math.round(area * PRICE_PER_SQM),
-          x: Math.round(x),
-          y: Math.round(y),
-          width: Math.round(width),
-          height: Math.round(height),
+          x: sx,
+          y: sy,
+          width: sw,
+          height: sh,
         }
         setBooths((prev) => [...prev, newBooth])
         setSelectedBoothId(newBooth.id)

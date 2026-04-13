@@ -72,23 +72,62 @@ export async function PATCH(
       }
     }
 
-    const updateData: Record<string, unknown> = {};
+    const updateData: Record<string, any> = {};
     if (name !== undefined) updateData.name = name.trim();
     if (description !== undefined) updateData.description = description || null;
-    if (width !== undefined) updateData.width = width;
-    if (height !== undefined) updateData.height = height;
+    if (width !== undefined) updateData.width = Number(width);
+    if (height !== undefined) updateData.height = Number(height);
     if (isActive !== undefined) updateData.isActive = isActive;
 
-    const updatedPlan = await db.floorPlan.update({
-      where: { id },
-      data: updateData,
-      include: { booths: true },
+    const result = await db.$transaction(async (tx) => {
+      // 1. Update plan metadata
+      await tx.floorPlan.update({
+        where: { id },
+        data: updateData,
+      });
+
+      if (body.booths && Array.isArray(body.booths)) {
+        // 2. Delete existing booths on this plan that are NOT booked or pending
+        // This avoids deleting booths that already have active reservations
+        await tx.booth.deleteMany({
+          where: {
+            floorPlanId: id,
+            status: { notIn: ['booked', 'pending'] },
+          },
+        });
+
+        // 3. Create new booths
+        // We filter out booths that have 'booked' or 'pending' status because those should already exist in DB
+        const boothsToCreate = body.booths.filter((b: any) => b.status !== 'booked' && b.status !== 'pending');
+        
+        if (boothsToCreate.length > 0) {
+          await tx.booth.createMany({
+            data: boothsToCreate.map((b: any) => ({
+              label: b.label,
+              area: Number(b.area),
+              status: b.status || 'available',
+              boothType: b.boothType || 'standard',
+              price: b.price ? Number(b.price) : null,
+              x: Number(b.x ?? 0),
+              y: Number(b.y ?? 0),
+              width: Number(b.width ?? 100),
+              height: Number(b.height ?? 80),
+              floorPlanId: id,
+            })),
+          });
+        }
+      }
+
+      return await tx.floorPlan.findUnique({
+        where: { id },
+        include: { booths: true },
+      });
     });
 
     return NextResponse.json({
       success: true,
       message: 'Floor plan updated successfully',
-      data: updatedPlan,
+      data: result,
     });
   } catch (error) {
     console.error('Error updating floor plan:', error);

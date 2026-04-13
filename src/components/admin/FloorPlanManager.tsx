@@ -147,51 +147,39 @@ export default function FloorPlanManager() {
   const handleEditorSave = async (booths: BoothShape[], name: string, width: number, height: number): Promise<boolean> => {
     try {
       if (editingPlan) {
-        // Editing: update name, delete old booths, create new booths
-        const patchRes = await fetch(`/api/floor-plans/${editingPlan.id}`, {
+        // Efficient transactional update: single PATCH with plan details and booths
+        const res = await fetch(`/api/floor-plans/${editingPlan.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, width, height }),
+          body: JSON.stringify({ 
+            name, 
+            width, 
+            height,
+            booths: booths.map(b => ({
+              label: b.label,
+              area: b.area,
+              status: b.status,
+              boothType: b.boothType,
+              price: b.price,
+              x: b.x,
+              y: b.y,
+              width: b.width,
+              height: b.height
+            }))
+          }),
         })
-        const patchData = await patchRes.json()
-        if (!patchData.success) {
-          toast.error(patchData.error || t('common.error'))
+        const data = await res.json()
+        if (data.success) {
+          setEditorOpen(false)
+          fetchPlans()
+          toast.success(t('common.success'))
+          return true
+        } else {
+          toast.error(data.error || t('common.error'))
           return false
         }
-
-        // Delete all old non-booked booths on this floor plan
-        const oldBooths = editingPlan.booths || []
-        await Promise.all(
-          oldBooths
-            .filter((b: BoothShape) => b.status !== 'booked')
-            .map((b: BoothShape) =>
-              fetch(`/api/booths/${b.id}`, { method: 'DELETE' }).catch(() => null)
-            )
-        )
-
-        // Create new booths
-        for (const booth of booths) {
-          await fetch(`/api/floor-plans/${editingPlan.id}/booths`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              label: booth.label,
-              area: booth.area,
-              status: booth.status || 'available',
-              boothType: booth.boothType,
-              price: booth.price,
-              x: booth.x,
-              y: booth.y,
-              width: booth.width,
-              height: booth.height,
-            }),
-          })
-        }
-
-        setEditorOpen(false)
-        fetchPlans()
-        return true
       } else {
+
         // Creating: POST new floor plan with booths
         const res = await fetch('/api/floor-plans', {
           method: 'POST',
