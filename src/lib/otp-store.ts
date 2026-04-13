@@ -1,43 +1,54 @@
-interface OTPEntry {
-  email: string;
-  otp: string;
-  expiresAt: number;
-  verified: boolean;
-}
+import { db } from './db';
 
-const otpStore = new Map<string, OTPEntry>();
 const OTP_TTL = 5 * 60 * 1000; // 5 minutes
 
-export function generateOTP(email: string): string {
+export async function generateOTP(email: string): Promise<string> {
   const otp = Math.floor(1000 + Math.random() * 9000).toString();
-  otpStore.set(email, {
-    email,
-    otp,
-    expiresAt: Date.now() + OTP_TTL,
-    verified: false,
+  await db.verificationToken.upsert({
+    where: { email },
+    update: {
+      otp,
+      verified: false,
+      expiresAt: new Date(Date.now() + OTP_TTL),
+    },
+    create: {
+      email,
+      otp,
+      verified: false,
+      expiresAt: new Date(Date.now() + OTP_TTL),
+    },
   });
   return otp;
 }
 
-export function verifyOTP(email: string, otp: string): boolean {
-  const entry = otpStore.get(email);
+export async function verifyOTP(email: string, otp: string): Promise<boolean> {
+  const entry = await db.verificationToken.findUnique({
+    where: { email },
+  });
+
   if (!entry) return false;
-  if (Date.now() > entry.expiresAt) {
-    otpStore.delete(email);
+  if (new Date() > entry.expiresAt) {
+    await db.verificationToken.delete({ where: { email } });
     return false;
   }
+
   if (entry.otp === otp) {
-    entry.verified = true;
+    await db.verificationToken.update({
+      where: { email },
+      data: { verified: true },
+    });
     return true;
   }
   return false;
 }
 
-export function isVerified(email: string): boolean {
-  const entry = otpStore.get(email);
+export async function isVerified(email: string): Promise<boolean> {
+  const entry = await db.verificationToken.findUnique({
+    where: { email },
+  });
   return entry?.verified === true;
 }
 
-export function clearOTP(email: string): void {
-  otpStore.delete(email);
+export async function clearOTP(email: string): Promise<void> {
+  await db.verificationToken.delete({ where: { email } }).catch(() => {});
 }

@@ -23,7 +23,7 @@ export async function GET() {
       return NextResponse.json({ success: true, data: [] });
     }
 
-    const lockedIds = getLockedBoothIds();
+    const lockedIds = await getLockedBoothIds();
 
     // 3. Process booths for the active plan
     const enrichedBooths = activePlan.booths.map((booth) => ({

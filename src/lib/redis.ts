@@ -1,59 +1,58 @@
-// In-memory booth lock system simulating Redis with TTL
-interface LockEntry {
-  bookingId: string;
-  boothIds: string[];
-  expiresAt: number; // timestamp in ms
-  email: string;
-}
+import { db } from './db';
 
-const locks = new Map<string, LockEntry>();
 const LOCK_TTL = 2 * 60 * 60 * 1000; // 2 hours
 
-export function setLock(bookingId: string, boothIds: string[], email: string): void {
-  // Remove any existing locks for these booths
-  for (const [key, entry] of locks.entries()) {
-    if (entry.boothIds.some(id => boothIds.includes(id))) {
-      locks.delete(key);
-    }
-  }
-  locks.set(bookingId, {
-    bookingId,
-    boothIds,
-    expiresAt: Date.now() + LOCK_TTL,
-    email,
+export async function setLock(bookingId: string, boothIds: string[], email: string): Promise<void> {
+  // 1. Remove any existing locks for these booths to allow takeover/overlap resolution
+  await db.boothLock.deleteMany({
+    where: { boothId: { in: boothIds } },
+  });
+
+  // 2. Create new locks
+  const expiresAt = new Date(Date.now() + LOCK_TTL);
+  
+  // Use createMany for performance
+  await db.boothLock.createMany({
+    data: boothIds.map(boothId => ({
+      boothId,
+      bookingId,
+      email,
+      expiresAt,
+    })),
+    skipDuplicates: true,
   });
 }
 
-export function getLock(bookingId: string): LockEntry | undefined {
-  return locks.get(bookingId);
+export async function removeLock(bookingId: string): Promise<void> {
+  await db.boothLock.deleteMany({
+    where: { bookingId },
+  });
 }
 
-export function removeLock(bookingId: string): boolean {
-  return locks.delete(bookingId);
-}
+export async function isBoothLocked(boothId: string): Promise<boolean> {
+  const lock = await db.boothLock.findUnique({
+    where: { boothId },
+  });
 
-export function isBoothLocked(boothId: string): boolean {
-  cleanupExpired();
-  for (const [, entry] of locks.entries()) {
-    if (entry.boothIds.includes(boothId)) return true;
+  if (!lock) return false;
+
+  if (new Date() > lock.expiresAt) {
+    await db.boothLock.delete({ where: { boothId } });
+    return false;
   }
-  return false;
+
+  return true;
 }
 
-export function getLockedBoothIds(): string[] {
-  cleanupExpired();
-  const ids: string[] = [];
-  for (const [, entry] of locks.entries()) {
-    ids.push(...entry.boothIds);
-  }
-  return [...new Set(ids)];
-}
+export async function getLockedBoothIds(): Promise<string[]> {
+  // Clean up expired locks first
+  await db.boothLock.deleteMany({
+    where: { expiresAt: { lt: new Date() } },
+  });
 
-export function cleanupExpired(): void {
-  const now = Date.now();
-  for (const [key, entry] of locks.entries()) {
-    if (now > entry.expiresAt) {
-      locks.delete(key);
-    }
-  }
+  const locks = await db.boothLock.findMany({
+    select: { boothId: true },
+  });
+
+  return locks.map(l => l.boothId);
 }

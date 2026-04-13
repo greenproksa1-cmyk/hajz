@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate OTP
-    const otp = generateOTP(email);
+    const otp = await generateOTP(email);
 
     // Send email
     let emailSent = false;

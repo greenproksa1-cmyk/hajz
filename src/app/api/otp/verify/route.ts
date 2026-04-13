@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const isValid = verifyOTP(email, otp);
+    const isValid = await verifyOTP(email, otp);
 
     if (isValid) {
       return NextResponse.json({

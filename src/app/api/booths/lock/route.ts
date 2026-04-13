@@ -7,6 +7,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { boothIds, email, bookingId } = body;
 
+    const boothIds: string[] = body.boothIds;
+    const { email, bookingId } = body;
+
     if (!boothIds || !Array.isArray(boothIds) || boothIds.length === 0) {
       return NextResponse.json(
         { success: false, error: 'boothIds is required and must be a non-empty array' },
@@ -26,15 +29,19 @@ export async function POST(request: NextRequest) {
       where: { id: { in: boothIds } },
     });
 
-    const alreadyBooked = booths.filter(
-      (b) => b.status === 'booked' && !isBoothLocked(b.id)
-    );
+    const bookedBooths = [];
+    for (const b of booths) {
+      const locked = await isBoothLocked(b.id);
+      if (b.status === 'booked' && !locked) {
+        bookedBooths.push(b);
+      }
+    }
 
-    if (alreadyBooked.length > 0) {
+    if (bookedBooths.length > 0) {
       return NextResponse.json(
         {
           success: false,
-          error: `Booth(s) already booked: ${alreadyBooked.map((b) => b.label).join(', ')}`,
+          error: `Booth(s) already booked: ${bookedBooths.map((b) => b.label).join(', ')}`,
         },
         { status: 409 }
       );
@@ -42,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // Set lock (this also removes any existing locks for these booths)
     const lockId = bookingId || `lock-${Date.now()}`;
-    setLock(lockId, boothIds, email);
+    await setLock(lockId, boothIds, email);
 
     // Update booth statuses to pending in DB
     await db.booth.updateMany({

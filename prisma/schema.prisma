@@ -90,3 +90,21 @@ model Payment {
   createdAt   DateTime  @default(now())
   booking     Booking   @relation(fields: [bookingId], references: [id])
 }
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  otp       String
+  verified  Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model BoothLock {
+  id        String   @id @default(cuid())
+  boothId   String   @unique
+  bookingId String
+  email     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

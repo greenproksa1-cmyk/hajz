@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { removeLock } from '@/lib/redis';
+import { removeLock, getLockedBoothIds } from '@/lib/redis';
 import { isVerified, clearOTP } from '@/lib/otp-store';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
@@ -18,6 +18,8 @@ export async function GET() {
       select: { id: true },
     });
     const activePlanIds = activeFloorPlans.map(fp => fp.id);
+
+    const lockedIds = await getLockedBoothIds();
 
     // 1. Gather all unique booth IDs to prevent N+1 queries
     const allBoothIds = new Set<string>();
@@ -95,7 +97,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify OTP
-    if (!isVerified(body.email)) {
+    const verified = await isVerified(body.email);
+    if (!verified) {
       return NextResponse.json(
         { success: false, error: 'Email not verified. Please verify your OTP first.' },
         { status: 403 }
@@ -158,10 +161,10 @@ export async function POST(request: NextRequest) {
     });
 
     // Remove the lock since booking is now created
-    removeLock(body.bookingId || '');
+    await removeLock(body.bookingId || '');
 
     // Clear OTP for this email
-    clearOTP(body.email);
+    await clearOTP(body.email);
 
     return NextResponse.json({
       success: true,
