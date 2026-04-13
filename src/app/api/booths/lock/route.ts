@@ -7,9 +7,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { boothIds, email, bookingId } = body;
 
-    const boothIds: string[] = body.boothIds;
-    const { email, bookingId } = body;
-
     if (!boothIds || !Array.isArray(boothIds) || boothIds.length === 0) {
       return NextResponse.json(
         { success: false, error: 'boothIds is required and must be a non-empty array' },

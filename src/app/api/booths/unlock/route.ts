@@ -1,6 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { removeLock, getLock } from '@/lib/redis';
+import { removeLock } from '@/lib/redis';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,22 +12,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the lock to know which booths to unlock
-    const lock = getLock(bookingId);
-    if (!lock) {
-      return NextResponse.json(
-        { success: false, error: 'No active lock found for this bookingId' },
-        { status: 404 }
-      );
+    // 1. Get the locks for this bookingId to know which booths to reset
+    const locks = await db.boothLock.findMany({
+      where: { bookingId },
+      select: { boothId: true },
+    });
+
+    if (locks.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: 'No active locks found, nothing to unlock.',
+      });
     }
 
-    // Remove the lock
-    removeLock(bookingId);
+    const boothIds = locks.map(l => l.boothId);
 
-    // Reset booth statuses to available in DB (only those that were pending)
+    // 2. Remove the locks
+    await removeLock(bookingId);
+
+    // 3. Reset booth statuses to available in DB (only those that were pending)
     await db.booth.updateMany({
       where: {
-        id: { in: lock.boothIds },
+        id: { in: boothIds },
         status: 'pending',
       },
       data: { status: 'available' },
