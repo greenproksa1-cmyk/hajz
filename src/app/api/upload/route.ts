@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,19 +9,72 @@ export async function POST(request: NextRequest) {
     const contract = formData.get('contract') as File | null;
     const receipt = formData.get('receipt') as File | null;
 
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json(
+        { success: false, error: 'Database environment variables are missing' },
+        { status: 500 }
+      );
+    }
+
+    const uploadToSupabase = async (fileObj: File, type: string) => {
+      const buffer = await fileObj.arrayBuffer();
+      const filename = `${Date.now()}-${fileObj.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const pathUrl = `${supabaseUrl}/storage/v1/object/uploads/${type}/${filename}`;
+
+      let response = await fetch(pathUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': fileObj.type,
+        },
+        body: buffer,
+      });
+
+      // If bucket "uploads" doesn't exist, create it and retry
+      if (response.status === 404 || response.status === 400) {
+        const errorData = await response.json().catch(() => ({}));
+        if (errorData?.error === 'Bucket not found' || errorData?.message?.includes('bucket')) {
+          await fetch(`${supabaseUrl}/storage/v1/bucket`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id: "uploads",
+              name: "uploads",
+              public: true
+            }),
+          });
+
+          // Retry upload
+          response = await fetch(pathUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': fileObj.type,
+            },
+            body: buffer,
+          });
+        }
+      }
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+
+      return `${supabaseUrl}/storage/v1/object/public/uploads/${type}/${filename}`;
+    };
+
     // Single file upload mode
     if (file) {
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'contracts');
-      await mkdir(uploadDir, { recursive: true });
-
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const filepath = path.join(uploadDir, filename);
-      await writeFile(filepath, buffer);
-
+      const path = await uploadToSupabase(file, 'general');
       return NextResponse.json({
         success: true,
-        path: `/uploads/contracts/${filename}`,
+        path,
       });
     }
 
@@ -38,36 +89,22 @@ export async function POST(request: NextRequest) {
     const result: { contractPath?: string; receiptPath?: string } = {};
 
     if (contract) {
-      const contractDir = path.join(process.cwd(), 'public', 'uploads', 'contracts');
-      await mkdir(contractDir, { recursive: true });
-
-      const contractBuffer = Buffer.from(await contract.arrayBuffer());
-      const contractFilename = `${Date.now()}-${contract.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const contractPath = path.join(contractDir, contractFilename);
-      await writeFile(contractPath, contractBuffer);
-      result.contractPath = `/uploads/contracts/${contractFilename}`;
+      result.contractPath = await uploadToSupabase(contract, 'contracts');
     }
 
     if (receipt) {
-      const receiptDir = path.join(process.cwd(), 'public', 'uploads', 'receipts');
-      await mkdir(receiptDir, { recursive: true });
-
-      const receiptBuffer = Buffer.from(await receipt.arrayBuffer());
-      const receiptFilename = `${Date.now()}-${receipt.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const receiptPath = path.join(receiptDir, receiptFilename);
-      await writeFile(receiptPath, receiptBuffer);
-      result.receiptPath = `/uploads/receipts/${receiptFilename}`;
+      result.receiptPath = await uploadToSupabase(receipt, 'receipts');
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Files uploaded successfully',
+      message: 'Files uploaded successfully to cloud',
       data: result,
     });
   } catch (error) {
-    console.error('Error uploading files:', error);
+    console.error('Error uploading files to Supabase:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to upload files' },
+      { success: false, error: 'Failed to upload files to cloud storage' },
       { status: 500 }
     );
   }
