@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getLockedBoothIds } from '@/lib/redis';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
+    console.log('[API/Booths] Fetching active floor plan...');
     // 1. Get the currently active floor plan
     let activePlan = await db.floorPlan.findFirst({
       where: { isActive: true },
@@ -11,17 +14,23 @@ export async function GET() {
       orderBy: { updatedAt: 'desc' }
     });
 
+    console.log('[API/Booths] Active plan found:', activePlan?.name || 'None');
+
     // 2. Fallback to the latest plan if none is active
     if (!activePlan) {
+      console.log('[API/Booths] No active plan, falling back to latest...');
       activePlan = await db.floorPlan.findFirst({
         include: { booths: true },
         orderBy: { createdAt: 'desc' }
       });
+      console.log('[API/Booths] Fallback plan:', activePlan?.name || 'None');
     }
 
     if (!activePlan) {
       return NextResponse.json({ success: true, data: [] });
     }
+
+    console.log(`[API/Booths] Processing ${activePlan.booths.length} booths for plan ${activePlan.name}`);
 
     const lockedIds = await getLockedBoothIds();
 
