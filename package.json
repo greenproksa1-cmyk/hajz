@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && mkdir -p .next/standalone/node_modules && cp -r node_modules/pdf-lib .next/standalone/node_modules/pdf-lib && cp -r node_modules/nodemailer .next/standalone/node_modules/nodemailer && cp -r node_modules/mailparser .next/standalone/node_modules/mailparser 2>/dev/null; cp -r node_modules/iconv-lite .next/standalone/node_modules/iconv-lite 2>/dev/null; true",
-    "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
+    "build": "prisma generate && next build",
+    "postinstall": "prisma generate",
+    "start": "next start",
     "lint": "eslint .",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
