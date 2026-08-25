@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import crypto from "crypto";
 import { sendPasswordResetEmail } from "@/lib/email";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();

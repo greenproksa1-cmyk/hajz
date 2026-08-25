@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 // GET: Return all floor plans
 export async function GET() {
   try {
@@ -96,10 +98,10 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating floor plan:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create floor plan' },
+      { success: false, error: error.message || 'Failed to create floor plan' },
       { status: 500 }
     );
   }
