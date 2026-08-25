@@ -32,6 +32,7 @@ import {
   Image as ImageIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { openOrDownloadFile } from '@/lib/file-viewer'
 import BookingTracker from './BookingTracker'
 import BookingHistoryTable from './BookingHistoryTable'
 import PaymentInstructions from './PaymentInstructions'
@@ -137,27 +138,12 @@ export default function UserDashboard({ email, onBack }: UserDashboardProps) {
     }
   }
 
-  const handleDownloadContract = async (booking: Booking) => {
+  const handleDownloadContract = (booking: Booking) => {
     if (!booking.contractPath) {
       toast.error(isRTL ? 'لا يوجد عقد متاح' : 'No contract available')
       return
     }
-    try {
-      const response = await fetch(booking.contractPath)
-      if (!response.ok) throw new Error('Download failed')
-      const blob = await response.blob()
-      const blobUrl = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = blobUrl
-      link.download = `contract-${booking.entityName}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(blobUrl)
-      toast.success(t('common.success'))
-    } catch {
-      toast.error(t('common.error'))
-    }
+    openOrDownloadFile(booking.contractPath, `contract-${booking.entityName}.pdf`, true)
   }
 
   const getStatusLabel = (status: string) => {

@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { FileText, Image as ImageIcon, Download, Trash2, Loader2, Eye, File } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { openOrDownloadFile } from '@/lib/file-viewer'
+
 interface FilePreviewProps {
   filePath: string | null
   fileName: string
@@ -15,22 +17,26 @@ interface FilePreviewProps {
 }
 
 function getFileExtension(path: string): string {
+  if (path.startsWith('data:image/')) return 'png'
+  if (path.startsWith('data:application/pdf')) return 'pdf'
   const parts = path.split('.')
   return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : ''
 }
 
 function isImageFile(path: string): boolean {
+  if (path.startsWith('data:image/')) return true
   const ext = getFileExtension(path)
   return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)
 }
 
 function isPdfFile(path: string): boolean {
+  if (path.startsWith('data:application/pdf')) return true
   const ext = getFileExtension(path)
   return ext === 'pdf'
 }
 
 function constructFileUrl(path: string): string {
-  if (path.startsWith('http://') || path.startsWith('https://')) {
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
     return path
   }
   if (path.startsWith('/')) {
@@ -54,34 +60,14 @@ export default function FilePreview({
     setImageError(false)
   }, [filePath])
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     if (!filePath) return
-    setIsLoading(true)
-    try {
-      const url = constructFileUrl(filePath)
-      const response = await fetch(url)
-      if (!response.ok) throw new Error('Download failed')
-      const blob = await response.blob()
-      const blobUrl = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = blobUrl
-      link.download = fileName || 'download'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(blobUrl)
-      toast.success(t('common.success'))
-    } catch {
-      toast.error(t('common.error'))
-    } finally {
-      setIsLoading(false)
-    }
+    openOrDownloadFile(filePath, fileName || 'document.pdf', true)
   }
 
   const handleView = () => {
     if (!filePath) return
-    const url = constructFileUrl(filePath)
-    window.open(url, '_blank', 'noopener,noreferrer')
+    openOrDownloadFile(filePath, fileName || 'document.pdf', false)
   }
 
   // No file placeholder

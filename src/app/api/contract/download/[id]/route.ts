@@ -25,10 +25,27 @@ export async function GET(
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }
 
-    // If the customer has uploaded a signed contract, redirect to that exact file
+    // If the customer has uploaded a signed contract, return it or redirect
     const existingContractPath = booking.signedContractPath || booking.contractPath;
     if (existingContractPath) {
-      return NextResponse.redirect(new URL(existingContractPath, request.url));
+      if (existingContractPath.startsWith('data:')) {
+        const matches = existingContractPath.match(/^data:([^;]+);base64,(.+)$/);
+        if (matches) {
+          const mimeType = matches[1];
+          const buffer = Buffer.from(matches[2], 'base64');
+          return new NextResponse(buffer, {
+            status: 200,
+            headers: {
+              'Content-Type': mimeType,
+              'Content-Disposition': 'inline; filename="contract.pdf"',
+            },
+          });
+        }
+      } else if (existingContractPath.startsWith('http://') || existingContractPath.startsWith('https://')) {
+        return NextResponse.redirect(existingContractPath);
+      } else {
+        return NextResponse.redirect(new URL(existingContractPath, request.url));
+      }
     }
 
     const boothLabels = booking.booths.map(b => b.label);

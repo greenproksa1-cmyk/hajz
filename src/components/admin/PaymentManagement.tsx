@@ -53,6 +53,14 @@ import {
 import { toast } from 'sonner'
 import { generateContractPDF } from '@/lib/pdf-export'
 import { ContractTemplate } from '@/components/ContractTemplate'
+import { openOrDownloadFile } from '@/lib/file-viewer'
+
+function isImageFile(path: string | null): boolean {
+  if (!path) return false
+  if (path.startsWith('data:image/')) return true
+  const ext = path.split('.').pop()?.toLowerCase() || ''
+  return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)
+}
 
 interface PaymentRecord {
   id: string
@@ -394,24 +402,31 @@ export default function PaymentManagement() {
               <img
                 src={receiptDialog.receiptPath}
                 alt={t('admin.payments.receipt')}
-                className="max-h-[500px] rounded-lg border object-contain"
+                className="max-h-[500px] rounded-lg border object-contain shadow-sm"
               />
             </div>
           )}
           {receiptDialog?.receiptPath && !isImageFile(receiptDialog.receiptPath) && (
             <div className="flex flex-col items-center justify-center gap-4 py-8">
-              <FileText className="h-16 w-16 text-gray-400" />
-              <p className="text-sm text-gray-500">{isRTL ? 'ملف PDF' : 'PDF File'}</p>
-              <a
-                href={receiptDialog.receiptPath}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button variant="outline" className="gap-2">
+              <FileText className="h-16 w-16 text-blue-600" />
+              <p className="text-sm text-gray-600 font-medium">{isRTL ? 'إيصال دفع (PDF)' : 'Payment Receipt (PDF)'}</p>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => openOrDownloadFile(receiptDialog.receiptPath, `receipt-${receiptDialog.entityName}.pdf`, false)}
+                  className="gap-2 bg-blue-600 hover:bg-blue-700"
+                >
                   <ExternalLink className="h-4 w-4" />
-                  {isRTL ? 'فتح الملف' : 'Open File'}
+                  {isRTL ? 'معاينة / فتح الملف' : 'View / Open File'}
                 </Button>
-              </a>
+                <Button 
+                  variant="outline"
+                  onClick={() => openOrDownloadFile(receiptDialog.receiptPath, `receipt-${receiptDialog.entityName}.pdf`, true)}
+                  className="gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  {isRTL ? 'تحميل' : 'Download'}
+                </Button>
+              </div>
             </div>
           )}
           <DialogFooter>

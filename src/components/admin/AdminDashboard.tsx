@@ -35,6 +35,7 @@ import {
   ChevronUp,
   Loader2,
 } from 'lucide-react'
+import { openOrDownloadFile } from '@/lib/file-viewer'
 import { toast } from 'sonner'
 
 interface Booking {
@@ -391,26 +392,26 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 <h4 className="mb-2 font-semibold text-gray-700">{t('admin.viewFiles')}</h4>
                 <div className="flex gap-2">
                   {detailBooking.contractPath && (
-                    <a
-                      href={detailBooking.contractPath}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-md bg-orange-50 px-3 py-2 text-sm text-orange-700 transition-colors hover:bg-blue-50"
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openOrDownloadFile(detailBooking.contractPath, `contract-${detailBooking.entityName}.pdf`)}
+                      className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-200"
                     >
                       <FileText className="h-4 w-4" />
                       {t('admin.contractFile')}
-                    </a>
+                    </Button>
                   )}
                   {detailBooking.receiptPath && (
-                    <a
-                      href={detailBooking.receiptPath}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-md bg-orange-50 px-3 py-2 text-sm text-orange-700 transition-colors hover:bg-blue-50"
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openOrDownloadFile(detailBooking.receiptPath, `receipt-${detailBooking.entityName}.pdf`)}
+                      className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200"
                     >
                       <ImageIcon className="h-4 w-4" />
                       {t('admin.receiptFile')}
-                    </a>
+                    </Button>
                   )}
                   {!detailBooking.contractPath && !detailBooking.receiptPath && (
                     <span className="text-sm text-gray-500">{t('common.noData')}</span>
