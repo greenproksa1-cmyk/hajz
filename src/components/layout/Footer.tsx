@@ -1,0 +1,70 @@
+'use client'
+
+import { useTranslation } from '@/i18n'
+import { MapPin, Phone, Mail } from 'lucide-react'
+
+export default function Footer() {
+  const { t, lang } = useTranslation()
+
+  return (
+    <footer className="border-t border-gray-200 bg-gray-900 text-gray-300">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-3 text-center md:text-start">
+          {/* Exhibition Info */}
+          <div className="flex flex-col items-center md:items-start gap-4">
+            <img 
+              src="/images/logo.png" 
+              alt={lang === 'ar' ? 'شركة قرين بروجكتس لتنظيم المعارض والمؤتمرات' : 'Green Projects Exhibitions & Conferences'} 
+              className="h-14 w-auto object-contain self-start invert brightness-0" 
+            />
+            <h3 className="text-lg font-bold text-white hidden">
+              {lang === 'ar' ? 'قرين بروجكتس للمعارض والمؤتمرات' : 'Green Projects Exhibitions & Conferences'}
+            </h3>
+            <p className="text-sm leading-relaxed text-gray-400">
+              {lang === 'ar'
+                ? 'المنصة الرائدة لحجز الأجنحة وإدارة المعارض والمؤتمرات في المملكة العربية السعودية'
+                : 'The leading platform for booth reservations and exhibition management in Saudi Arabia'}
+            </p>
+          </div>
+
+          {/* Location */}
+          <div>
+            <h3 className="mb-3 text-lg font-bold text-white">
+              {lang === 'ar' ? 'الموقع' : 'Location'}
+            </h3>
+            <div className="flex flex-col gap-2 text-sm text-gray-400">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 shrink-0 text-blue-600" />
+                <span>{lang === 'ar' ? 'المملكة العربية السعودية - الرياض' : 'Riyadh, Kingdom of Saudi Arabia'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h3 className="mb-3 text-lg font-bold text-white">
+              {lang === 'ar' ? 'التواصل' : 'Contact'}
+            </h3>
+            <div className="flex flex-col gap-2 text-sm text-gray-400">
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 shrink-0 text-blue-600" />
+                <span dir="ltr">+966 59 0401 777</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 shrink-0 text-blue-600" />
+                <span>contact@gren-pro.com</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Copyright */}
+        <div className="mt-8 border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
+          <p>
+            © {new Date().getFullYear()} {lang === 'ar' ? 'شركة قرين بروجكتس لتنظيم المعارض والمؤتمرات. جميع الحقوق محفوظة' : 'Green Projects for Exhibitions & Conferences. All rights reserved.'}
+          </p>
+        </div>
+      </div>
+    </footer>
+  )
+}
