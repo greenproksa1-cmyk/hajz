@@ -78,10 +78,10 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
     textColor = '#ffffff'
   } else if (isVIPSafe) {
     fillUrl = 'url(#grad-vip)'
-    textColor = '#451a03'
+    textColor = '#ffffff'
   } else if (isSP) {
     fillUrl = 'url(#grad-sp)'
-    textColor = '#334155'
+    textColor = '#ffffff'
   }
 
   return (
@@ -381,22 +381,22 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
                     </filter>
 
                     <linearGradient id="grad-vip" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#ffedd5', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#f97316', stopOpacity: 1 }} />
+                      <stop offset="0%" style={{ stopColor: '#fbbf24', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: '#ea580c', stopOpacity: 1 }} />
                     </linearGradient>
 
                     <linearGradient id="grad-sp" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#ede9fe', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#8b5cf6', stopOpacity: 1 }} />
+                      <stop offset="0%" style={{ stopColor: '#a78bfa', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: '#7c3aed', stopOpacity: 1 }} />
                     </linearGradient>
 
                     <linearGradient id="grad-standard" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#e0f2fe', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#0ea5e9', stopOpacity: 1 }} />
+                      <stop offset="0%" style={{ stopColor: '#34d399', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: '#059669', stopOpacity: 1 }} />
                     </linearGradient>
 
                     <linearGradient id="grad-booked" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#fca5a5', stopOpacity: 1 }} />
+                      <stop offset="0%" style={{ stopColor: '#f87171', stopOpacity: 1 }} />
                       <stop offset="100%" style={{ stopColor: '#dc2626', stopOpacity: 1 }} />
                     </linearGradient>
 
@@ -529,7 +529,7 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
                                <div className="bg-slate-50 rounded-2xl p-4 transition-colors hover:bg-slate-100/80">
                                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">{isRTL ? 'الفئة' : 'Category'}</span>
                                  <span className="text-sm font-black text-slate-800 uppercase tracking-tight">
-                                   {isVIP ? 'VIP' : (isSP ? (isRTL ? 'راعي' : 'Sponsor') : (isRTL ? 'عادي' : 'Standard'))}
+                                   {isVIP ? 'VIP Package' : (isSP ? (isRTL ? 'مخصص للرعاة' : 'Sponsors') : (isRTL ? 'متاح ريادي' : 'Available'))}
                                  </span>
                                </div>
                             </div>
@@ -580,7 +580,7 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
                 <div className="grid grid-cols-2 gap-4">
                    <LegendItem color="bg-gradient-to-br from-emerald-400 to-emerald-600" label={isRTL ? 'متاح ريادي' : 'Available'} isRTL={isRTL} />
                    <LegendItem color="bg-gradient-to-br from-amber-300 to-orange-500" label="VIP Package" isRTL={isRTL} />
-                   <LegendItem color="bg-gradient-to-br from-slate-200 to-slate-400" label={isRTL ? 'مخصص للرعاة' : 'Sponsors'} isRTL={isRTL} />
+                   <LegendItem color="bg-gradient-to-br from-purple-400 to-purple-600" label={isRTL ? 'مخصص للرعاة' : 'Sponsors'} isRTL={isRTL} />
                    <LegendItem color="bg-gradient-to-br from-red-400 to-red-600" label={isRTL ? 'محجوز رسمياً' : 'Reserved'} isRTL={isRTL} />
                 </div>
              </div>
