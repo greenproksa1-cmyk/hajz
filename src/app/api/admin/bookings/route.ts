@@ -14,7 +14,7 @@ function checkAdminAuth(request: NextRequest): boolean {
   }
 }
 
-// GET: Return ALL bookings for admin (no NextAuth session required)
+// GET: Return ALL bookings for admin enriched with booth details and documents
 export async function GET(request: NextRequest) {
   try {
     if (!checkAdminAuth(request)) {
@@ -23,17 +23,56 @@ export async function GET(request: NextRequest) {
 
     const bookings = await db.booking.findMany({
       orderBy: { createdAt: 'desc' },
-      include: { booths: true },
+      include: {
+        booths: true,
+        payment: true,
+      },
     });
 
-    return NextResponse.json({ success: true, data: bookings });
+    // 1. Gather all unique booth IDs to resolve any booths not linked via relation
+    const allBoothIds = new Set<string>();
+    const parsedBoothsMap = new Map<string, string[]>();
+
+    for (const booking of bookings) {
+      try {
+        const ids = typeof booking.boothIds === 'string' ? JSON.parse(booking.boothIds) : booking.boothIds;
+        if (Array.isArray(ids)) {
+          parsedBoothsMap.set(booking.id, ids);
+          ids.forEach(id => allBoothIds.add(id));
+        }
+      } catch {
+        // ignore parse error
+      }
+    }
+
+    const boothsList = await db.booth.findMany({
+      where: { id: { in: Array.from(allBoothIds) } },
+      select: { id: true, label: true, area: true, boothType: true, status: true },
+    });
+
+    const boothsById = new Map<string, any>();
+    boothsList.forEach(b => boothsById.set(b.id, b));
+
+    const enrichedBookings = bookings.map(booking => {
+      let booths = booking.booths;
+      if (!booths || booths.length === 0) {
+        const ids = parsedBoothsMap.get(booking.id) || [];
+        booths = ids.map(id => boothsById.get(id)).filter(Boolean) as any;
+      }
+      return {
+        ...booking,
+        booths,
+      };
+    });
+
+    return NextResponse.json({ success: true, data: enrichedBookings });
   } catch (error) {
     console.error('Error fetching admin bookings:', error);
     return NextResponse.json({ success: false, error: 'Failed to fetch bookings' }, { status: 500 });
   }
 }
 
-// PATCH: Update booking status (approve/reject)
+// PATCH: Update booking status (approve / reject / pending) with booth status sync
 export async function PATCH(request: NextRequest) {
   try {
     if (!checkAdminAuth(request)) {
@@ -65,21 +104,28 @@ export async function PATCH(request: NextRequest) {
       data: { status },
     });
 
-    // Update booth statuses based on action
-    if (status === 'approved') {
-      const boothIds: string[] = JSON.parse(booking.boothIds);
-      await db.booth.updateMany({
-        where: { id: { in: boothIds } },
-        data: { status: 'booked' },
-      });
+    // Extract booth IDs
+    let boothIds: string[] = [];
+    try {
+      boothIds = typeof booking.boothIds === 'string' ? JSON.parse(booking.boothIds) : booking.boothIds;
+    } catch {
+      boothIds = [];
     }
 
-    if (status === 'rejected') {
-      const boothIds: string[] = JSON.parse(booking.boothIds);
-      await db.booth.updateMany({
-        where: { id: { in: boothIds } },
-        data: { status: 'available' },
-      });
+    if (Array.isArray(boothIds) && boothIds.length > 0) {
+      if (status === 'approved' || status === 'completed') {
+        // Mark booths as booked
+        await db.booth.updateMany({
+          where: { id: { in: boothIds } },
+          data: { status: 'booked' },
+        });
+      } else {
+        // When rejected or pending, release the booths back to available
+        await db.booth.updateMany({
+          where: { id: { in: boothIds } },
+          data: { status: 'available' },
+        });
+      }
     }
 
     return NextResponse.json({ success: true, data: updatedBooking });
