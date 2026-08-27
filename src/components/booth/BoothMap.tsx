@@ -74,8 +74,8 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
   let textColor = '#ffffff'
   
   if (isBooked) {
-    fillUrl = 'url(#grad-disabled)'
-    textColor = '#64748b'
+    fillUrl = 'url(#grad-booked)'
+    textColor = '#ffffff'
   } else if (isVIPSafe) {
     fillUrl = 'url(#grad-vip)'
     textColor = '#451a03'
@@ -149,7 +149,7 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
       {/* Labels */}
       <text
         x={booth.x + booth.width / 2}
-        y={booth.y + booth.height / 2 + (isBooked || (!isVIPSafe && !isSP) ? -5 : 5)}
+        y={booth.y + booth.height / 2 + (isBooked ? -14 : (!isVIPSafe && !isSP) ? -5 : 5)}
         textAnchor="middle"
         dominantBaseline="central"
         fontSize={14}
@@ -163,18 +163,36 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
       
       <text
         x={booth.x + booth.width / 2}
-        y={booth.y + booth.height / 2 + (isBooked || (!isVIPSafe && !isSP) ? 12 : 20)}
+        y={booth.y + booth.height / 2 + (isBooked ? 3 : (!isVIPSafe && !isSP) ? 12 : 20)}
         textAnchor="middle"
         dominantBaseline="central"
         fontSize={10}
         fontWeight="700"
         fill={textColor}
-        opacity={0.8}
+        opacity={0.85}
         style={{ pointerEvents: 'none' }}
         className="font-sans select-none tracking-tight"
       >
         {booth.area} {t('boothMap.sqm') || 'm²'}
       </text>
+
+      {/* Booked label */}
+      {isBooked && (
+        <text
+          x={booth.x + booth.width / 2}
+          y={booth.y + booth.height / 2 + 18}
+          textAnchor="middle"
+          dominantBaseline="central"
+          fontSize={9}
+          fontWeight="900"
+          fill="#fee2e2"
+          opacity={1}
+          style={{ pointerEvents: 'none', letterSpacing: '0.08em' }}
+          className="font-sans select-none uppercase"
+        >
+          {t('boothMap.booked') || 'تم الحجز'}
+        </text>
+      )}
 
       {/* Iconography */}
       {!isBooked && (isVIPSafe || isSP) && (
@@ -194,12 +212,12 @@ const BoothItem = memo(({ booth, status, isVIP, onClick, isInteracting, t }: Boo
       {isBooked && (
         <text
           x={booth.x + booth.width / 2}
-          y={booth.y + booth.height / 2 - 20}
+          y={booth.y + booth.height / 2 - 24}
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={16}
           fill={textColor}
-          opacity={0.4}
+          opacity={0.9}
           style={{ pointerEvents: 'none' }}
         >
           🔒
@@ -375,6 +393,11 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
                     <linearGradient id="grad-standard" x1="0%" y1="0%" x2="0%" y2="100%">
                       <stop offset="0%" style={{ stopColor: '#e0f2fe', stopOpacity: 1 }} />
                       <stop offset="100%" style={{ stopColor: '#0ea5e9', stopOpacity: 1 }} />
+                    </linearGradient>
+
+                    <linearGradient id="grad-booked" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: '#fca5a5', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: '#dc2626', stopOpacity: 1 }} />
                     </linearGradient>
 
                     <linearGradient id="grad-disabled" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -558,7 +581,7 @@ export default function BoothMap({ booths, selectedBoothIds, onSelectBooths, onB
                    <LegendItem color="bg-gradient-to-br from-emerald-400 to-emerald-600" label={isRTL ? 'متاح ريادي' : 'Available'} isRTL={isRTL} />
                    <LegendItem color="bg-gradient-to-br from-amber-300 to-orange-500" label="VIP Package" isRTL={isRTL} />
                    <LegendItem color="bg-gradient-to-br from-slate-200 to-slate-400" label={isRTL ? 'مخصص للرعاة' : 'Sponsors'} isRTL={isRTL} />
-                   <LegendItem color="bg-gradient-to-br from-slate-700 to-slate-800 opacity-50" label={isRTL ? 'محجوز رسمياً' : 'Reserved'} isRTL={isRTL} />
+                   <LegendItem color="bg-gradient-to-br from-red-400 to-red-600" label={isRTL ? 'محجوز رسمياً' : 'Reserved'} isRTL={isRTL} />
                 </div>
              </div>
           </div>

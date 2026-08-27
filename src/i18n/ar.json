@@ -27,7 +27,8 @@
     "perSqm": "سعر المتر المربع",
     "currency": "ر.س",
     "boothsSelected": "أجنحة محددة",
-    "sqm": "م²"
+    "sqm": "م²",
+    "booked": "تم الحجز"
   },
   "booking": {
     "step1Title": "التسجيل",

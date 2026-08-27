@@ -27,7 +27,8 @@
     "perSqm": "Price per sqm",
     "currency": "SAR",
     "boothsSelected": "booths selected",
-    "sqm": "sqm"
+    "sqm": "sqm",
+    "booked": "BOOKED"
   },
   "booking": {
     "step1Title": "Registration",
