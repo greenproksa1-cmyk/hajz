@@ -9,9 +9,31 @@ import PaymentManagement from './PaymentManagement'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import { toast } from 'sonner'
+import { RefreshCw, Trash2, AlertTriangle } from 'lucide-react'
 
 interface AdminDashboardNewProps {
   onLogout: () => void
+}
+
+// Helper: Build admin auth header from stored credentials
+export function getAdminKey(): string | null {
+  if (typeof window === 'undefined') return null;
+  const creds = sessionStorage.getItem('admin_creds');
+  if (!creds) return null;
+  return btoa(creds);
+}
+
+export function adminFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const key = getAdminKey();
+  return fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+      ...(key ? { 'x-admin-key': key } : {}),
+    },
+  });
 }
 
 export default function AdminDashboardNew({ onLogout }: AdminDashboardNewProps) {
@@ -26,10 +48,10 @@ export default function AdminDashboardNew({ onLogout }: AdminDashboardNewProps) 
       case 'payments':
         return <PaymentManagement />
       case 'bookings':
-        return <BookingsPanel />
+        return <BookingsPanel isRTL={isRTL} t={t} />
       case 'dashboard':
       default:
-        return <OverviewPanel />
+        return <OverviewPanel isRTL={isRTL} t={t} />
     }
   }
 
@@ -57,16 +79,18 @@ export default function AdminDashboardNew({ onLogout }: AdminDashboardNewProps) 
 }
 
 // ============== Overview Panel ==============
-function OverviewPanel() {
-  const { t, isRTL } = useTranslation()
+function OverviewPanel({ isRTL, t }: { isRTL: boolean; t: (k: string) => string }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [booths, setBooths] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [isResetting, setIsResetting] = useState(false)
 
   const fetchData = async () => {
     try {
+      setIsLoading(true)
       const [bookingsRes, boothsRes] = await Promise.all([
-        fetch('/api/bookings'),
+        adminFetch('/api/admin/bookings'),
         fetch('/api/booths'),
       ])
       const bookingsData = await bookingsRes.json()
@@ -83,6 +107,29 @@ function OverviewPanel() {
   useEffect(() => {
     fetchData()
   }, [])
+
+  const handleReset = async () => {
+    try {
+      setIsResetting(true)
+      const res = await adminFetch('/api/admin/reset', { method: 'POST' })
+      const data = await res.json()
+      if (data.success) {
+        toast.success(
+          isRTL
+            ? `تم حذف ${data.data.deletedBookings} حجز وإعادة تعيين ${data.data.resetBooths} بوث`
+            : `Deleted ${data.data.deletedBookings} bookings, reset ${data.data.resetBooths} booths`
+        )
+        setShowResetConfirm(false)
+        await fetchData()
+      } else {
+        toast.error(isRTL ? 'فشل إعادة التعيين' : 'Reset failed')
+      }
+    } catch {
+      toast.error(isRTL ? 'حدث خطأ' : 'An error occurred')
+    } finally {
+      setIsResetting(false)
+    }
+  }
 
   const totalBookings = bookings?.length || 0
   const pendingBookings = bookings?.filter((b: any) => b?.status === 'pending').length || 0
@@ -128,15 +175,66 @@ function OverviewPanel() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight text-foreground">
-          {isRTL ? 'نظرة عامة' : 'Overview'}
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {isRTL
-            ? 'ملخص سريع لحالة المعرض والحجوزات'
-            : 'Quick summary of exhibition status and bookings'}
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">
+            {isRTL ? 'نظرة عامة' : 'Overview'}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {isRTL
+              ? 'ملخص سريع لحالة المعرض والحجوزات'
+              : 'Quick summary of exhibition status and bookings'}
+          </p>
+        </div>
+
+        {/* Reset Database Button */}
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={fetchData}
+            disabled={isLoading}
+            className="gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            {isRTL ? 'تحديث' : 'Refresh'}
+          </Button>
+
+          {!showResetConfirm ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowResetConfirm(true)}
+              className="gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+            >
+              <Trash2 className="h-4 w-4" />
+              {isRTL ? 'حذف كل الحجوزات' : 'Clear All Bookings'}
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5">
+              <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
+              <span className="text-xs text-red-700 font-medium">
+                {isRTL ? 'هل أنت متأكد؟' : 'Are you sure?'}
+              </span>
+              <Button
+                size="sm"
+                className="h-7 bg-red-600 hover:bg-red-700 text-white text-xs px-3"
+                onClick={handleReset}
+                disabled={isResetting}
+              >
+                {isResetting ? '...' : (isRTL ? 'نعم، احذف' : 'Yes, Delete')}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs px-2"
+                onClick={() => setShowResetConfirm(false)}
+              >
+                {isRTL ? 'إلغاء' : 'Cancel'}
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Stats */}
@@ -257,15 +355,15 @@ function OverviewPanel() {
 }
 
 // ============== Bookings Panel ==============
-function BookingsPanel() {
-  const { t, isRTL } = useTranslation()
+function BookingsPanel({ isRTL, t }: { isRTL: boolean; t: (k: string) => string }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState('all')
 
   const fetchBookings = async () => {
     try {
-      const res = await fetch('/api/bookings')
+      setIsLoading(true)
+      const res = await adminFetch('/api/admin/bookings')
       const data = await res.json()
       if (data.success) {
         setBookings(Array.isArray(data.data) ? data.data : [])
@@ -292,19 +390,21 @@ function BookingsPanel() {
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status: newStatus } : b));
 
     try {
-      const res = await fetch(`/api/bookings/${id}`, {
+      const res = await adminFetch('/api/admin/bookings', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: newStatus,
-        }),
+        body: JSON.stringify({ id, status: newStatus }),
       })
       const data = await res.json()
-      if (data.success) {
-        // Success
-      } else {
+      if (!data.success) {
         // Rollback
         setBookings(prevBookings);
+        toast.error(isRTL ? 'فشل تحديث الحجز' : 'Failed to update booking')
+      } else {
+        toast.success(
+          action === 'approve'
+            ? (isRTL ? 'تمت الموافقة على الحجز' : 'Booking approved')
+            : (isRTL ? 'تم رفض الحجز' : 'Booking rejected')
+        )
       }
     } catch {
       // Rollback

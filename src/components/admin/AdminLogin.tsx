@@ -46,6 +46,8 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
       })
       const result = await res.json()
       if (result.success) {
+        // Store credentials in sessionStorage for subsequent admin API calls
+        sessionStorage.setItem('admin_creds', JSON.stringify({ username: data.username, password: data.password }))
         toast.success(t('common.success'))
         onLogin()
       } else {
