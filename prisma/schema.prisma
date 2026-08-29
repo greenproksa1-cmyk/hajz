@@ -31,6 +31,8 @@ model FloorPlan {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   booths      Booth[]
+
+  @@index([isActive])
 }
 
 model Booth {
@@ -49,6 +51,8 @@ model Booth {
   bookings    Booking[]  @relation("BookingToBooth")
 
   @@unique([floorPlanId, label])
+  @@index([floorPlanId])
+  @@index([status])
 }
 
 model Booking {
@@ -75,6 +79,10 @@ model Booking {
   user               User?    @relation(fields: [userId], references: [id])
   payment            Payment?
   booths             Booth[]  @relation("BookingToBooth")
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Payment {

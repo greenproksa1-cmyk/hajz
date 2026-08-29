@@ -5,6 +5,9 @@ import DashboardClient from "./DashboardClient";
 import { db } from "@/lib/db";
 import { TranslationProvider } from "@/i18n";
 
+// Revalidate page every 60 seconds instead of every request
+export const revalidate = 60;
+
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
@@ -14,12 +17,27 @@ export default async function DashboardPage() {
 
   const userId = (session.user as any).id;
 
-  // Fetch ALL bookings for this user with booth details included via relation
-  // No floor plan filtering - users should always see ALL their bookings
+  // Optimized: select only the fields needed instead of include: { booths: true }
+  // This avoids fetching unnecessary columns and reduces data transfer significantly
   const userBookings = await db.booking.findMany({
     where: { userId },
     orderBy: { createdAt: 'desc' },
-    include: { booths: true },
+    select: {
+      id: true,
+      entityName: true,
+      totalPrice: true,
+      status: true,
+      createdAt: true,
+      contractPath: true,
+      signedContractPath: true,
+      booths: {
+        select: {
+          id: true,
+          label: true,
+          area: true,
+        },
+      },
+    },
   });
 
   return (

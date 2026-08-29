@@ -62,6 +62,8 @@ function isImageFile(path: string | null): boolean {
   return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)
 }
 
+import { adminFetch } from './AdminDashboardNew'
+
 interface PaymentRecord {
   id: string
   bookingId: string
@@ -90,7 +92,7 @@ export default function PaymentManagement() {
 
   const fetchPayments = useCallback(async () => {
     try {
-      const res = await fetch('/api/bookings')
+      const res = await adminFetch('/api/admin/bookings')
       const data = await res.json()
       if (data.success) {
         // Transform bookings into payment records

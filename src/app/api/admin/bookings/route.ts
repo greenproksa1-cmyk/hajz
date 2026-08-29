@@ -21,56 +21,66 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Single optimized query - booths are always included via relation
+    // No need for a second booth fetch since the relation covers all cases
     const bookings = await db.booking.findMany({
       orderBy: { createdAt: 'desc' },
-      include: {
-        booths: true,
-        payment: true,
+      select: {
+        id: true,
+        entityName: true,
+        unifiedNumber: true,
+        address: true,
+        contactName: true,
+        jobTitle: true,
+        mobile: true,
+        phone: true,
+        email: true,
+        boothIds: true,
+        totalPrice: true,
+        status: true,
+        contractPath: true,
+        receiptPath: true,
+        signedContractPath: true,
+        adminNotes: true,
+        createdAt: true,
+        userId: true,
+        booths: {
+          select: {
+            id: true,
+            label: true,
+            area: true,
+            boothType: true,
+            status: true,
+          },
+        },
+        payment: {
+          select: {
+            id: true,
+            amount: true,
+            status: true,
+            receiptPath: true,
+            bankName: true,
+            verifiedAt: true,
+          },
+        },
       },
     });
 
-    // 1. Gather all unique booth IDs to resolve any booths not linked via relation
-    const allBoothIds = new Set<string>();
-    const parsedBoothsMap = new Map<string, string[]>();
-
-    for (const booking of bookings) {
-      try {
-        const ids = typeof booking.boothIds === 'string' ? JSON.parse(booking.boothIds) : booking.boothIds;
-        if (Array.isArray(ids)) {
-          parsedBoothsMap.set(booking.id, ids);
-          ids.forEach(id => allBoothIds.add(id));
-        }
-      } catch {
-        // ignore parse error
+    return NextResponse.json(
+      { success: true, data: bookings },
+      {
+        headers: {
+          // Short cache since admins need fresh data, but allow revalidation
+          'Cache-Control': 'private, max-age=10, stale-while-revalidate=30',
+        },
       }
-    }
-
-    const boothsList = await db.booth.findMany({
-      where: { id: { in: Array.from(allBoothIds) } },
-      select: { id: true, label: true, area: true, boothType: true, status: true },
-    });
-
-    const boothsById = new Map<string, any>();
-    boothsList.forEach(b => boothsById.set(b.id, b));
-
-    const enrichedBookings = bookings.map(booking => {
-      let booths = booking.booths;
-      if (!booths || booths.length === 0) {
-        const ids = parsedBoothsMap.get(booking.id) || [];
-        booths = ids.map(id => boothsById.get(id)).filter(Boolean) as any;
-      }
-      return {
-        ...booking,
-        booths,
-      };
-    });
-
-    return NextResponse.json({ success: true, data: enrichedBookings });
+    );
   } catch (error) {
     console.error('Error fetching admin bookings:', error);
     return NextResponse.json({ success: false, error: 'Failed to fetch bookings' }, { status: 500 });
   }
 }
+
 
 // PATCH: Update booking status (approve / reject / pending) with booth status sync
 export async function PATCH(request: NextRequest) {

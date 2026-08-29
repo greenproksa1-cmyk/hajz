@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { removeLock, getLockedBoothIds } from '@/lib/redis';
+import { removeLock } from '@/lib/redis';
 import { isVerified, clearOTP } from '@/lib/otp-store';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-// GET: Return all bookings (for admin)
+// GET: Return bookings for the current user (filtered to active floor plans only)
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -16,19 +16,36 @@ export async function GET() {
     const isAdmin = (session.user as any).role === 'admin';
     const userId = (session.user as any).id;
 
-    const bookings = await db.booking.findMany({
-      where: isAdmin ? {} : { userId },
-      orderBy: { createdAt: 'desc' },
-    });
+    // Run both queries in parallel for speed
+    const [bookings, activeFloorPlans] = await Promise.all([
+      db.booking.findMany({
+        where: isAdmin ? {} : { userId },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          entityName: true,
+          unifiedNumber: true,
+          contactName: true,
+          jobTitle: true,
+          mobile: true,
+          email: true,
+          boothIds: true,
+          totalPrice: true,
+          status: true,
+          contractPath: true,
+          receiptPath: true,
+          signedContractPath: true,
+          createdAt: true,
+          userId: true,
+        },
+      }),
+      db.floorPlan.findMany({
+        where: { isActive: true },
+        select: { id: true },
+      }),
+    ]);
 
-    // Fetch all active floor plans to know which booths to include
-    const activeFloorPlans = await db.floorPlan.findMany({
-      where: { isActive: true },
-      select: { id: true },
-    });
-    const activePlanIds = activeFloorPlans.map(fp => fp.id);
-
-    const lockedIds = await getLockedBoothIds();
+    const activePlanIds = new Set(activeFloorPlans.map(fp => fp.id));
 
     // 1. Gather all unique booth IDs to prevent N+1 queries
     const allBoothIds = new Set<string>();
@@ -46,7 +63,7 @@ export async function GET() {
       }
     }
 
-    // 2. Fetch all involved booths in one fast aggregated query
+    // 2. Fetch all involved booths in one fast query
     const boothsList = await db.booth.findMany({
       where: { id: { in: Array.from(allBoothIds) } },
       select: { id: true, label: true, area: true, floorPlanId: true },
@@ -55,15 +72,15 @@ export async function GET() {
     const boothsById = new Map<string, any>();
     boothsList.forEach(b => boothsById.set(b.id, b));
 
-    const enrichedBookings = [];
+    const enrichedBookings: any[] = [];
 
-    // 3. Process bookings purely in-memory
+    // 3. Process bookings purely in-memory (no extra DB calls)
     for (const booking of bookings) {
       const ids = parsedBoothsMap.get(booking.id) || [];
       const boothDetails = ids.map(id => boothsById.get(id)).filter(Boolean);
       
       // A booking is active if ANY of its booths belong to an active floor plan
-      const isBookingActive = boothDetails.some(b => b.floorPlanId && activePlanIds.includes(b.floorPlanId));
+      const isBookingActive = boothDetails.some(b => b.floorPlanId && activePlanIds.has(b.floorPlanId));
 
       if (isBookingActive) {
         enrichedBookings.push({
@@ -73,10 +90,16 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      data: enrichedBookings,
-    });
+
+    return NextResponse.json(
+      { success: true, data: enrichedBookings },
+      {
+        headers: {
+          // Cache for 30s on client, allow stale for 60s while revalidating
+          'Cache-Control': 'private, max-age=30, stale-while-revalidate=60',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error fetching bookings:', error);
     return NextResponse.json(
@@ -85,6 +108,7 @@ export async function GET() {
     );
   }
 }
+
 
 // POST: Create new booking
 export async function POST(request: NextRequest) {

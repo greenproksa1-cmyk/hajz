@@ -3,22 +3,48 @@ import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-// GET: Return all floor plans
+// GET: Return all floor plans (summary list - no heavy booth data)
 export async function GET() {
   try {
+    // For the list view, we only need summary info + booth count
+    // Full booth details are fetched on demand via [id] endpoint
     const floorPlans = await db.floorPlan.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        width: true,
+        height: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
         booths: {
+          select: {
+            id: true,
+            label: true,
+            area: true,
+            status: true,
+            boothType: true,
+            price: true,
+            x: true,
+            y: true,
+            width: true,
+            height: true,
+          },
           orderBy: [{ y: 'asc' }, { x: 'asc' }],
         },
       },
       orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json({
-      success: true,
-      data: floorPlans,
-    });
+    return NextResponse.json(
+      { success: true, data: floorPlans },
+      {
+        headers: {
+          'Cache-Control': 'private, max-age=15, stale-while-revalidate=30',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error fetching floor plans:', error);
     return NextResponse.json(
@@ -27,6 +53,7 @@ export async function GET() {
     );
   }
 }
+
 
 // POST: Create new floor plan with booths array in body
 export async function POST(request: NextRequest) {
